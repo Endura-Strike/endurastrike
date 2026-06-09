@@ -1,0 +1,3736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ENDURA STRIKE</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   ENDURA STRIKE — FULL REDESIGN
+   Industrial Fight OS · Dark · Brutal · Clean
+═══════════════════════════════════════════ */
+:root {
+  --bg:         #05050a;
+  --s1:         #0d0d14;
+  --s2:         #12121a;
+  --s3:         #191922;
+  --red:        #e8192c;
+  --red-soft:   rgba(232,25,44,.14);
+  --red-border: rgba(232,25,44,.28);
+  --red-glow:   rgba(232,25,44,.22);
+  --gold:       #f0b429;
+  --gold-soft:  rgba(240,180,41,.1);
+  --green:      #22c55e;
+  --blue:       #38bdf8;
+  --purple:     #a855f7;
+  --white:      #f2f2f8;
+  --muted:      #9090a8;
+  --dim:        #5a5a70;
+  --border:     rgba(255,255,255,.065);
+  --border2:    rgba(255,255,255,.1);
+  --r:          14px;
+  --r-sm:       9px;
+  --r-lg:       20px;
+  --display:    'Barlow Condensed', sans-serif;
+  --body:       'DM Sans', sans-serif;
+  --mono:       'JetBrains Mono', monospace;
+}
+
+*,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  background: var(--bg);
+  font-family: var(--body);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grain */
+body::before {
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:9999;
+  opacity:.28;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+}
+
+/* Ambient orbs */
+.orb {
+  position:fixed; border-radius:50%; pointer-events:none; z-index:0;
+  filter:blur(80px);
+}
+.orb-red  { width:640px;height:640px;top:-200px;right:-180px;background:rgba(232,25,44,.07); }
+.orb-gold { width:480px;height:480px;bottom:-160px;left:-120px;background:rgba(240,180,41,.055); }
+
+.app { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+/* ─────────────── SIDEBAR ─────────────── */
+.sidebar {
+  width:260px; flex-shrink:0;
+  background: var(--s1);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh;
+  overflow-y:auto; overflow-x:hidden;
+  scrollbar-width:none;
+}
+.sidebar::-webkit-scrollbar { display:none; }
+
+.sb-inner { padding:20px 16px; display:flex; flex-direction:column; gap:14px; flex:1; }
+
+/* Brand */
+.brand {
+  display:flex; align-items:center; gap:11px;
+  padding:4px 4px 18px;
+  border-bottom:1px solid var(--border);
+}
+.brand-mark {
+  width:40px; height:40px; border-radius:10px; flex-shrink:0;
+  background:var(--red); position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--display); font-size:16px; font-weight:900;
+  box-shadow:0 0 20px var(--red-glow);
+}
+.brand-mark::after {
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.18) 0%,transparent 55%);
+}
+.brand-name { font-family:var(--display); font-size:16px; font-weight:900; letter-spacing:3px; }
+.brand-sub  { font-size:9px; color:var(--dim); letter-spacing:4px; margin-top:2px; font-family:var(--mono); }
+
+/* Athlete chip */
+.athlete-chip {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px;
+  position:relative; overflow:hidden;
+}
+.athlete-chip::before {
+  content:""; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,var(--red),transparent 60%);
+}
+.chip-top { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.chip-avatar {
+  width:44px; height:44px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg,var(--red),#6d000e);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--display); font-size:12px; font-weight:700;
+  border:2px solid var(--red-border);
+  box-shadow:0 0 16px var(--red-glow);
+}
+.chip-name { font-size:15px; font-weight:700; }
+.chip-xp   { font-size:11px; color:var(--muted); font-family:var(--mono); margin-top:1px; }
+
+.chip-stats { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:12px; }
+.chip-stat {
+  background:var(--s3); border-radius:var(--r-sm); padding:8px 10px;
+  border:1px solid var(--border);
+}
+.chip-stat .cs-label { font-size:8px; color:var(--dim); letter-spacing:2px; text-transform:uppercase; font-family:var(--mono); }
+.chip-stat .cs-val   { font-size:14px; font-weight:700; margin-top:2px; font-variant-numeric:tabular-nums; }
+
+.chip-bar-row { font-size:9px; color:var(--dim); letter-spacing:2px; text-transform:uppercase; font-family:var(--mono); margin-bottom:5px; display:flex; justify-content:space-between; }
+.chip-bar { height:4px; background:var(--s3); border-radius:50px; overflow:hidden; }
+.chip-bar-fill { height:100%; background:linear-gradient(90deg,var(--red),var(--red-soft) 120%); transition:width .6s; }
+
+/* Nav */
+.sb-nav { display:flex; flex-direction:column; gap:2px; }
+.sb-section-label {
+  font-size:8px; color:var(--dim); letter-spacing:3px;
+  text-transform:uppercase; font-family:var(--mono);
+  padding:10px 8px 5px;
+}
+.nav-link {
+  display:flex; align-items:center; gap:9px;
+  padding:9px 10px; border-radius:var(--r-sm);
+  cursor:pointer; transition:all .15s ease;
+  color:var(--dim); font-size:13px; font-weight:500;
+  text-decoration:none; position:relative;
+}
+.nav-icon { font-size:14px; width:16px; text-align:center; transition:.15s; }
+.nav-link:hover { background:var(--s2); color:var(--white); }
+.nav-link.active {
+  background:var(--red-soft); color:var(--white);
+  border:1px solid var(--red-border);
+}
+.nav-link.active::before {
+  content:""; position:absolute; left:0; top:25%; bottom:25%;
+  width:2px; border-radius:1px; background:var(--red);
+  box-shadow:0 0 6px var(--red);
+}
+
+/* ─────────────── MAIN ─────────────── */
+.main { flex:1; overflow-y:auto; background:var(--bg); }
+
+.page { display:none; animation:pgIn .25s ease; padding:32px 36px; }
+.active-page { display:block; }
+
+@keyframes pgIn {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Page header ── */
+.pg-header {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  margin-bottom:28px; padding-bottom:24px;
+  border-bottom:1px solid var(--border);
+}
+.pg-header-left { }
+.pg-eyebrow {
+  font-size:9px; letter-spacing:5px; color:var(--dim);
+  text-transform:uppercase; font-family:var(--mono); margin-bottom:6px;
+}
+.pg-title {
+  font-family:var(--display); font-size:52px; font-weight:900;
+  line-height:.9; letter-spacing:-1px; text-transform:uppercase;
+}
+.pg-title span { color:var(--red); }
+.pg-header-right { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.pg-badge {
+  padding:6px 14px; border-radius:50px;
+  background:var(--red-soft); border:1px solid var(--red-border);
+  font-size:11px; font-weight:700; color:var(--red); font-family:var(--mono);
+}
+
+/* ── Section label ── */
+.section-label {
+  font-size:9px; letter-spacing:4px; color:var(--dim);
+  text-transform:uppercase; font-family:var(--mono);
+  margin-bottom:12px; display:block;
+}
+
+/* ── Grid ── */
+.grid  { display:grid; gap:16px; }
+.g2    { grid-template-columns:1fr 1fr; }
+.g3    { grid-template-columns:1fr 1fr 1fr; }
+.g4    { grid-template-columns:repeat(4,1fr); }
+.g3-2  { grid-template-columns:3fr 2fr; }
+.g2-1  { grid-template-columns:2fr 1fr; }
+.span2 { grid-column:span 2; }
+.col   { display:flex; flex-direction:column; gap:16px; }
+
+/* ── Card ── */
+.card {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--r-lg); padding:20px;
+  position:relative; overflow:hidden;
+  transition:border-color .2s;
+}
+.card::before {
+  content:""; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+}
+.card:hover { border-color:var(--border2); }
+
+.card-title {
+  font-family:var(--display); font-size:16px; font-weight:700;
+  letter-spacing:1px; text-transform:uppercase;
+  margin-bottom:16px; color:var(--white);
+  display:flex; align-items:center; gap:8px;
+}
+.card-title .ct-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--red); flex-shrink:0;
+}
+
+/* ── Stat row ── */
+.sr {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 0; border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+.sr:last-child { border-bottom:none; }
+.sr .sr-l { color:var(--muted); }
+.sr .sr-r { font-weight:600; font-variant-numeric:tabular-nums; }
+
+/* ── Big metric ── */
+.metric-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+.metric {
+  background:var(--s1); border:1px solid var(--border);
+  border-radius:var(--r-lg); padding:18px 20px;
+  position:relative; overflow:hidden; transition:all .2s;
+}
+.metric::after {
+  content:""; position:absolute; bottom:0; left:0; right:0; height:2px;
+  background:var(--red); opacity:0; transition:.2s;
+}
+.metric:hover { border-color:var(--red-border); transform:translateY(-2px); }
+.metric:hover::after { opacity:1; }
+.metric .m-eye  { font-size:8px; letter-spacing:4px; color:var(--dim); text-transform:uppercase; font-family:var(--mono); }
+.metric .m-num  { font-family:var(--display); font-size:42px; font-weight:900; line-height:1.1; margin:5px 0 3px; font-variant-numeric:tabular-nums; }
+.metric .m-sub  { font-size:11px; color:var(--muted); }
+
+/* ── Progress bar ── */
+.pbar-wrap { margin-bottom:12px; }
+.pbar-top  { display:flex; justify-content:space-between; font-size:12px; margin-bottom:5px; }
+.pbar-top .pbar-label { color:var(--muted); }
+.pbar-top .pbar-val   { font-weight:700; font-variant-numeric:tabular-nums; }
+.pbar { height:5px; background:var(--s3); border-radius:50px; overflow:hidden; }
+.pbar .pbar-fill {
+  height:100%; border-radius:50px;
+  background:linear-gradient(90deg,var(--red),#ff4455);
+  transition:width .6s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 6px var(--red-glow);
+}
+.pbar-fill.gold   { background:linear-gradient(90deg,var(--gold),#ffd970); box-shadow:0 0 6px rgba(240,180,41,.3); }
+.pbar-fill.green  { background:linear-gradient(90deg,var(--green),#4ade80); box-shadow:0 0 6px rgba(34,197,94,.3); }
+.pbar-fill.blue   { background:linear-gradient(90deg,var(--blue),#7dd3fc); }
+.pbar-fill.purple { background:linear-gradient(90deg,var(--purple),#c084fc); }
+
+/* ── Info highlight box ── */
+.highlight {
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px 16px;
+  font-size:13px; line-height:1.7; color:var(--muted);
+}
+.highlight.red-accent { border-left:2px solid var(--red); }
+.highlight h4 {
+  font-size:9px; letter-spacing:3px; color:var(--red);
+  text-transform:uppercase; font-family:var(--mono); margin-bottom:7px;
+}
+.highlight p { color:#b0b0c0; }
+.highlight ul { list-style:none; }
+.highlight ul li { padding:3px 0; display:flex; gap:8px; color:#b0b0c0; font-size:13px; }
+.highlight ul li::before { content:"→"; color:var(--red); flex-shrink:0; }
+
+/* ── Missions ── */
+.mission-item {
+  display:flex; align-items:center; gap:11px;
+  background:var(--s2); border-radius:var(--r-sm);
+  padding:11px 13px; margin-bottom:7px;
+  cursor:pointer; transition:all .15s;
+  border:1px solid var(--border);
+}
+.mission-item:hover { border-color:var(--red-border); transform:translateX(2px); }
+.mission-item.done { opacity:.4; }
+.mission-item.done .m-name { text-decoration:line-through; }
+.m-check {
+  width:18px; height:18px; border-radius:5px;
+  border:1.5px solid var(--dim); display:flex; align-items:center;
+  justify-content:center; flex-shrink:0; font-size:10px;
+  font-weight:700; transition:.15s;
+}
+.mission-item.done .m-check { background:var(--red); border-color:var(--red); }
+.m-name { flex:1; font-size:13px; font-weight:500; }
+.m-xp { font-size:10px; color:var(--gold); font-weight:700; font-family:var(--mono); }
+
+.day-cta {
+  width:100%; margin-top:12px; padding:13px;
+  background:var(--red); border:none; border-radius:var(--r);
+  color:white; font-family:var(--display); font-size:14px;
+  font-weight:900; letter-spacing:3px; text-transform:uppercase;
+  cursor:pointer; transition:all .2s;
+  box-shadow:0 4px 18px var(--red-glow); position:relative; overflow:hidden;
+}
+.day-cta::before { content:""; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.12),transparent 55%); }
+.day-cta:hover { transform:translateY(-2px); box-shadow:0 8px 28px var(--red-glow); }
+
+/* ── Tags ── */
+.tag {
+  display:inline-flex; align-items:center;
+  padding:3px 10px; border-radius:50px;
+  font-size:10px; font-weight:700; font-family:var(--mono);
+  letter-spacing:.5px;
+}
+.tag-red    { background:var(--red-soft);  border:1px solid var(--red-border);  color:var(--red); }
+.tag-gold   { background:var(--gold-soft); border:1px solid rgba(240,180,41,.28); color:var(--gold); }
+.tag-green  { background:rgba(34,197,94,.1);  border:1px solid rgba(34,197,94,.25); color:var(--green); }
+.tag-blue   { background:rgba(56,189,248,.1);  border:1px solid rgba(56,189,248,.25); color:var(--blue); }
+.tag-purple { background:rgba(168,85,247,.1); border:1px solid rgba(168,85,247,.25); color:var(--purple); }
+
+/* ── Pillar boxes ── */
+.pillar-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; }
+.pillar-box {
+  background:var(--s2); border-radius:var(--r); padding:14px;
+  text-align:center; border:1px solid var(--border); transition:.2s;
+}
+.pillar-box:hover { border-color:var(--red-border); transform:translateY(-2px); }
+.pillar-box .pb-icon { font-size:20px; margin-bottom:6px; }
+.pillar-box h4 { font-size:12px; font-weight:700; font-family:var(--display); letter-spacing:2px; text-transform:uppercase; }
+.pillar-box p  { font-size:10px; color:var(--dim); margin-top:2px; }
+
+/* ── Event list ── */
+.event-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 12px; background:var(--s2); border-radius:var(--r-sm);
+  margin-bottom:6px; border:1px solid transparent; transition:.15s; font-size:13px;
+}
+.event-row:hover { border-color:var(--border); padding-left:16px; }
+.event-row strong { font-weight:600; }
+.event-row span   { font-family:var(--mono); font-size:11px; color:var(--muted); }
+.event-row.today  { border-left:2px solid var(--red); background:var(--red-soft); }
+.event-row.today strong { color:var(--red); }
+
+/* ── Notes ── */
+.notes-ta {
+  width:100%; min-height:100px;
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:var(--r); padding:12px; color:var(--white);
+  font-family:var(--body); font-size:13px; resize:vertical;
+  outline:none; transition:.15s; line-height:1.6;
+}
+.notes-ta:focus { border-color:var(--red-border); }
+.ghost-btn {
+  width:100%; padding:10px; margin-top:8px;
+  background:transparent; border:1px solid var(--border);
+  border-radius:var(--r-sm); color:var(--muted);
+  font-family:var(--body); font-size:12px; cursor:pointer; transition:.15s;
+  letter-spacing:1px;
+}
+.ghost-btn:hover { border-color:var(--red-border); color:var(--white); }
+
+/* ── Reminders ── */
+.reminder-row {
+  display:flex; gap:10px; align-items:flex-start;
+  padding:10px 12px; background:var(--s2);
+  border-left:2px solid var(--red);
+  border-radius:0 var(--r-sm) var(--r-sm) 0;
+  margin-bottom:6px; font-size:12px; color:var(--muted);
+}
+
+/* ── Slider cards ── */
+.slider-card { text-align:center; }
+.big-num {
+  font-family:var(--display); font-size:72px; font-weight:900;
+  color:var(--red); line-height:1; font-variant-numeric:tabular-nums;
+  letter-spacing:-3px; margin:10px 0 4px;
+}
+.big-unit { font-size:10px; color:var(--dim); letter-spacing:3px; text-transform:uppercase; font-family:var(--mono); margin-bottom:12px; }
+.perf-slider { width:100%; accent-color:var(--red); cursor:pointer; }
+
+/* IMC */
+.imc-big { font-family:var(--display); font-size:88px; font-weight:900; text-align:center; line-height:1; letter-spacing:-3px; font-variant-numeric:tabular-nums; }
+.imc-lbl { text-align:center; font-size:9px; color:var(--dim); letter-spacing:5px; text-transform:uppercase; font-family:var(--mono); margin-top:4px; }
+.imc-status { text-align:center; font-size:13px; font-weight:600; margin-top:8px; }
+
+/* Cat */
+.cat-name  { font-family:var(--display); font-size:28px; font-weight:900; color:var(--red); text-transform:uppercase; letter-spacing:1px; }
+.cat-range { font-size:11px; color:var(--dim); font-family:var(--mono); margin-top:3px; }
+
+/* Weight history */
+.wh-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid var(--border); font-size:12px;
+  font-variant-numeric:tabular-nums;
+}
+.wh-row:last-child { border-bottom:none; }
+.wh-date { color:var(--dim); font-family:var(--mono); }
+
+/* ── Boxing Hub ── */
+.tech-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
+.tech-btn {
+  background:var(--s2); border-radius:var(--r); padding:16px 10px;
+  text-align:center; cursor:pointer; transition:all .18s;
+  border:1px solid var(--border);
+}
+.tech-btn:hover { border-color:var(--red-border); transform:translateY(-2px); }
+.tech-btn.active { border-color:var(--red); background:var(--red-soft); box-shadow:0 0 16px var(--red-glow); }
+.tech-btn .tb-icon { font-size:24px; margin-bottom:6px; }
+.tech-btn h4 { font-size:12px; font-weight:700; font-family:var(--display); letter-spacing:2px; text-transform:uppercase; }
+.tech-btn p  { font-size:10px; color:var(--dim); margin-top:2px; }
+
+.td-eyebrow { font-size:9px; letter-spacing:3px; color:var(--dim); text-transform:uppercase; font-family:var(--mono); margin-bottom:7px; }
+.td-list { list-style:none; }
+.td-list li { display:flex; gap:8px; padding:5px 0; font-size:13px; color:#b0b0c0; line-height:1.5; }
+.td-list li::before { content:"→"; color:var(--red); flex-shrink:0; font-weight:700; }
+
+/* ── Champion Path ── */
+.rank-stack { display:flex; flex-direction:column; gap:8px; }
+.rank-card {
+  display:flex; align-items:center; gap:14px;
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px 16px; transition:.18s;
+}
+.rank-card:hover { transform:translateX(3px); }
+.rank-card.done { border-color:rgba(232,25,44,.2); }
+.rank-card.now  { background:var(--red-soft); border-color:var(--red); box-shadow:0 0 20px var(--red-glow); }
+.rank-card.locked { opacity:.38; filter:grayscale(.4); }
+.rank-icon  { font-size:30px; flex-shrink:0; }
+.rank-meta  { flex:1; }
+.rank-meta h3 { font-size:14px; font-weight:700; font-family:var(--display); text-transform:uppercase; letter-spacing:.5px; margin-bottom:2px; }
+.rank-meta p  { font-size:11px; color:var(--muted); }
+.rank-xp { font-family:var(--mono); font-size:11px; color:var(--gold); font-weight:600; }
+
+.lvl-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; }
+.lvl-chip {
+  background:var(--s2); border-radius:var(--r-sm); padding:10px;
+  border:1px solid transparent; text-align:center;
+}
+.lvl-chip.done { border-color:rgba(232,25,44,.15); }
+.lvl-chip.now  { border-color:var(--red); background:var(--red-soft); }
+.lvl-chip .lc-n { font-family:var(--display); font-size:18px; font-weight:900; }
+.lvl-chip .lc-x { font-size:9px; color:var(--dim); font-family:var(--mono); margin-top:2px; }
+
+/* ── Coach ── */
+.coach-tip {
+  background:var(--s2); border-radius:var(--r); padding:16px;
+  border-left:2px solid var(--red);
+  border-top:1px solid var(--border); border-right:1px solid var(--border); border-bottom:1px solid var(--border);
+  margin-bottom:10px;
+}
+.coach-tip h4 { font-size:9px; letter-spacing:3px; color:var(--red); text-transform:uppercase; font-family:var(--mono); margin-bottom:7px; }
+.coach-tip p  { font-size:13px; line-height:1.7; color:#b0b0c0; }
+.coach-tip ul { list-style:none; }
+.coach-tip ul li { padding:3px 0; display:flex; gap:8px; color:#b0b0c0; font-size:13px; }
+.coach-tip ul li::before { content:"·"; color:var(--red); font-weight:900; }
+
+.week-chips { display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+.wc {
+  background:var(--s2); border-radius:var(--r-sm); padding:10px 4px; text-align:center;
+  border:1px solid transparent;
+}
+.wc.today { border-color:var(--red); background:var(--red-soft); }
+.wc .wc-d { font-size:8px; color:var(--dim); font-family:var(--mono); margin-bottom:4px; letter-spacing:1px; }
+.wc .wc-a { font-size:11px; font-weight:700; font-family:var(--display); letter-spacing:1px; color:var(--red); }
+.wc.rest .wc-a { color:var(--dim); }
+
+/* ── Settings ── */
+.setting-block { padding:14px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.setting-block:last-child { border-bottom:none; }
+.sb-label { font-size:14px; font-weight:500; }
+.sb-sub   { font-size:11px; color:var(--muted); margin-top:3px; }
+.action-btn {
+  padding:8px 16px; background:var(--s2); border:1px solid var(--border);
+  border-radius:var(--r-sm); color:var(--muted); font-family:var(--body);
+  font-size:12px; cursor:pointer; transition:.15s; white-space:nowrap;
+}
+.action-btn:hover { border-color:var(--red-border); color:var(--white); }
+.action-btn.danger:hover { background:var(--red-soft); border-color:var(--red); color:var(--red); }
+
+/* ── Toast ── */
+.toast {
+  position:fixed; bottom:24px; right:24px;
+  background:var(--s1); border:1px solid var(--red-border);
+  border-radius:var(--r); padding:12px 18px;
+  font-size:13px; font-weight:600;
+  box-shadow:0 8px 32px rgba(0,0,0,.6), 0 0 0 1px var(--border);
+  z-index:9998; transform:translateY(60px); opacity:0;
+  transition:all .28s cubic-bezier(.4,0,.2,1); max-width:300px;
+}
+.toast.show { transform:translateY(0); opacity:1; }
+
+/* ── Punch counter ── */
+.punch-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+.punch-btn {
+  border:none; border-radius:var(--r-lg);
+  padding:26px 14px; cursor:pointer; transition:all .12s ease;
+  font-family:var(--body); position:relative; overflow:hidden;
+}
+.punch-btn::before { content:""; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,.1),transparent 55%); pointer-events:none; }
+.punch-btn:active { transform:scale(.92); filter:brightness(1.3); }
+.punch-btn .pb-label { font-size:16px; font-weight:700; color:white; margin-top:6px; display:block; font-family:var(--display); letter-spacing:2px; }
+.punch-btn .pb-count { font-family:var(--display); font-size:52px; font-weight:900; color:white; line-height:1; display:block; }
+
+/* ── Combos ── */
+.combo-item {
+  display:flex; align-items:center; gap:11px;
+  padding:12px 14px; background:var(--s2); border-radius:var(--r);
+  margin-bottom:8px; cursor:pointer; transition:.15s;
+  border:1px solid var(--border);
+}
+.combo-item:hover { border-color:var(--red-border); transform:translateX(2px); }
+.combo-item.active { border-color:var(--red); background:var(--red-soft); }
+.combo-seq-row { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; }
+.combo-seq-row span {
+  padding:3px 9px; border-radius:50px;
+  font-size:10px; font-weight:700; font-family:var(--mono);
+  background:var(--s3); border:1px solid var(--border);
+}
+
+/* ── Logros ── */
+.logro-row {
+  display:flex; align-items:center; gap:12px;
+  padding:12px; background:var(--s2); border-radius:var(--r);
+  margin-bottom:7px; border:1px solid var(--border);
+}
+.logro-row.unlocked { border-color:rgba(240,180,41,.25); }
+.logro-row.locked   { opacity:.3; }
+.logro-icon { font-size:24px; flex-shrink:0; }
+.logro-meta h4 { font-size:13px; font-weight:700; margin-bottom:2px; }
+.logro-meta p  { font-size:11px; color:var(--muted); }
+.logro-xp { margin-left:auto; font-size:10px; font-weight:700; color:var(--gold); font-family:var(--mono); flex-shrink:0; }
+
+/* ── Nutrition ── */
+.act-btn {
+  width:100%; padding:9px 12px; text-align:left;
+  background:var(--s2); border:1px solid var(--border);
+  border-radius:var(--r-sm); color:var(--muted);
+  font-family:var(--body); font-size:12px; cursor:pointer; transition:.15s;
+}
+.act-btn:hover { border-color:var(--red-border); color:var(--white); }
+.act-btn.active-act { border-color:var(--red); color:var(--white); background:var(--red-soft); }
+
+.macro-card {
+  background:var(--s2); border-radius:var(--r); padding:12px 14px; text-align:center;
+  border:1px solid var(--border);
+}
+.macro-card .mc-label { font-size:9px; color:var(--dim); letter-spacing:2px; text-transform:uppercase; font-family:var(--mono); margin-bottom:5px; }
+.macro-card .mc-val   { font-family:var(--display); font-size:34px; font-weight:900; line-height:1; }
+.macro-card .mc-unit  { font-size:10px; color:var(--muted); margin-top:3px; font-family:var(--mono); }
+
+/* ── Session log ── */
+.session-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 12px; background:var(--s2); border-radius:var(--r-sm);
+  margin-bottom:6px; font-size:12px; border:1px solid var(--border);
+}
+.session-row .sr-date { color:var(--dim); font-family:var(--mono); font-size:10px; }
+.session-row .sr-xp   { color:var(--gold); font-weight:700; font-family:var(--mono); }
+
+/* ── Timer ── */
+.timer-preset {
+  padding:5px 12px; background:var(--s2); border:1px solid var(--border);
+  border-radius:50px; color:var(--muted);
+  font-family:var(--mono); font-size:10px; font-weight:600;
+  cursor:pointer; transition:.15s; letter-spacing:.5px;
+}
+.timer-preset:hover,.timer-preset.active { border-color:var(--red); color:var(--white); background:var(--red-soft); }
+
+@keyframes tPulse { 0%,100%{text-shadow:0 0 8px rgba(232,25,44,.4)}50%{text-shadow:0 0 28px rgba(232,25,44,.9),0 0 60px rgba(232,25,44,.3)} }
+@keyframes rPulse { 0%,100%{text-shadow:0 0 8px rgba(34,197,94,.3)}50%{text-shadow:0 0 28px rgba(34,197,94,.8)} }
+.timer-running .timer-display  { animation:tPulse 1s infinite; }
+.timer-resting .timer-display  { animation:rPulse 1s infinite; color:var(--green)!important; }
+
+/* ── Style pick buttons ── */
+.style-pick {
+  padding:8px 14px; background:var(--s2);
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  color:var(--muted); font-family:var(--body); font-size:12px;
+  cursor:pointer; transition:.15s;
+}
+.style-pick:hover { border-color:var(--red-border); color:var(--white); }
+.style-pick.active-style { border-color:var(--red); color:var(--white); background:var(--red-soft); }
+
+/* ── Sparring messages ── */
+.spar-msg {
+  padding:10px 14px; border-radius:var(--r); font-size:13px; line-height:1.6; max-width:88%;
+}
+.spar-msg.rival { background:var(--s3); border:1px solid var(--border); align-self:flex-start; }
+.spar-msg.player { background:var(--red-soft); border:1px solid var(--red-border); align-self:flex-end; color:var(--white); }
+.spar-msg.coach { background:rgba(240,180,41,.08); border:1px solid rgba(240,180,41,.2); align-self:center; color:var(--gold); font-size:12px; text-align:center; max-width:100%; font-family:var(--mono); }
+.spar-msg.result-good { background:rgba(34,197,94,.08); border:1px solid rgba(34,197,94,.2); align-self:center; color:var(--green); max-width:100%; text-align:center; }
+.spar-msg.result-bad  { background:rgba(232,25,44,.08);  border:1px solid var(--red-border); align-self:center; color:var(--red); max-width:100%; text-align:center; }
+
+/* ── Reflejos feedback ── */
+@keyframes flashGreen { 0%,100%{background:var(--s1)} 50%{background:rgba(34,197,94,.08)} }
+@keyframes flashRed   { 0%,100%{background:var(--s1)} 50%{background:rgba(232,25,44,.08)} }
+.flash-green { animation:flashGreen .3s ease; }
+.flash-red   { animation:flashRed   .3s ease; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+/* ── AI output ── */
+.ai-section { margin-bottom:14px; }
+.ai-section h4 { font-size:9px; letter-spacing:3px; color:var(--red); text-transform:uppercase; font-family:var(--mono); margin-bottom:8px; }
+.ai-section p  { font-size:13px; line-height:1.7; color:#b0b0c0; }
+.ai-section ul { list-style:none; }
+.ai-section ul li { padding:3px 0; display:flex; gap:8px; color:#b0b0c0; font-size:13px; }
+.ai-section ul li::before { content:"→"; color:var(--red); flex-shrink:0; }
+
+/* ── Milestone ── */
+.milestone {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 12px; background:var(--s2); border-radius:var(--r-sm);
+  margin-bottom:6px; font-size:12px; border:1px solid var(--border);
+}
+.milestone .ms-date { color:var(--muted); font-family:var(--mono); }
+.milestone .ms-peso { font-weight:700; }
+
+/* ── Responsive ── */
+@media(max-width:1280px) {
+  .metric-row { grid-template-columns:repeat(2,1fr); }
+  .g4 { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:1024px) {
+  .sidebar { display:none; }
+  .page { padding:20px; }
+  .g2,.g3,.g3-2,.g2-1 { grid-template-columns:1fr; }
+  .span2 { grid-column:span 1; }
+  .pg-title { font-size:40px; }
+  .lvl-grid { grid-template-columns:repeat(4,1fr); }
+}
+@media(max-width:600px) {
+  .metric-row { grid-template-columns:1fr; }
+  .tech-grid  { grid-template-columns:1fr 1fr; }
+  .week-chips,.wc { grid-template-columns:repeat(4,1fr); }
+  .pg-title   { font-size:34px; }
+}
+</style>
+</head>
+<body>
+<div class="orb orb-red"></div>
+<div class="orb orb-gold"></div>
+
+<div class="app">
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar">
+  <div class="sb-inner">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-mark">ES</div>
+      <div>
+        <div class="brand-name">ENDURA STRIKE</div>
+        <div class="brand-sub">ATHLETE OS</div>
+      </div>
+    </div>
+
+    <!-- Athlete -->
+    <div class="athlete-chip">
+      <div class="chip-top">
+        <div class="chip-avatar" id="sb-level">LV12</div>
+        <div>
+          <div class="chip-name">Campeon</div>
+          <div class="chip-xp" id="sb-xp-text">4250 XP</div>
+        </div>
+      </div>
+      <div class="chip-stats">
+        <div class="chip-stat">
+          <div class="cs-label">Racha</div>
+          <div class="cs-val" id="sb-racha">12d</div>
+        </div>
+        <div class="chip-stat">
+          <div class="cs-label">Peso</div>
+          <div class="cs-val" id="sb-peso">67kg</div>
+        </div>
+        <div class="chip-stat">
+          <div class="cs-label">Objetivo</div>
+          <div class="cs-val" id="sb-obj">66.5</div>
+        </div>
+        <div class="chip-stat">
+          <div class="cs-label">Nivel</div>
+          <div class="cs-val" id="sb-nivel">12</div>
+        </div>
+      </div>
+      <div class="chip-bar-row">
+        <span>Champion Path</span><span id="sb-cp-pct">78%</span>
+      </div>
+      <div class="chip-bar"><div class="chip-bar-fill" id="sb-cp-bar" style="width:78%"></div></div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="sb-nav">
+      <div class="sb-section-label">Principal</div>
+      <a class="nav-link active" data-page="dashboard"><span class="nav-icon">🏠</span>Dashboard</a>
+      <a class="nav-link" data-page="missions"><span class="nav-icon">🎯</span>Mission Center</a>
+      <a class="nav-link" data-page="organizer"><span class="nav-icon">📋</span>Organizer AI</a>
+
+      <div class="sb-section-label">Atletismo</div>
+      <a class="nav-link" data-page="performance"><span class="nav-icon">⚖️</span>Performance</a>
+      <a class="nav-link" data-page="historial"><span class="nav-icon">📈</span>Historial</a>
+      <a class="nav-link" data-page="nutricion"><span class="nav-icon">🍎</span>Nutricion</a>
+
+      <div class="sb-section-label">Boxeo</div>
+      <a class="nav-link" data-page="boxing"><span class="nav-icon">🥊</span>Boxing Hub</a>
+      <a class="nav-link" data-page="golpes"><span class="nav-icon">👊</span>Contador</a>
+      <a class="nav-link" data-page="combos"><span class="nav-icon">🔥</span>Combinaciones</a>
+
+      <div class="sb-section-label">Progresion</div>
+      <a class="nav-link" data-page="champion"><span class="nav-icon">👑</span>Champion Path</a>
+      <a class="nav-link" data-page="coach"><span class="nav-icon">🧠</span>AI Coach</a>
+      <a class="nav-link" data-page="logros"><span class="nav-icon">🏅</span>Logros</a>
+
+      <div class="sb-section-label">Herramientas IA</div>
+      <a class="nav-link" data-page="sparring"><span class="nav-icon">🥊</span>Sparring IA</a>
+      <a class="nav-link" data-page="analisis"><span class="nav-icon">🔬</span>Analisis IA</a>
+      <a class="nav-link" data-page="estrategia"><span class="nav-icon">⚔️</span>Estrategia IA</a>
+      <a class="nav-link" data-page="reflejos"><span class="nav-icon">⚡</span>Test Reflejos</a>
+      <a class="nav-link" data-page="prediccion"><span class="nav-icon">📅</span>Prediccion Peso</a>
+
+      <div class="sb-section-label">Sistema</div>
+      <a class="nav-link" data-page="settings"><span class="nav-icon">⚙️</span>Settings</a>
+    </nav>
+
+  </div>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<main class="main">
+
+<!-- ── DASHBOARD ── -->
+<section id="dashboard" class="page active-page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">ATHLETE COMMAND CENTER</div>
+      <h1 class="pg-title">Bienvenido,<br><span>Campeon</span></h1>
+    </div>
+    <div class="pg-header-right">
+      <div class="tag tag-red" id="dash-level-tag">LV 12</div>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metric-row">
+    <div class="metric"><div class="m-eye">XP TOTAL</div><div class="m-num" id="dash-xp">4250</div><div class="m-sub" id="dash-xp-week">+250 esta semana</div></div>
+    <div class="metric"><div class="m-eye">RACHA</div><div class="m-num" id="dash-racha">12</div><div class="m-sub">dias consecutivos</div></div>
+    <div class="metric"><div class="m-eye">PESO</div><div class="m-num" id="dash-peso">67</div><div class="m-sub" id="dash-peso-sub">Objetivo: 66.5 KG</div></div>
+    <div class="metric"><div class="m-eye">NIVEL</div><div class="m-num" id="dash-nivel">12</div><div class="m-sub">Campeon</div></div>
+  </div>
+
+  <div class="grid g3-2">
+    <!-- Pilares -->
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Sistema de Pilares</div>
+      <div class="pbar-wrap">
+        <div class="pbar-top"><span class="pbar-label">ADAPT — Aprendizaje</span><span class="pbar-val" id="d-adapt-pct">74%</span></div>
+        <div class="pbar"><div class="pbar-fill" id="d-adapt-bar" style="width:74%"></div></div>
+      </div>
+      <div class="pbar-wrap">
+        <div class="pbar-top"><span class="pbar-label">ENDURE — Disciplina</span><span class="pbar-val" id="d-endure-pct">88%</span></div>
+        <div class="pbar"><div class="pbar-fill" id="d-endure-bar" style="width:88%"></div></div>
+      </div>
+      <div class="pbar-wrap">
+        <div class="pbar-top"><span class="pbar-label">STRIKE — Accion</span><span class="pbar-val" id="d-strike-pct">69%</span></div>
+        <div class="pbar"><div class="pbar-fill" id="d-strike-bar" style="width:69%"></div></div>
+      </div>
+      <div class="pillar-grid">
+        <div class="pillar-box"><div class="pb-icon">🧠</div><h4>ADAPT</h4><p>Aprendizaje</p></div>
+        <div class="pillar-box"><div class="pb-icon">⚡</div><h4>ENDURE</h4><p>Disciplina</p></div>
+        <div class="pillar-box"><div class="pb-icon">🥊</div><h4>STRIKE</h4><p>Accion</p></div>
+      </div>
+    </div>
+
+    <div class="col">
+      <!-- Resumen fisico -->
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Resumen Fisico</div>
+        <div class="sr"><span class="sr-l">Peso</span><strong class="sr-r" id="d-peso-stat">67 KG</strong></div>
+        <div class="sr"><span class="sr-l">Objetivo</span><strong class="sr-r" id="d-obj-stat">66.5 KG</strong></div>
+        <div class="sr"><span class="sr-l">IMC</span><strong class="sr-r" id="d-imc-stat">21.9</strong></div>
+        <div class="sr"><span class="sr-l">Categoria</span><strong class="sr-r" id="d-cat-stat">Welterweight</strong></div>
+        <div class="sr"><span class="sr-l">Diferencia</span><strong class="sr-r" id="d-diff-stat">0.5 KG</strong></div>
+      </div>
+      <!-- Coach snippet -->
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>AI Coach</div>
+        <div class="highlight red-accent">
+          <h4>Recomendacion del dia</h4>
+          <p>Tu resistencia supera tu ofensiva. Hoy: 100 jabs explosivos, footwork lateral y reaccion con pelota.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats sesion -->
+  <div class="card" style="margin-top:16px">
+    <div class="card-title"><span class="ct-dot"></span>Sesion de Hoy</div>
+    <div class="grid g4">
+      <div class="sr" style="flex-direction:column;align-items:flex-start;gap:3px;border:none;background:var(--s2);border-radius:var(--r-sm);padding:12px;border:1px solid var(--border)"><span class="sr-l">Misiones</span><strong class="sr-r" id="d-missions-today">0 / 5</strong></div>
+      <div class="sr" style="flex-direction:column;align-items:flex-start;gap:3px;border:none;background:var(--s2);border-radius:var(--r-sm);padding:12px;border:1px solid var(--border)"><span class="sr-l">XP hoy</span><strong class="sr-r" id="d-xp-today">0</strong></div>
+      <div class="sr" style="flex-direction:column;align-items:flex-start;gap:3px;border:none;background:var(--s2);border-radius:var(--r-sm);padding:12px;border:1px solid var(--border)"><span class="sr-l">XP para Lv+1</span><strong class="sr-r" id="d-xp-next">250</strong></div>
+      <div class="sr" style="flex-direction:column;align-items:flex-start;gap:3px;border:none;background:var(--s2);border-radius:var(--r-sm);padding:12px;border:1px solid var(--border)"><span class="sr-l">Racha max</span><strong class="sr-r" id="d-best-streak">12</strong></div>
+    </div>
+  </div>
+
+  <!-- Timer -->
+  <div class="card" style="margin-top:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div class="card-title" style="margin-bottom:0"><span class="ct-dot"></span>Temporizador</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="timer-preset" onclick="setTimerPreset(3*60)">3 min</button>
+        <button class="timer-preset" onclick="setTimerPreset(5*60)">5 min</button>
+        <button class="timer-preset" onclick="setTimerPreset(10*60)">10 min</button>
+        <button class="timer-preset" onclick="setTimerPreset(3*60,true)">3x Rounds</button>
+      </div>
+    </div>
+    <div class="grid g2" style="align-items:center">
+      <!-- Ring -->
+      <div style="text-align:center">
+        <div style="position:relative;display:inline-block">
+          <svg width="180" height="180" style="transform:rotate(-90deg)">
+            <circle cx="90" cy="90" r="78" fill="none" stroke="var(--s3)" stroke-width="8"/>
+            <circle id="timer-ring" cx="90" cy="90" r="78" fill="none"
+              stroke="var(--red)" stroke-width="8"
+              stroke-dasharray="490" stroke-dashoffset="0"
+              stroke-linecap="round" style="transition:stroke-dashoffset .4s ease;filter:drop-shadow(0 0 6px var(--red))"/>
+          </svg>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+            <div id="timer-display" class="timer-display" style="font-family:var(--display);font-size:46px;font-weight:900;color:var(--white);line-height:1;letter-spacing:1px">03:00</div>
+            <div id="timer-round-label" style="font-size:10px;color:var(--muted);letter-spacing:2px;margin-top:3px;font-family:var(--mono)">ROUND 1/1</div>
+            <div id="timer-status" style="font-size:10px;color:var(--red);letter-spacing:2px;margin-top:2px;font-family:var(--mono)">LISTO</div>
+          </div>
+        </div>
+      </div>
+      <!-- Controls -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--s2);border-radius:var(--r);padding:14px;border:1px solid var(--border)">
+          <div class="pg-eyebrow" style="margin-bottom:10px">Configuracion</div>
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;margin-bottom:10px">
+            <div>
+              <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:4px">MIN</div>
+              <input id="custom-min" type="number" min="0" max="60" value="3" style="width:100%;background:var(--s3);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px;color:var(--white);font-family:var(--mono);font-size:16px;text-align:center;outline:none"/>
+            </div>
+            <div style="font-size:20px;color:var(--dim);padding-bottom:6px">:</div>
+            <div>
+              <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:4px">SEG</div>
+              <input id="custom-sec" type="number" min="0" max="59" value="0" style="width:100%;background:var(--s3);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px;color:var(--white);font-family:var(--mono);font-size:16px;text-align:center;outline:none"/>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:4px">ROUNDS</div>
+              <input id="custom-rounds" type="number" min="1" max="20" value="1" style="width:100%;background:var(--s3);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px;color:var(--white);font-family:var(--mono);font-size:14px;text-align:center;outline:none"/>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:4px">DESCANSO (s)</div>
+              <input id="custom-rest" type="number" min="0" max="120" value="30" style="width:100%;background:var(--s3);border:1px solid var(--border);border-radius:var(--r-sm);padding:8px;color:var(--white);font-family:var(--mono);font-size:14px;text-align:center;outline:none"/>
+            </div>
+          </div>
+          <button onclick="setTimerCustom()" class="ghost-btn" style="margin-top:10px">Aplicar configuracion</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button id="btn-start" onclick="timerStartStop()" style="padding:13px;background:var(--red);border:none;border-radius:var(--r);color:white;font-weight:900;font-size:14px;cursor:pointer;font-family:var(--display);letter-spacing:2px;text-transform:uppercase;box-shadow:0 4px 18px var(--red-glow);transition:.2s">INICIAR</button>
+          <button onclick="timerReset()" style="padding:13px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r);color:var(--muted);font-weight:700;font-size:14px;cursor:pointer;font-family:var(--display);letter-spacing:1px;transition:.2s">RESET</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+          <div style="background:var(--s2);border-radius:var(--r-sm);padding:10px;text-align:center;border:1px solid var(--border)">
+            <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:3px">ROUNDS</div>
+            <div id="timer-stat-rounds" style="font-family:var(--display);font-size:22px;font-weight:900;color:var(--red)">1</div>
+          </div>
+          <div style="background:var(--s2);border-radius:var(--r-sm);padding:10px;text-align:center;border:1px solid var(--border)">
+            <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:3px">HECHOS</div>
+            <div id="timer-stat-done" style="font-family:var(--display);font-size:22px;font-weight:900;color:var(--green)">0</div>
+          </div>
+          <div style="background:var(--s2);border-radius:var(--r-sm);padding:10px;text-align:center;border:1px solid var(--border)">
+            <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:3px">TOTAL</div>
+            <div id="timer-stat-total" style="font-family:var(--display);font-size:22px;font-weight:900">0:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── MISSION CENTER ── -->
+<section id="missions" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">DAILY CHALLENGES</div>
+      <h1 class="pg-title">Mission<br><span>Center</span></h1>
+    </div>
+    <div class="pg-header-right">
+      <div class="tag tag-red">HOMBRES</div>
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="card-title" style="margin-bottom:0"><span class="ct-dot"></span>Misiones del Dia</div>
+        <span class="m-xp" style="font-size:12px">Completadas: <span id="m-done-count">0</span>/<span id="m-total-count">5</span></span>
+      </div>
+      <div id="missions-list"></div>
+      <button class="day-cta" onclick="completarDia()">Completar Dia (+100 XP Bonus)</button>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Progreso del Dia</div>
+        <div class="pbar-wrap" style="margin-bottom:16px">
+          <div class="pbar-top"><span class="pbar-label">Completado</span><span class="pbar-val" id="m-pct-text">0%</span></div>
+          <div class="pbar"><div class="pbar-fill" id="m-progress-bar" style="width:0%"></div></div>
+        </div>
+        <div class="sr"><span class="sr-l">XP ganado hoy</span><strong class="sr-r" id="m-xp-earned" style="color:var(--gold)">0 XP</strong></div>
+        <div class="sr"><span class="sr-l">Bonus disponible</span><strong class="sr-r">100 XP</strong></div>
+        <div class="sr"><span class="sr-l">Racha actual</span><strong class="sr-r" id="m-racha">12 dias</strong></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Misiones Semanales</div>
+        <div class="mission-item" id="wm1">
+          <div class="m-check"></div><div class="m-name">5 dias de entrenamiento</div><div class="m-xp">+500</div>
+        </div>
+        <div class="mission-item" id="wm2">
+          <div class="m-check"></div><div class="m-name">Llegar a 66.5 KG</div><div class="m-xp">+300</div>
+        </div>
+        <div class="mission-item" id="wm3">
+          <div class="m-check"></div><div class="m-name">1000 jabs en la semana</div><div class="m-xp">+400</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ORGANIZER AI ── -->
+<section id="organizer" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">ORGANIZATION CENTER</div>
+      <h1 class="pg-title">Organizer<br><span>AI</span></h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">📋</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="col">
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Horario Semanal</div>
+        <div id="schedule-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Recordatorios</div>
+        <div id="reminders-list"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Objetivos Activos</div>
+        <div class="mission-item" id="obj1"><div class="m-check"></div><div class="m-name">Llegar a 66.5 KG</div></div>
+        <div class="mission-item" id="obj2"><div class="m-check"></div><div class="m-name">Completar 20 rounds esta semana</div></div>
+        <div class="mission-item" id="obj3"><div class="m-check"></div><div class="m-name">Mejorar velocidad del Jab</div></div>
+        <div class="mission-item" id="obj4"><div class="m-check"></div><div class="m-name">Mantener racha de 12 dias</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Notas</div>
+        <textarea class="notes-ta" id="coach-notes" placeholder="Escribe tus notas aqui..."></textarea>
+        <button class="ghost-btn" onclick="guardarNotas()">Guardar notas</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PERFORMANCE ── -->
+<section id="performance" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">PHYSICAL TRACKING</div>
+      <h1 class="pg-title">Perfor-<br><span>mance</span></h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">⚖️</div></div>
+  </div>
+  <div class="grid g3" style="margin-bottom:16px">
+    <div class="card slider-card">
+      <div class="card-title"><span class="ct-dot"></span>Peso Actual</div>
+      <div class="big-num" id="p-peso-val">67</div>
+      <div class="big-unit">kilogramos</div>
+      <input id="slider-peso" type="range" class="perf-slider" min="40" max="120" value="67" step="0.5" oninput="updatePeso(this.value)">
+    </div>
+    <div class="card slider-card">
+      <div class="card-title"><span class="ct-dot"></span>Peso Objetivo</div>
+      <div class="big-num" id="p-obj-val">66.5</div>
+      <div class="big-unit">kilogramos</div>
+      <input id="slider-obj" type="range" class="perf-slider" min="40" max="120" value="66.5" step="0.5" oninput="updateObj(this.value)">
+    </div>
+    <div class="card slider-card">
+      <div class="card-title"><span class="ct-dot"></span>Altura</div>
+      <div class="big-num" id="p-talla-val">175</div>
+      <div class="big-unit">centimetros</div>
+      <input id="slider-talla" type="range" class="perf-slider" min="140" max="210" value="175" step="1" oninput="updateTalla(this.value)">
+    </div>
+  </div>
+  <div class="grid g2" style="margin-bottom:16px">
+    <div class="card" style="text-align:center">
+      <div class="card-title" style="justify-content:center"><span class="ct-dot"></span>IMC</div>
+      <div class="imc-big" id="p-imc">21.9</div>
+      <div class="imc-lbl">Indice de Masa Corporal</div>
+      <div class="imc-status" id="p-imc-status">Peso Normal</div>
+      <div class="pbar" style="margin-top:16px;height:6px">
+        <div class="pbar-fill" id="p-imc-bar" style="width:55%"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--dim);margin-top:4px;font-family:var(--mono)">
+        <span>16</span><span>18.5</span><span>25</span><span>30</span><span>40</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Categoria de Boxeo</div>
+      <div class="cat-name" id="p-cat">WELTERWEIGHT</div>
+      <div class="cat-range" id="p-cat-range">63.5 - 67 KG</div>
+      <div style="margin-top:16px">
+        <div class="sr"><span class="sr-l">Peso actual</span><strong class="sr-r" id="p-curr">67 KG</strong></div>
+        <div class="sr"><span class="sr-l">Objetivo</span><strong class="sr-r" id="p-tgt">66.5 KG</strong></div>
+        <div class="sr"><span class="sr-l">Diferencia</span><strong class="sr-r" id="p-diff">0.5 KG</strong></div>
+        <div class="sr"><span class="sr-l">Altura</span><strong class="sr-r" id="p-height">175 CM</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="ct-dot"></span>Historial de Peso</div>
+    <div id="weight-history-list"></div>
+  </div>
+</section>
+
+<!-- ── BOXING HUB ── -->
+<section id="boxing" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">KNOWLEDGE CENTER</div>
+      <h1 class="pg-title">Boxing<br><span>Hub</span></h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">🥊</div></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title"><span class="ct-dot"></span>Biblioteca de Tecnicas</div>
+    <div class="tech-grid">
+      <div class="tech-btn active" id="tb-JAB" onclick="verTecnica('JAB')">
+        <div class="tb-icon">👊</div><h4>JAB</h4><p>Velocidad</p>
+      </div>
+      <div class="tech-btn" id="tb-CROSS" onclick="verTecnica('CROSS')">
+        <div class="tb-icon">💥</div><h4>CROSS</h4><p>Potencia</p>
+      </div>
+      <div class="tech-btn" id="tb-HOOK" onclick="verTecnica('HOOK')">
+        <div class="tb-icon">🌀</div><h4>HOOK</h4><p>Lateral</p>
+      </div>
+      <div class="tech-btn" id="tb-UPPERCUT" onclick="verTecnica('UPPERCUT')">
+        <div class="tb-icon">⬆️</div><h4>UPPERCUT</h4><p>Ascendente</p>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="tech-detail-card"></div>
+</section>
+
+<!-- ── CHAMPION PATH ── -->
+<section id="champion" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">PROGRESSION SYSTEM</div>
+      <h1 class="pg-title">Champion<br><span>Path</span></h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">👑</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Tu Progreso</div>
+      <div class="sr"><span class="sr-l">XP Total</span><strong class="sr-r" id="cp-xp">4250</strong></div>
+      <div class="sr"><span class="sr-l">Nivel Actual</span><strong class="sr-r" id="cp-nivel">12</strong></div>
+      <div class="sr"><span class="sr-l">Rango</span><strong class="sr-r" id="cp-rango">Campeon</strong></div>
+      <div class="sr"><span class="sr-l">XP siguiente nivel</span><strong class="sr-r" id="cp-next">4500</strong></div>
+      <div style="margin-top:14px">
+        <div class="pbar-top"><span class="pbar-label">Nivel <span id="cp-pct">83%</span></span></div>
+        <div style="height:8px;background:var(--s3);border-radius:50px;overflow:hidden;margin-top:6px">
+          <div id="cp-bar" style="height:100%;background:linear-gradient(90deg,var(--red),#ff4455);transition:width .7s;box-shadow:0 0 8px var(--red-glow);width:83%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Sistema de Rangos</div>
+      <div class="rank-stack">
+        <div class="rank-card done" id="rank-amateur"><div class="rank-icon">🥉</div><div class="rank-meta"><h3>Amateur</h3><p>Inicio del camino</p></div><div class="rank-xp">0 XP</div></div>
+        <div class="rank-card done" id="rank-competidor"><div class="rank-icon">🥈</div><div class="rank-meta"><h3>Competidor</h3><p>Nivel 5+</p></div><div class="rank-xp">1000 XP</div></div>
+        <div class="rank-card now" id="rank-campeon"><div class="rank-icon">🥇</div><div class="rank-meta"><h3>Campeon</h3><p>Nivel 10+ — ACTUAL</p></div><div class="rank-xp">3000 XP</div></div>
+        <div class="rank-card locked" id="rank-leyenda"><div class="rank-icon">👑</div><div class="rank-meta"><h3>Leyenda</h3><p>Nivel 20+</p></div><div class="rank-xp">8000 XP</div></div>
+      </div>
+    </div>
+    <div class="card span2">
+      <div class="card-title"><span class="ct-dot"></span>Tabla de Niveles</div>
+      <div class="lvl-grid" id="level-table"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── AI COACH ── -->
+<section id="coach" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">INTELLIGENT ADVISOR</div>
+      <h1 class="pg-title">AI<br><span>Coach</span></h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">🧠</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="col">
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Analisis del Atleta</div>
+        <div class="coach-tip"><h4>Fortalezas</h4><ul><li>Resistencia cardiovascular (<span id="coach-endure">88</span>%)</li><li>Disciplina — racha <span id="coach-racha">12</span> dias</li><li>Peso controlado cerca del objetivo</li></ul></div>
+        <div class="coach-tip"><h4>Areas de Mejora</h4><ul><li>Explosividad ofensiva (STRIKE <span id="coach-strike">69</span>%)</li><li>Velocidad de reaccion</li><li>Combinaciones jab-cross-hook</li></ul></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Objetivos Sugeridos</div>
+        <div id="suggested-goals"></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Plan Semanal</div>
+        <div class="week-chips" id="weekly-plan-chips"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Recomendacion de Hoy</div>
+        <div id="coach-tip"></div>
+        <div class="coach-tip" style="margin-top:10px"><h4>Nutricion</h4><p>Para bajar 0.5 KG: deficit calorico de 200-300 kcal. Mantiene 1.6g de proteina por kg de peso.</p></div>
+        <div class="coach-tip" style="margin-top:10px"><h4>Recuperacion</h4><p>8 horas de sueno. La adaptacion neuromuscular ocurre durante el descanso.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SETTINGS ── -->
+<section id="settings" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">CONFIGURATION</div>
+      <h1 class="pg-title">Settings</h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">⚙️</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Datos</div>
+      <div class="setting-block"><div><div class="sb-label">Guardar progreso</div><div class="sb-sub">Guardar todos los datos actuales</div></div><button class="action-btn" onclick="guardarTodo()">Guardar</button></div>
+      <div class="setting-block"><div><div class="sb-label">Exportar datos</div><div class="sb-sub">Descargar resumen en JSON</div></div><button class="action-btn" onclick="exportarDatos()">Exportar</button></div>
+      <div class="setting-block"><div><div class="sb-label">Reiniciar estadisticas</div><div class="sb-sub">Borra todo el progreso guardado</div></div><button class="action-btn danger" onclick="reiniciarDatos()">Reiniciar</button></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Informacion</div>
+      <div class="sr"><span class="sr-l">Version</span><strong class="sr-r">v5.0</strong></div>
+      <div class="sr"><span class="sr-l">Almacenamiento</span><strong class="sr-r" id="st-storage">Local</strong></div>
+      <div class="sr"><span class="sr-l">Guardado automatico</span><strong class="sr-r">Cada 3 seg</strong></div>
+      <div class="sr"><span class="sr-l">Misiones</span><strong class="sr-r" id="st-missions">—</strong></div>
+      <div class="sr"><span class="sr-l">XP Total</span><strong class="sr-r" id="st-xp-total">—</strong></div>
+      <div class="sr"><span class="sr-l">Nivel</span><strong class="sr-r" id="st-nivel">—</strong></div>
+      <div class="sr"><span class="sr-l">Racha</span><strong class="sr-r" id="st-racha">—</strong></div>
+    </div>
+    <div class="card span2">
+      <div class="card-title"><span class="ct-dot"></span>Acerca de Endura Strike</div>
+      <div class="highlight">
+        <p>Endura Strike es tu sistema operativo personal para boxeo y rendimiento atletico. Combina tracking fisico, gamificacion con XP, AI Coach y biblioteca de tecnicas para ayudarte a convertirte en campeon.</p>
+        <p style="margin-top:10px;color:var(--dim)">Desarrollado con pasion. 🥊</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CONTADOR DE GOLPES ── -->
+<section id="golpes" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">PUNCH TRACKER</div>
+      <h1 class="pg-title">Contador<br><span>de Golpes</span></h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">👊</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Sesion de Golpes</div>
+      <div class="punch-grid" id="punch-btns">
+        <button class="punch-btn" data-punch="jab" onclick="registerPunch('jab')" style="background:linear-gradient(135deg,var(--red),#6d000e)">
+          <span style="font-size:30px">👊</span>
+          <span class="pb-label">JAB</span>
+          <span class="pb-count" id="cnt-jab">0</span>
+        </button>
+        <button class="punch-btn" data-punch="cross" onclick="registerPunch('cross')" style="background:linear-gradient(135deg,#ea580c,#7c2d12)">
+          <span style="font-size:30px">💥</span>
+          <span class="pb-label">CROSS</span>
+          <span class="pb-count" id="cnt-cross">0</span>
+        </button>
+        <button class="punch-btn" data-punch="hook" onclick="registerPunch('hook')" style="background:linear-gradient(135deg,#9333ea,#4a007c)">
+          <span style="font-size:30px">🌀</span>
+          <span class="pb-label">HOOK</span>
+          <span class="pb-count" id="cnt-hook">0</span>
+        </button>
+        <button class="punch-btn" data-punch="uppercut" onclick="registerPunch('uppercut')" style="background:linear-gradient(135deg,#16a34a,#064e3b)">
+          <span style="font-size:30px">⬆️</span>
+          <span class="pb-label">UPPERCUT</span>
+          <span class="pb-count" id="cnt-uppercut">0</span>
+        </button>
+      </div>
+      <button onclick="resetPunches()" class="ghost-btn">Reiniciar sesion</button>
+    </div>
+    <div class="col">
+      <div class="card" style="text-align:center">
+        <div class="card-title" style="justify-content:center"><span class="ct-dot"></span>Total de la Sesion</div>
+        <div style="font-family:var(--display);font-size:88px;font-weight:900;color:var(--red);line-height:1;margin:8px 0 4px" id="cnt-total">0</div>
+        <div style="font-size:9px;color:var(--dim);letter-spacing:4px;font-family:var(--mono)">GOLPES TOTALES</div>
+        <div style="margin-top:14px">
+          <div class="sr"><span class="sr-l">Jabs</span><strong class="sr-r" id="stat-jab">0</strong></div>
+          <div class="sr"><span class="sr-l">Cross</span><strong class="sr-r" id="stat-cross">0</strong></div>
+          <div class="sr"><span class="sr-l">Hooks</span><strong class="sr-r" id="stat-hook">0</strong></div>
+          <div class="sr"><span class="sr-l">Uppercuts</span><strong class="sr-r" id="stat-upper">0</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Distribucion</div>
+        <div id="punch-bars"></div>
+        <div class="highlight red-accent" style="margin-top:12px"><h4>Analisis</h4><p id="punch-analysis">Empieza a golpear para ver el analisis.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── COMBINACIONES ── -->
+<section id="combos" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">COMBINATION LIBRARY</div>
+      <h1 class="pg-title">Combina-<br><span>ciones</span></h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">🔥</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Biblioteca de Combos</div>
+      <div id="combo-list"></div>
+    </div>
+    <div class="card" id="combo-detail-card">
+      <div class="card-title"><span class="ct-dot"></span>Selecciona un combo</div>
+      <div class="highlight"><p>Haz clic en un combo de la izquierda para ver los detalles, la ejecucion y los consejos del AI Coach.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── LOGROS ── -->
+<section id="logros" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">ACHIEVEMENTS</div>
+      <h1 class="pg-title">Logros</h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">🏅</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Desbloqueados</div>
+      <div id="logros-unlocked"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Pendientes</div>
+      <div id="logros-locked"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NUTRICION ── -->
+<section id="nutricion" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">NUTRITION CENTER</div>
+      <h1 class="pg-title">Nutricion</h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">🍎</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Calculadora de Calorias</div>
+      <div style="background:var(--s2);border-radius:var(--r);padding:14px;margin-bottom:14px;border:1px solid var(--border)">
+        <div class="pg-eyebrow" style="margin-bottom:10px">Nivel de Actividad</div>
+        <div style="display:flex;flex-direction:column;gap:6px" id="activity-btns">
+          <button class="act-btn" data-factor="1.2" onclick="setActivity(this,1.2)">Sedentario — poco o nada de ejercicio</button>
+          <button class="act-btn" data-factor="1.375" onclick="setActivity(this,1.375)">Ligero — 1-3 dias/semana</button>
+          <button class="act-btn active-act" data-factor="1.55" onclick="setActivity(this,1.55)">Moderado — 3-5 dias/semana</button>
+          <button class="act-btn" data-factor="1.725" onclick="setActivity(this,1.725)">Activo — 6-7 dias/semana</button>
+          <button class="act-btn" data-factor="1.9" onclick="setActivity(this,1.9)">Muy activo — doble sesion</button>
+        </div>
+      </div>
+      <div class="grid g2">
+        <div class="macro-card"><div class="mc-label">Mantenimiento</div><div class="mc-val" id="cal-maintenance" style="color:var(--white)">0</div><div class="mc-unit">kcal/dia</div></div>
+        <div class="macro-card"><div class="mc-label">Deficit objetivo</div><div class="mc-val" id="cal-deficit" style="color:var(--red)">0</div><div class="mc-unit">kcal/dia</div></div>
+        <div class="macro-card"><div class="mc-label">Proteina diaria</div><div class="mc-val" id="cal-protein" style="color:var(--green)">0</div><div class="mc-unit">gramos</div></div>
+        <div class="macro-card"><div class="mc-label">Agua diaria</div><div class="mc-val" id="cal-water" style="color:var(--blue)">0</div><div class="mc-unit">litros</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Guia Nutricional</div>
+        <div id="nutrition-tips"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Macros Recomendados</div>
+        <div id="macros-display"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HISTORIAL ── -->
+<section id="historial" class="page">
+  <div class="pg-header">
+    <div class="pg-header-left">
+      <div class="pg-eyebrow">TRAINING HISTORY</div>
+      <h1 class="pg-title">Historial</h1>
+    </div>
+    <div class="pg-header-right"><div class="page-icon">📈</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Grafica de Peso</div>
+      <canvas id="weight-chart" height="200" style="width:100%;display:block;margin-top:8px"></canvas>
+      <div id="weight-chart-legend" style="margin-top:10px;display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);font-family:var(--mono)"></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="ct-dot"></span>Resumen Semanal</div>
+      <div id="weekly-summary"></div>
+    </div>
+    <div class="card span2">
+      <div class="card-title"><span class="ct-dot"></span>Registro de Sesiones</div>
+      <div id="session-log"></div>
+    </div>
+  </div>
+</section>
+
+
+  <!-- ── SPARRING IA ── -->
+  <section id="sparring" class="page">
+    <div class="pg-header">
+      <div class="pg-header-left">
+        <div class="pg-eyebrow">AI SPARRING MODE</div>
+        <h1 class="pg-title">Sparring<br><span>con IA</span></h1>
+      </div>
+      <div class="pg-header-right"><div class="pg-badge" id="spar-round-badge">ROUND 1</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="col">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>Rival Virtual</div>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:18px">
+            <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#1e1e2e,#2d2d3e);display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid var(--border);flex-shrink:0">🥊</div>
+            <div>
+              <div style="font-family:var(--display);font-size:20px;font-weight:900" id="rival-name">El Serpiente</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px" id="rival-style">Contragolpeador · Zurdo</div>
+              <div style="display:flex;gap:6px;margin-top:6px">
+                <span class="tag tag-red" id="rival-level">Intermedio</span>
+              </div>
+            </div>
+          </div>
+          <div class="sr"><span class="sr-l">Estilo</span><strong class="sr-r" id="rival-style-stat">Contragolpeador</strong></div>
+          <div class="sr"><span class="sr-l">Guardia</span><strong class="sr-r" id="rival-guard">Zurda</strong></div>
+          <div class="sr"><span class="sr-l">Fortaleza</span><strong class="sr-r" id="rival-strength">Defensa</strong></div>
+          <div class="sr"><span class="sr-l">Debilidad</span><strong class="sr-r" id="rival-weakness">Cuerpo</strong></div>
+          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+            <button onclick="cambiarRival()" style="flex:1;padding:10px;background:var(--s2);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--muted);font-family:var(--body);font-size:12px;cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--red-border)';this.style.color='var(--white)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Cambiar rival</button>
+            <button onclick="iniciarSparring()" style="flex:2;padding:10px;background:var(--red);border:none;border-radius:var(--r-sm);color:white;font-family:var(--display);font-size:14px;font-weight:900;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 16px var(--red-glow)">INICIAR ROUND</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>Tu Marcador</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;text-align:center">
+            <div style="background:var(--s2);border-radius:var(--r);padding:14px;border:1px solid var(--border)">
+              <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:4px">ATAQUES</div>
+              <div style="font-family:var(--display);font-size:32px;font-weight:900;color:var(--red)" id="spar-attacks">0</div>
+            </div>
+            <div style="background:var(--s2);border-radius:var(--r);padding:14px;border:1px solid var(--border)">
+              <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:4px">ESQUIVAS</div>
+              <div style="font-family:var(--display);font-size:32px;font-weight:900;color:var(--green)" id="spar-dodges">0</div>
+            </div>
+            <div style="background:var(--s2);border-radius:var(--r);padding:14px;border:1px solid var(--border)">
+              <div style="font-size:9px;color:var(--dim);font-family:var(--mono);margin-bottom:4px">ROUNDS</div>
+              <div style="font-family:var(--display);font-size:32px;font-weight:900" id="spar-rounds-done">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column">
+        <div class="card-title"><span class="ct-dot"></span>Arena de Combate</div>
+        <div id="spar-arena" style="flex:1;min-height:420px;background:var(--s2);border-radius:var(--r);border:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden">
+          <div id="spar-messages" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin">
+            <div style="text-align:center;padding:40px 20px">
+              <div style="font-size:48px;margin-bottom:12px">🥊</div>
+              <div style="font-family:var(--display);font-size:22px;font-weight:900;color:var(--muted);letter-spacing:2px">LISTO PARA SPARRING</div>
+              <div style="font-size:13px;color:var(--dim);margin-top:8px">Presiona INICIAR ROUND para comenzar</div>
+            </div>
+          </div>
+          <div id="spar-options" style="padding:12px;border-top:1px solid var(--border);display:none">
+            <div style="font-size:10px;color:var(--dim);font-family:var(--mono);margin-bottom:8px;letter-spacing:2px">TU RESPUESTA:</div>
+            <div id="spar-btn-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+          </div>
+          <div id="spar-loading" style="padding:16px;text-align:center;display:none">
+            <div style="font-size:12px;color:var(--muted);font-family:var(--mono);animation:pulse 1.2s infinite">Analizando tu movimiento...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── ANALISIS POST SESION ── -->
+  <section id="analisis" class="page">
+    <div class="pg-header">
+      <div class="pg-header-left">
+        <div class="pg-eyebrow">POST-SESSION ANALYSIS</div>
+        <h1 class="pg-title">Analisis<br><span>IA</span></h1>
+      </div>
+      <div class="pg-header-right"><div class="page-icon">🔬</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="col">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>Generar Reporte con IA</div>
+          <div class="highlight" style="margin-bottom:14px">
+            <h4>Como funciona</h4>
+            <p>La IA analiza tus datos reales de hoy: misiones, golpes, XP, peso y racha, y genera un reporte personalizado con fortalezas, areas de mejora y plan para manana.</p>
+          </div>
+          <div style="background:var(--s2);border-radius:var(--r);padding:14px;border:1px solid var(--border);margin-bottom:14px">
+            <div class="pg-eyebrow" style="margin-bottom:12px">Datos de hoy</div>
+            <div class="sr"><span class="sr-l">Misiones completadas</span><strong class="sr-r" id="an-missions">—</strong></div>
+            <div class="sr"><span class="sr-l">XP ganado</span><strong class="sr-r" id="an-xp" style="color:var(--gold)">—</strong></div>
+            <div class="sr"><span class="sr-l">Golpes registrados</span><strong class="sr-r" id="an-punches">—</strong></div>
+            <div class="sr"><span class="sr-l">Racha actual</span><strong class="sr-r" id="an-racha">—</strong></div>
+            <div class="sr"><span class="sr-l">Peso actual</span><strong class="sr-r" id="an-peso">—</strong></div>
+          </div>
+          <button onclick="generarAnalisis()" id="btn-analisis" style="width:100%;padding:14px;background:var(--red);border:none;border-radius:var(--r);color:white;font-family:var(--display);font-size:15px;font-weight:900;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 18px var(--red-glow);transition:.2s">
+            GENERAR REPORTE CON IA
+          </button>
+        </div>
+        <div class="card" id="analisis-plan-card" style="display:none">
+          <div class="card-title"><span class="ct-dot"></span>Plan para Manana</div>
+          <div id="analisis-plan"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Reporte de la IA</div>
+        <div id="analisis-output" style="min-height:300px">
+          <div style="text-align:center;padding:60px 20px;color:var(--dim)">
+            <div style="font-size:40px;margin-bottom:12px">🔬</div>
+            <div style="font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:2px">ESPERANDO DATOS</div>
+            <div style="font-size:12px;margin-top:8px">Presiona el boton para generar tu reporte personalizado</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── REFLEJOS ── -->
+  <section id="reflejos" class="page">
+    <div class="pg-header">
+      <div class="pg-header-left">
+        <div class="pg-eyebrow">REACTION TRAINER</div>
+        <h1 class="pg-title">Test de<br><span>Reflejos</span></h1>
+      </div>
+      <div class="pg-header-right"><div class="pg-badge" id="reflejos-badge">LISTO</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;text-align:center">
+        <div id="reflejos-signal" style="font-size:80px;margin-bottom:20px;transition:all .2s">👁️</div>
+        <div id="reflejos-command" style="font-family:var(--display);font-size:52px;font-weight:900;color:var(--muted);letter-spacing:3px;margin-bottom:8px;min-height:60px">ESPERA...</div>
+        <div id="reflejos-sub" style="font-size:13px;color:var(--dim);margin-bottom:24px">Presiona INICIAR para comenzar</div>
+        <div id="reflejos-timer-display" style="font-family:var(--mono);font-size:28px;color:var(--red);min-height:36px"></div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>Golpes de respuesta</div>
+          <div id="reflejos-btns" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+            <button onclick="respondReflejos('JAB')" style="padding:18px;background:linear-gradient(135deg,var(--red),#6d000e);border:none;border-radius:var(--r);color:white;font-family:var(--display);font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;transition:all .12s;opacity:.5" id="rbtn-JAB">JAB</button>
+            <button onclick="respondReflejos('CROSS')" style="padding:18px;background:linear-gradient(135deg,#ea580c,#7c2d12);border:none;border-radius:var(--r);color:white;font-family:var(--display);font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;transition:all .12s;opacity:.5" id="rbtn-CROSS">CROSS</button>
+            <button onclick="respondReflejos('HOOK')" style="padding:18px;background:linear-gradient(135deg,#9333ea,#4a007c);border:none;border-radius:var(--r);color:white;font-family:var(--display);font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;transition:all .12s;opacity:.5" id="rbtn-HOOK">HOOK</button>
+            <button onclick="respondReflejos('UPPERCUT')" style="padding:18px;background:linear-gradient(135deg,#16a34a,#064e3b);border:none;border-radius:var(--r);color:white;font-family:var(--display);font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;transition:all .12s;opacity:.5" id="rbtn-UPPERCUT">UPPER</button>
+          </div>
+          <button onclick="iniciarReflejos()" id="btn-reflejos" style="width:100%;padding:13px;background:var(--red);border:none;border-radius:var(--r);color:white;font-family:var(--display);font-size:14px;font-weight:900;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 16px var(--red-glow)">INICIAR TEST</button>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>Estadisticas</div>
+          <div class="sr"><span class="sr-l">Intentos</span><strong class="sr-r" id="ref-attempts">0</strong></div>
+          <div class="sr"><span class="sr-l">Correctos</span><strong class="sr-r" id="ref-correct" style="color:var(--green)">0</strong></div>
+          <div class="sr"><span class="sr-l">Precision</span><strong class="sr-r" id="ref-accuracy">0%</strong></div>
+          <div class="sr"><span class="sr-l">Tiempo promedio</span><strong class="sr-r" id="ref-avg-time" style="color:var(--blue)">— ms</strong></div>
+          <div class="sr"><span class="sr-l">Mejor tiempo</span><strong class="sr-r" id="ref-best-time" style="color:var(--gold)">— ms</strong></div>
+          <div style="margin-top:12px" id="ref-history"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── CALCULADORA DE PELEA ── -->
+  <section id="estrategia" class="page">
+    <div class="pg-header">
+      <div class="pg-header-left">
+        <div class="pg-eyebrow">FIGHT CALCULATOR</div>
+        <h1 class="pg-title">Calcula-<br><span>dora IA</span></h1>
+      </div>
+      <div class="pg-header-right"><div class="page-icon">⚔️</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="col">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>Tu Perfil</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div class="pg-eyebrow" style="margin-bottom:6px">Estilo de pelea</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px" id="my-style-btns">
+                <button class="style-pick active-style" onclick="pickStyle(this,'Presionador')">Presionador</button>
+                <button class="style-pick" onclick="pickStyle(this,'Contragolpeador')">Contragolpeador</button>
+                <button class="style-pick" onclick="pickStyle(this,'Boxeador puro')">Boxeador puro</button>
+                <button class="style-pick" onclick="pickStyle(this,'Brawler')">Brawler</button>
+                <button class="style-pick" onclick="pickStyle(this,'Swarmer')">Swarmer</button>
+              </div>
+            </div>
+            <div>
+              <div class="pg-eyebrow" style="margin-bottom:6px">Guardia</div>
+              <div style="display:flex;gap:6px">
+                <button class="style-pick active-style" id="guard-ort" onclick="pickGuard('Ortodoxo')">Ortodoxo</button>
+                <button class="style-pick" id="guard-zur" onclick="pickGuard('Zurdo')">Zurdo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>Perfil del Rival</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div>
+              <div class="pg-eyebrow" style="margin-bottom:6px">Estilo del rival</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px" id="rival-style-btns">
+                <button class="style-pick" onclick="pickRivalStyle(this,'Presionador')">Presionador</button>
+                <button class="style-pick active-style" onclick="pickRivalStyle(this,'Contragolpeador')">Contragolpeador</button>
+                <button class="style-pick" onclick="pickRivalStyle(this,'Boxeador puro')">Boxeador puro</button>
+                <button class="style-pick" onclick="pickRivalStyle(this,'Brawler')">Brawler</button>
+                <button class="style-pick" onclick="pickRivalStyle(this,'Swarmer')">Swarmer</button>
+              </div>
+            </div>
+            <div>
+              <div class="pg-eyebrow" style="margin-bottom:6px">Nivel del rival</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="style-pick" onclick="pickRivalLevel(this,'Principiante')">Principiante</button>
+                <button class="style-pick active-style" onclick="pickRivalLevel(this,'Intermedio')">Intermedio</button>
+                <button class="style-pick" onclick="pickRivalLevel(this,'Avanzado')">Avanzado</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button onclick="generarEstrategia()" style="width:100%;padding:14px;background:var(--red);border:none;border-radius:var(--r);color:white;font-family:var(--display);font-size:15px;font-weight:900;letter-spacing:2px;cursor:pointer;box-shadow:0 4px 18px var(--red-glow)">ANALIZAR CON IA</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Estrategia de la IA</div>
+        <div id="estrategia-output" style="min-height:350px">
+          <div style="text-align:center;padding:60px 20px;color:var(--dim)">
+            <div style="font-size:40px;margin-bottom:12px">⚔️</div>
+            <div style="font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:2px">CONFIGURA TU PELEA</div>
+            <div style="font-size:12px;margin-top:8px">Selecciona los perfiles y presiona Analizar</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PREDICCION PESO ── -->
+  <section id="prediccion" class="page">
+    <div class="pg-header">
+      <div class="pg-header-left">
+        <div class="pg-eyebrow">WEIGHT PREDICTION</div>
+        <h1 class="pg-title">Prediccion<br><span>de Peso</span></h1>
+      </div>
+      <div class="pg-header-right"><div class="page-icon">📅</div></div>
+    </div>
+    <div class="grid g2">
+      <div class="col">
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>Configuracion</div>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div>
+              <div class="pg-eyebrow" style="margin-bottom:8px">Deficit calorico diario</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap" id="deficit-btns">
+                <button class="style-pick" onclick="setDeficit(this,150)">150 kcal</button>
+                <button class="style-pick active-style" onclick="setDeficit(this,300)">300 kcal</button>
+                <button class="style-pick" onclick="setDeficit(this,500)">500 kcal</button>
+                <button class="style-pick" onclick="setDeficit(this,750)">750 kcal</button>
+              </div>
+            </div>
+            <div>
+              <div class="pg-eyebrow" style="margin-bottom:8px">Dias de entrenamiento/semana</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap" id="dias-btns">
+                <button class="style-pick" onclick="setDias(this,3)">3 dias</button>
+                <button class="style-pick active-style" onclick="setDias(this,5)">5 dias</button>
+                <button class="style-pick" onclick="setDias(this,6)">6 dias</button>
+                <button class="style-pick" onclick="setDias(this,7)">7 dias</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-dot"></span>Resumen</div>
+          <div class="sr"><span class="sr-l">Peso actual</span><strong class="sr-r" id="pred-current">—</strong></div>
+          <div class="sr"><span class="sr-l">Peso objetivo</span><strong class="sr-r" id="pred-target">—</strong></div>
+          <div class="sr"><span class="sr-l">Por bajar</span><strong class="sr-r" id="pred-diff" style="color:var(--red)">—</strong></div>
+          <div class="sr"><span class="sr-l">Deficit diario</span><strong class="sr-r" id="pred-deficit">300 kcal</strong></div>
+          <div class="sr"><span class="sr-l">Perdida/semana</span><strong class="sr-r" id="pred-week-loss">—</strong></div>
+          <div class="sr"><span class="sr-l">Fecha estimada</span><strong class="sr-r" id="pred-date" style="color:var(--green)">—</strong></div>
+          <div class="sr"><span class="sr-l">Semanas restantes</span><strong class="sr-r" id="pred-weeks">—</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="ct-dot"></span>Proyeccion Semanal</div>
+        <canvas id="pred-chart" height="220" style="width:100%;display:block;margin-top:8px"></canvas>
+        <div id="pred-milestones" style="margin-top:14px"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+
+
+// ════════════════════════════════════════════════════════════
+// ENDURA STRIKE V5 — MOTOR COMPLETO
+// Cubre: Dashboard, Mission Center, Organizer AI,
+//        Performance, Boxing Hub, Champion Path,
+//        AI Coach, Settings
+// ════════════════════════════════════════════════════════════
+
+// ──────────────────────────────────────────
+// 1. ESTADO GLOBAL
+// ──────────────────────────────────────────
+let state = {
+  nombre:    'Campeón',
+  peso:      67,
+  objetivo:  66.5,
+  talla:     175,
+  xp:        4250,
+  racha:     12,
+  bestStreak:12,
+  xpToday:   0,
+  xpWeek:    250,
+  pillar: { adapt: 74, endure: 88, strike: 69 },
+  missions: [
+    { id:'m1', name:'100 Jabs explosivos',      xp:50, done:false },
+    { id:'m2', name:'3 Rounds Shadow Boxing',   xp:75, done:false },
+    { id:'m3', name:'15 Min Cardio continuo',   xp:60, done:false },
+    { id:'m4', name:'Estudiar técnica del día', xp:40, done:false },
+    { id:'m5', name:'50 Abdominales',           xp:35, done:false }
+  ],
+  dayCompleted: false,
+  weeklyMissions: { wm1:false, wm2:false, wm3:false },
+  objetivos:      { obj1:false, obj2:false, obj3:false, obj4:false },
+  weightHistory: [
+    { date:'2024-01-10', peso:68.5 },
+    { date:'2024-01-13', peso:68.0 },
+    { date:'2024-01-16', peso:67.5 },
+    { date:'2024-01-19', peso:67.0 }
+  ],
+  notes: 'Trabajar más la movilidad lateral y mantener la guardia alta en todo momento.',
+  schedule: [
+    { day:'Lunes',     activity:'Boxeo técnico',    time:'18:00', type:'box'  },
+    { day:'Martes',    activity:'Cardio HIIT',       time:'17:00', type:'card' },
+    { day:'Miércoles', activity:'Sparring',          time:'18:00', type:'spar' },
+    { day:'Jueves',    activity:'Descanso activo',   time:'—',     type:'rest' },
+    { day:'Viernes',   activity:'Resistencia',       time:'19:00', type:'end'  },
+    { day:'Sábado',    activity:'Técnica libre',     time:'10:00', type:'tech' },
+    { day:'Domingo',   activity:'Descanso completo', time:'—',     type:'rest' }
+  ]
+};
+
+// ──────────────────────────────────────────
+// 2. CONSTANTES
+// ──────────────────────────────────────────
+const XP_PER_LEVEL = 500;
+
+const TECNICAS = {
+  JAB: {
+    name:'JAB', badge:'Velocidad', icon:'👊', color:'#ff2233',
+    desc:'El jab es el golpe más importante del boxeo. Golpe recto y rápido con la mano delantera — mide distancia, puntúa y prepara combinaciones.',
+    ejecucion:[
+      'Extiende el brazo delantero rápidamente en línea recta',
+      'Rota el puño 90° al final del golpe (palma hacia abajo)',
+      'Regresa la mano de inmediato a la guardia',
+      'Mantén el hombro trasero alto como escudo'
+    ],
+    errores:[
+      'Bajar la guardia al golpear — queda expuesto al contra',
+      'No regresar la mano a tiempo — pierde la protección',
+      'Tensión muscular excesiva — el jab necesita soltura',
+      'Telegrafiar el golpe moviendo el hombro primero'
+    ],
+    consejos:'El jab viene de la relajación, no de la tensión. Practica 100 jabs frente al espejo cada día. La velocidad es tu arma principal — no la fuerza.'
+  },
+  CROSS: {
+    name:'CROSS', badge:'Potencia', icon:'💥', color:'#ff6600',
+    desc:'El cross es el golpe de potencia por excelencia. Sale desde la mano trasera con rotación completa de caderas y hombros. Ideal como segundo golpe en la combinación jab-cross.',
+    ejecucion:[
+      'Rota caderas y hombro trasero hacia adelante explosivamente',
+      'Extiende el brazo trasero en línea recta hacia el objetivo',
+      'Transfiere el peso al pie delantero durante el golpe',
+      'Protege con el brazo delantero (toca la mejilla) mientras golpeas'
+    ],
+    errores:[
+      'No rotar las caderas — golpe débil sin transferencia de fuerza',
+      'Dejar el brazo delantero caído — queda sin defensa',
+      'Sobre-extenderse — pierde el balance y queda expuesto',
+      'Telegrafiar con el hombro o la cadera antes del golpe'
+    ],
+    consejos:'El poder del cross viene 80% de las caderas. Trabaja la rotación de cadera en el espejo sin guantes primero. El brazo solo canaliza la energía del cuerpo.'
+  },
+  HOOK: {
+    name:'HOOK', badge:'Lateral', icon:'🌀', color:'#aa00ff',
+    desc:'El gancho es un golpe circular que ataca por el lateral. Extremadamente efectivo en corta distancia. Puede dirigirse a la cabeza o al cuerpo con resultados devastadores.',
+    ejecucion:[
+      'Flexiona el codo a 90 grados con el puño al nivel de la barbilla',
+      'Gira explosivamente el cuerpo desde la cintura hacia el objetivo',
+      'El poder viene de la rotación del torso, no solo del brazo',
+      'Mantén los nudillos apuntando al objetivo en el impacto'
+    ],
+    errores:[
+      'Codo demasiado bajo o alto — cambia el ángulo y pierde potencia',
+      'Falta de rotación del torso — golpe débil',
+      'Golpe demasiado abierto — fácil de ver y esquivar',
+      'No volver a la guardia después — queda sin defensa'
+    ],
+    consejos:'El hook izquierdo es uno de los golpes KO más comunes. Practica primero al cuerpo — menor riesgo de recibir un contra. La clave es ocultarlo detrás del jab.'
+  },
+  UPPERCUT: {
+    name:'UPPERCUT', badge:'Ascendente', icon:'⬆️', color:'#00cc88',
+    desc:'Golpe ascendente y explosivo, devastador cuando el rival baja la guardia. Se utiliza en corta distancia o cuando el rival se inclina hacia adelante.',
+    ejecucion:[
+      'Flexiona ligeramente las rodillas antes del golpe para cargar energía',
+      'Sube el puño con rotación de cadera en trayectoria ascendente',
+      'El codo baja primero como carga, luego el puño asciende',
+      'Golpea con los dos nudillos superiores en contacto directo'
+    ],
+    errores:[
+      'Preparar el golpe bajando el puño de forma visible — telegrafía',
+      'Falta de flexión de rodillas — golpe sin energía de piernas',
+      'No rotar la cadera — pierde el 70% de la potencia',
+      'Usarlo en distancia larga — fácil de ver y esquivar'
+    ],
+    consejos:'El uppercut es más efectivo al cuerpo que a la cabeza. Al recibirlo en el cuerpo, el rival tiende a doblarse y queda expuesto para el hook. Combínalo: uppercut body → hook head.'
+  }
+};
+
+// ──────────────────────────────────────────
+// 3. UTILIDADES
+// ──────────────────────────────────────────
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+function setStyle(id, prop, val) {
+  const el = document.getElementById(id);
+  if (el) el.style[prop] = val;
+}
+function setHTML(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ──────────────────────────────────────────
+// 4. CÁLCULOS
+// ──────────────────────────────────────────
+function getLevel(xp)     { return Math.floor(xp / XP_PER_LEVEL) + 1; }
+function getXPInLevel(xp) { return xp % XP_PER_LEVEL; }
+function getLevelPct(xp)  { return Math.round((getXPInLevel(xp) / XP_PER_LEVEL) * 100); }
+function xpForLevel(n)    { return n * XP_PER_LEVEL; }
+
+function getRango(nivel) {
+  if (nivel >= 20) return { name:'Leyenda',    icon:'👑' };
+  if (nivel >= 10) return { name:'Campeón',    icon:'🥇' };
+  if (nivel >= 5)  return { name:'Competidor', icon:'🥈' };
+  return                   { name:'Amateur',   icon:'🥉' };
+}
+
+function calcIMC() {
+  const m = state.talla / 100;
+  return parseFloat((state.peso / (m * m)).toFixed(1));
+}
+function getIMCStatus(imc) {
+  if (imc < 16)   return { label:'Delgadez Severa', color:'#f87171' };
+  if (imc < 18.5) return { label:'Bajo Peso',        color:'#fb923c' };
+  if (imc < 25)   return { label:'Peso Normal ✓',    color:'#4ade80' };
+  if (imc < 30)   return { label:'Sobrepeso',        color:'#fb923c' };
+  return                  { label:'Obesidad',        color:'#f87171' };
+}
+function getCategoria(p) {
+  if (p <= 48)   return ['Light Flyweight',    '≤ 48 KG'];
+  if (p <= 51)   return ['Flyweight',          '≤ 51 KG'];
+  if (p <= 54)   return ['Bantamweight',       '≤ 54 KG'];
+  if (p <= 57)   return ['Featherweight',      '≤ 57 KG'];
+  if (p <= 60)   return ['Lightweight',        '≤ 60 KG'];
+  if (p <= 63.5) return ['Light Welterweight', '≤ 63.5 KG'];
+  if (p <= 67)   return ['Welterweight',       '63.5 – 67 KG'];
+  if (p <= 71)   return ['Light Middleweight', '≤ 71 KG'];
+  if (p <= 75)   return ['Middleweight',       '≤ 75 KG'];
+  if (p <= 81)   return ['Light Heavyweight',  '≤ 81 KG'];
+  if (p <= 91)   return ['Cruiserweight',      '≤ 91 KG'];
+  return                 ['Heavyweight',       '+ 91 KG'];
+}
+function misionesCompletadas() { return state.missions.filter(m => m.done).length; }
+
+// ──────────────────────────────────────────
+// 5. NAVEGACIÓN
+// ──────────────────────────────────────────
+document.querySelectorAll('.nav-link').forEach(link => {
+  link.addEventListener('click', () => {
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+    link.classList.add('active');
+    const target = document.getElementById(link.dataset.page);
+    if (target) target.classList.add('active-page');
+
+    const page = link.dataset.page;
+    const renderMap = {
+      dashboard:   renderDashboard,
+      missions:    renderMissions,
+      organizer:   renderOrganizer,
+      performance: renderPerformance,
+      boxing:      renderBoxing,
+      champion:    renderChampion,
+      coach:       renderCoach,
+      settings:    renderSettings
+    };
+    if (renderMap[page]) renderMap[page]();
+  });
+});
+
+// ──────────────────────────────────────────
+// 6. SIDEBAR
+// ──────────────────────────────────────────
+function renderSidebar() {
+  const nivel = getLevel(state.xp);
+  const cpPct = Math.min(100, Math.round((state.xp / 8000) * 100));
+  setText('sb-level',   `LV${nivel}`);
+  setText('sb-xp-text', `${state.xp} XP`);
+  setText('sb-racha',   `${state.racha} días`);
+  setText('sb-peso',    `${state.peso} KG`);
+  setText('sb-obj',     `${state.objetivo} KG`);
+  setText('sb-nivel',   nivel);
+  setText('sb-cp-pct',  `${cpPct}%`);
+  setStyle('sb-cp-bar', 'width', `${cpPct}%`);
+}
+
+// ──────────────────────────────────────────
+// 7. DASHBOARD
+// ──────────────────────────────────────────
+function renderDashboard() {
+  const imc    = calcIMC();
+  const [cat]  = getCategoria(state.peso);
+  const diff   = Math.abs(state.peso - state.objetivo).toFixed(1);
+  const nivel  = getLevel(state.xp);
+  const xpNext = XP_PER_LEVEL - getXPInLevel(state.xp);
+  const doneM  = misionesCompletadas();
+
+  actualizarPilares();
+
+  setText('dash-xp',          state.xp);
+  setText('dash-xp-week',     `+${state.xpWeek} esta semana`);
+  setText('dash-racha',       state.racha);
+  setText('dash-peso',        state.peso);
+  setText('dash-peso-sub',    `Objetivo: ${state.objetivo} KG`);
+  setText('dash-nivel',       nivel);
+  setText('dash-level-num',   nivel);
+  setText('d-peso-stat',      `${state.peso} KG`);
+  setText('d-obj-stat',       `${state.objetivo} KG`);
+  setText('d-imc-stat',       imc);
+  setText('d-cat-stat',       cat);
+  setText('d-diff-stat',      `${diff} KG`);
+  setText('d-missions-today', `${doneM} / ${state.missions.length}`);
+  setText('d-xp-today',       `${state.xpToday} XP`);
+  setText('d-xp-next',        `${xpNext} XP`);
+  setText('d-best-streak',    `${state.bestStreak} días`);
+
+  ['adapt','endure','strike'].forEach(p => {
+    setStyle(`d-${p}-bar`, 'width', `${state.pillar[p]}%`);
+    setText(`d-${p}-pct`, `${state.pillar[p]}%`);
+  });
+}
+
+function actualizarPilares() {
+  state.pillar.endure = Math.min(100, 60 + state.racha * 2);
+  const boxDone = state.missions.filter(m =>
+    (m.name.toLowerCase().includes('jab') ||
+     m.name.toLowerCase().includes('shadow') ||
+     m.name.toLowerCase().includes('boxeo')) && m.done
+  ).length;
+  state.pillar.strike = Math.min(100, 69 + boxDone * 5);
+  const studyDone = state.missions.filter(m =>
+    m.name.toLowerCase().includes('estudiar') && m.done
+  ).length;
+  state.pillar.adapt = Math.min(100, 74 + studyDone * 10);
+}
+
+// ──────────────────────────────────────────
+// 8. MISSION CENTER
+// ──────────────────────────────────────────
+function renderMissions() {
+  const list = document.getElementById('missions-list');
+  if (!list) return;
+  list.innerHTML = '';
+  state.missions.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'mission-item' + (m.done ? ' done' : '');
+    div.innerHTML = `
+      <div class="m-check">${m.done ? '✓' : ''}</div>
+      <div class="m-name">${m.name}</div>
+      <div class="m-xp">+${m.xp} XP</div>
+    `;
+    div.onclick = () => toggleMission(m.id);
+    list.appendChild(div);
+  });
+  renderMissionStats();
+  renderWeeklyMissions();
+}
+
+function renderMissionStats() {
+  const doneM = misionesCompletadas();
+  const total = state.missions.length;
+  const pct   = Math.round((doneM / total) * 100);
+  setText('m-done-count',  doneM);
+  setText('m-total-count', total);
+  setText('m-pct-text',    `${pct}%`);
+  setStyle('m-progress-bar', 'width', `${pct}%`);
+  setText('m-xp-earned',   `${state.xpToday} XP`);
+  setText('m-racha',       `${state.racha} días`);
+}
+
+function renderWeeklyMissions() {
+  ['wm1','wm2','wm3'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const done  = state.weeklyMissions[id];
+    const check = el.querySelector('.m-check');
+    el.classList.toggle('done', done);
+    if (check) check.textContent = done ? '✓' : '';
+    el.onclick = () => toggleWeeklyMission(id);
+  });
+}
+
+function toggleMission(id) {
+  const m = state.missions.find(x => x.id === id);
+  if (!m) return;
+  if (!m.done) {
+    m.done = true;
+    ganarXP(m.xp);
+    showToast(`✅ ¡Misión completada! +${m.xp} XP`);
+  } else {
+    m.done        = false;
+    state.xp      = Math.max(0, state.xp - m.xp);
+    state.xpToday = Math.max(0, state.xpToday - m.xp);
+    state.xpWeek  = Math.max(0, state.xpWeek - m.xp);
+  }
+  actualizarPilares();
+  renderMissions();
+  renderDashboard();
+  renderSidebar();
+}
+
+function toggleWeeklyMission(id) {
+  const xpMap = { wm1:500, wm2:300, wm3:400 };
+  state.weeklyMissions[id] = !state.weeklyMissions[id];
+  if (state.weeklyMissions[id]) {
+    ganarXP(xpMap[id] || 0);
+    showToast(`🏆 Misión semanal completada! +${xpMap[id]} XP`);
+  } else {
+    state.xp      = Math.max(0, state.xp - (xpMap[id] || 0));
+    state.xpToday = Math.max(0, state.xpToday - (xpMap[id] || 0));
+  }
+  renderWeeklyMissions();
+  renderSidebar();
+}
+
+function completarDia() {
+  if (state.dayCompleted) { showToast('⚡ Ya completaste el día de hoy. ¡Vuelve mañana!'); return; }
+  const doneM = misionesCompletadas();
+  if (doneM < state.missions.length) {
+    showToast(`⚠️ Faltan ${state.missions.length - doneM} misiones por completar`);
+    return;
+  }
+  state.dayCompleted = true;
+  ganarXP(100);
+  state.racha++;
+  if (state.racha > state.bestStreak) state.bestStreak = state.racha;
+  showToast(`🏆 ¡Día completado! +100 XP Bonus · Racha: ${state.racha} días`);
+  renderMissions();
+  renderDashboard();
+  renderSidebar();
+}
+
+// ──────────────────────────────────────────
+// 9. XP ENGINE
+// ──────────────────────────────────────────
+function ganarXP(cantidad) {
+  const prevLevel = getLevel(state.xp);
+  state.xp       += cantidad;
+  state.xpToday  += cantidad;
+  state.xpWeek   += cantidad;
+  const newLevel  = getLevel(state.xp);
+  if (newLevel > prevLevel) {
+    setTimeout(() => showToast(`🎉 ¡SUBISTE AL NIVEL ${newLevel}! ¡CAMPEÓN!`), 400);
+  }
+  renderSidebar();
+}
+
+// ──────────────────────────────────────────
+// 10. ORGANIZER AI
+// ──────────────────────────────────────────
+function renderOrganizer() {
+  renderSchedule();
+  renderObjetivos();
+  renderReminders();
+  loadNotes();
+}
+
+function renderSchedule() {
+  const container = document.getElementById('schedule-list');
+  if (!container) return;
+  const typeIcon  = { box:'🥊', card:'🏃', spar:'⚔️', rest:'😴', end:'💪', tech:'🎯' };
+  const typeColor = { box:'var(--red)', card:'#fb923c', spar:'#a855f7', rest:'var(--gray)', end:'#4ade80', tech:'#38bdf8' };
+  const days      = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const today     = days[new Date().getDay()];
+  container.innerHTML = state.schedule.map(s => {
+    const isToday = s.day === today;
+    return `
+      <div class="event-item" style="${isToday ? 'border-left:3px solid var(--red);padding-left:11px;background:#18080e' : ''}">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">${typeIcon[s.type] || '📌'}</span>
+          <div>
+            <strong style="${isToday ? 'color:var(--red)' : ''}">${s.day}${isToday ? ' — HOY' : ''}</strong>
+            <div style="font-size:12px;color:var(--gray);margin-top:2px">${s.activity}</div>
+          </div>
+        </div>
+        <span style="color:${typeColor[s.type]};font-size:13px;font-weight:700">${s.time}</span>
+      </div>`;
+  }).join('');
+}
+
+function renderObjetivos() {
+  ['obj1','obj2','obj3','obj4'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const done  = state.objetivos[id];
+    const check = el.querySelector('.m-check');
+    el.classList.toggle('done', done);
+    if (check) check.textContent = done ? '✓' : '';
+    el.onclick = () => toggleObjetivo(id);
+  });
+}
+
+function toggleObjetivo(id) {
+  state.objetivos[id] = !state.objetivos[id];
+  renderObjetivos();
+  showToast(state.objetivos[id] ? '✅ Objetivo marcado' : '↩️ Objetivo desmarcado');
+}
+
+function renderReminders() {
+  const container = document.getElementById('reminders-list');
+  if (!container) return;
+  const days        = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const today       = days[new Date().getDay()];
+  const todaySched  = state.schedule.find(s => s.day === today);
+  const pending     = state.missions.length - misionesCompletadas();
+  const reminders   = [
+    { icon:'🥊', text: todaySched && todaySched.type !== 'rest'
+        ? `Entrenar hoy — ${todaySched.activity} a las ${todaySched.time}`
+        : 'Día de descanso — recupera energía activamente' },
+    { icon:'💧', text:'Beber 3 litros de agua hoy' },
+    { icon:'😴', text:'Dormir mínimo 8 horas esta noche' },
+    { icon:'🍎', text:'Comer limpio — sin azúcar procesada' },
+    { icon:'📊', text:'Registrar peso mañana en ayunas' },
+    { icon:'🎯', text: pending > 0 ? `${pending} misión${pending > 1 ? 'es' : ''} pendiente${pending > 1 ? 's' : ''} hoy` : '¡Todas las misiones de hoy completadas! 🏆' }
+  ];
+  container.innerHTML = reminders.map(r => `
+    <div class="reminder-item">${r.icon} ${r.text}</div>
+  `).join('');
+}
+
+function guardarNotas() {
+  const ta = document.getElementById('coach-notes');
+  if (ta) { state.notes = ta.value; guardarDatos(); showToast('📝 Notas guardadas correctamente'); }
+}
+function loadNotes() {
+  const ta = document.getElementById('coach-notes');
+  if (ta) ta.value = state.notes;
+}
+
+// ──────────────────────────────────────────
+// 11. PERFORMANCE
+// ──────────────────────────────────────────
+function renderPerformance() {
+  const imc          = calcIMC();
+  const imcSt        = getIMCStatus(imc);
+  const [cat, range] = getCategoria(state.peso);
+  const diff         = Math.abs(state.peso - state.objetivo).toFixed(1);
+
+  setText('p-peso-val',  state.peso);
+  setText('p-obj-val',   state.objetivo);
+  setText('p-talla-val', state.talla);
+  syncSlider('slider-peso',  state.peso);
+  syncSlider('slider-obj',   state.objetivo);
+  syncSlider('slider-talla', state.talla);
+
+  setText('p-imc',        imc);
+  setText('p-imc-status', imcSt.label);
+  setStyle('p-imc-status', 'color', imcSt.color);
+  const imcBarPct = Math.min(100, Math.max(0, ((imc - 16) / (40 - 16)) * 100));
+  setStyle('p-imc-bar', 'width', `${imcBarPct}%`);
+
+  setText('p-cat',       cat.toUpperCase());
+  setText('p-cat-range', range);
+  setText('p-curr',      `${state.peso} KG`);
+  setText('p-tgt',       `${state.objetivo} KG`);
+  setText('p-diff',      `${diff} KG`);
+  setText('p-height',    `${state.talla} CM`);
+
+  renderWeightHistory();
+}
+
+function syncSlider(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+function updatePeso(val) {
+  state.peso = parseFloat(val);
+  const today = new Date().toISOString().split('T')[0];
+  const last  = state.weightHistory[state.weightHistory.length - 1];
+  if (!last || last.date !== today) {
+    state.weightHistory.push({ date:today, peso:state.peso });
+  } else {
+    last.peso = state.peso;
+  }
+  renderPerformance();
+  renderDashboard();
+  renderSidebar();
+}
+function updateObj(val)   { state.objetivo = parseFloat(val); renderPerformance(); renderDashboard(); renderSidebar(); }
+function updateTalla(val) { state.talla    = parseFloat(val); renderPerformance(); }
+
+function renderWeightHistory() {
+  const list = document.getElementById('weight-history-list');
+  if (!list) return;
+  const hist = [...state.weightHistory].reverse().slice(0, 8);
+  if (!hist.length) {
+    list.innerHTML = '<p style="color:var(--gray);font-size:13px;padding:10px 0">Sin registros aún. Ajusta tu peso con el slider.</p>';
+    return;
+  }
+  list.innerHTML = hist.map((entry, i) => {
+    const prev = hist[i + 1];
+    let diffHTML = '';
+    if (prev) {
+      const d     = parseFloat((entry.peso - prev.peso).toFixed(1));
+      const arrow = d < 0 ? '↓' : d > 0 ? '↑' : '→';
+      const color = d < 0 ? '#4ade80' : d > 0 ? '#f87171' : 'var(--gray)';
+      diffHTML = `<span style="color:${color};font-size:12px;font-weight:700">${arrow} ${Math.abs(d)} KG</span>`;
+    }
+    return `<div class="wh-row">
+      <span style="color:var(--gray);font-size:13px">${entry.date}</span>
+      <span style="font-weight:600">${entry.peso} KG</span>
+      ${diffHTML}
+    </div>`;
+  }).join('');
+}
+
+// ──────────────────────────────────────────
+// 12. BOXING HUB
+// ──────────────────────────────────────────
+function renderBoxing() {
+  const active = document.querySelector('.tech-btn.active');
+  if (!active) verTecnica('JAB');
+}
+
+function verTecnica(nombre) {
+  document.querySelectorAll('.tech-btn').forEach(b => b.classList.remove('active'));
+  const tb = document.getElementById('tb-' + nombre);
+  if (tb) tb.classList.add('active');
+  const t    = TECNICAS[nombre];
+  if (!t) return;
+  const card = document.getElementById('tech-detail-card');
+  if (!card) return;
+  card.innerHTML = `
+    <div class="tech-detail">
+      <div class="td-header">
+        <h2 style="font-family:'Bebas Neue';font-size:36px;letter-spacing:1px">${t.icon} ${t.name}</h2>
+        <span class="td-badge" style="background:${t.color}">${t.badge}</span>
+      </div>
+      <div class="grid grid-2">
+        <div>
+          <div class="td-section">
+            <h4>Descripción</h4>
+            <p style="font-size:14px;line-height:1.8;color:#ccc">${t.desc}</p>
+          </div>
+          <div class="td-section" style="margin-top:20px">
+            <h4>Ejecución correcta</h4>
+            <ul class="td-list">
+              ${t.ejecucion.map((e,i) => `<li><span style="color:${t.color};font-weight:700;margin-right:4px">${i+1}.</span>${e}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+        <div>
+          <div class="td-section">
+            <h4>Errores comunes</h4>
+            <ul class="td-list">
+              ${t.errores.map(e => `<li style="color:#f87171">${e}</li>`).join('')}
+            </ul>
+          </div>
+          <div class="td-section" style="margin-top:20px">
+            <h4>Consejo del AI Coach</h4>
+            <div class="info-box">
+              <h3 style="color:${t.color}">🧠 Coach dice:</h3>
+              <p style="margin-top:8px">${t.consejos}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ──────────────────────────────────────────
+// 13. CHAMPION PATH
+// ──────────────────────────────────────────
+function renderChampion() {
+  const nivel  = getLevel(state.xp);
+  const pct    = getLevelPct(state.xp);
+  const rango  = getRango(nivel);
+  const xpNext = xpForLevel(nivel + 1);
+  setText('cp-xp',    state.xp);
+  setText('cp-nivel', nivel);
+  setText('cp-rango', rango.name);
+  setText('cp-next',  xpNext);
+  setText('cp-pct',   `${pct}%`);
+  setStyle('cp-bar',  'width', `${pct}%`);
+  renderLevelTable();
+}
+
+function renderLevelTable() {
+  const table = document.getElementById('level-table');
+  if (!table) return;
+  const nivel = getLevel(state.xp);
+  let html = '';
+  for (let i = 1; i <= 20; i++) {
+    const unlocked = state.xp >= xpForLevel(i - 1);
+    const current  = nivel === i;
+    const rango    = getRango(i);
+    html += `
+      <div style="border-radius:12px;padding:14px;background:#111118;
+        border:1px solid ${current ? 'var(--red)' : 'transparent'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <strong style="font-size:14px;color:${current ? 'var(--red)' : unlocked ? 'var(--white)' : 'var(--gray)'}">
+            Nivel ${i}${current ? ' ⭐' : ''}
+          </strong>
+          <span style="font-size:12px">${rango.icon}</span>
+        </div>
+        <span style="font-size:11px;color:var(--gray)">${xpForLevel(i-1)} XP</span>
+      </div>`;
+  }
+  table.innerHTML = html;
+}
+
+// ──────────────────────────────────────────
+// 14. AI COACH
+// ──────────────────────────────────────────
+function renderCoach() {
+  renderCoachTip();
+  renderWeeklyPlan();
+  renderSuggestedGoals();
+}
+
+function renderCoachTip() {
+  const container = document.getElementById('coach-tip');
+  if (!container) return;
+  const doneM = misionesCompletadas();
+  const diff  = parseFloat((state.peso - state.objetivo).toFixed(1));
+  let tip = '';
+  if (doneM === 0) {
+    tip = `<h3>Recomendación de hoy</h3>
+      <p>¡Aún no has completado misiones hoy! Empieza con los 100 jabs — es el ejercicio más importante para tu STRIKE. Solo necesitas 5 minutos para arrancar.</p>`;
+  } else if (diff > 1) {
+    tip = `<h3>Recomendación de hoy</h3>
+      <p>Tienes ${diff} KG por bajar para llegar al objetivo. Mantén un déficit calórico de 300 kcal y añade 10 min extra de cardio LISS al final de cada sesión. No reduzcas proteínas.</p>`;
+  } else if (state.pillar.strike < 75) {
+    tip = `<h3>Recomendación de hoy</h3>
+      <p>Tu STRIKE está en ${state.pillar.strike}%. Prioriza hoy combinaciones: jab-cross ×20, jab-cross-hook ×15. Enfócate en velocidad, no en fuerza. La potencia viene sola.</p>`;
+  } else {
+    tip = `<h3>Recomendación de hoy</h3>
+      <p>¡Vas muy bien, Campeón! Racha de ${state.racha} días y ${doneM} misiones completadas. Hoy trabaja la precisión: golpea el punto exacto del saco, no solo con fuerza.</p>`;
+  }
+  container.innerHTML = tip;
+}
+
+function renderWeeklyPlan() {
+  const container = document.getElementById('weekly-plan-chips');
+  if (!container) return;
+  const dias = [
+    { label:'LUN', act:'BOX',  color:'var(--red)',  rest:false },
+    { label:'MAR', act:'CAR',  color:'#fb923c',     rest:false },
+    { label:'MIÉ', act:'SPA',  color:'#a855f7',     rest:false },
+    { label:'JUE', act:'DES',  color:'var(--gray)', rest:true  },
+    { label:'VIE', act:'RES',  color:'#4ade80',     rest:false },
+    { label:'SÁB', act:'TÉC',  color:'#38bdf8',     rest:false },
+    { label:'DOM', act:'DES',  color:'var(--gray)', rest:true  }
+  ];
+  const mapIdx  = [6,0,1,2,3,4,5];
+  const todayI  = mapIdx[new Date().getDay()];
+  container.innerHTML = dias.map((d, i) => {
+    const isToday = todayI === i;
+    return `
+      <div style="background:${isToday ? 'rgba(255,34,51,.15)' : '#111118'};
+        border:1px solid ${isToday ? 'var(--red)' : 'transparent'};
+        border-radius:12px;padding:12px 6px;text-align:center">
+        <div style="font-size:10px;color:var(--gray);letter-spacing:1px;margin-bottom:5px">${d.label}</div>
+        <div style="font-weight:700;font-size:13px;color:${d.color}">${d.act}</div>
+        ${isToday ? '<div style="font-size:9px;color:var(--red);margin-top:3px">HOY</div>' : ''}
+      </div>`;
+  }).join('');
+}
+
+function renderSuggestedGoals() {
+  const container = document.getElementById('suggested-goals');
+  if (!container) return;
+  const nivel = getLevel(state.xp);
+  const diff  = parseFloat((state.peso - state.objetivo).toFixed(1));
+  const goals = [];
+  if (diff > 0) {
+    goals.push(`Bajar ${diff} KG para llegar a ${state.objetivo} KG`);
+  } else {
+    goals.push(`Mantener el peso en ${state.peso} KG ✓`);
+  }
+  goals.push(`Completar las 5 misiones diarias sin fallar`);
+  goals.push(`Subir STRIKE del ${state.pillar.strike}% al ${Math.min(100, state.pillar.strike + 10)}%`);
+  goals.push(`Alcanzar nivel ${nivel + 1} — faltan ${XP_PER_LEVEL - getXPInLevel(state.xp)} XP`);
+  container.innerHTML = goals.map(g => `
+    <div style="display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--red);flex-shrink:0;font-weight:700">→</span>
+      <span style="font-size:13px;color:#ccc">${g}</span>
+    </div>`).join('');
+}
+
+// ──────────────────────────────────────────
+// 15. SETTINGS
+// ──────────────────────────────────────────
+function renderSettings() {
+  const storageUsed = JSON.stringify(state).length;
+  const kb          = (storageUsed / 1024).toFixed(1);
+  setText('st-storage',  `Local · ${kb} KB`);
+  setText('st-missions', `${misionesCompletadas()} / ${state.missions.length}`);
+  setText('st-xp-total', state.xp);
+  setText('st-nivel',    getLevel(state.xp));
+  setText('st-racha',    `${state.racha} días`);
+}
+
+function guardarTodo() {
+  guardarDatos();
+  showToast('💾 Progreso guardado correctamente');
+}
+
+function exportarDatos() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type:'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `endura-strike-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📤 Datos exportados como JSON');
+}
+
+function reiniciarDatos() {
+  if (!confirm('¿Estás seguro? Se borrará TODO el progreso. Esta acción no se puede deshacer.')) return;
+  localStorage.clear();
+  state.xp           = 0;
+  state.racha        = 0;
+  state.bestStreak   = 0;
+  state.xpToday      = 0;
+  state.xpWeek       = 0;
+  state.dayCompleted = false;
+  state.missions.forEach(m => m.done = false);
+  Object.keys(state.weeklyMissions).forEach(k => state.weeklyMissions[k] = false);
+  Object.keys(state.objetivos).forEach(k => state.objetivos[k] = false);
+  state.pillar = { adapt:74, endure:88, strike:69 };
+  renderAll();
+  showToast('🗑️ Estadísticas reiniciadas');
+}
+
+// ──────────────────────────────────────────
+// 16. LOCAL STORAGE
+// ──────────────────────────────────────────
+function guardarDatos() {
+  try { localStorage.setItem('es5-state', JSON.stringify(state)); }
+  catch(e) { console.warn('No se pudo guardar:', e); }
+}
+
+function cargarDatos() {
+  try {
+    const raw = localStorage.getItem('es5-state');
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    Object.assign(state, saved);
+    // Sanity checks
+    if (!Array.isArray(state.missions))      state.missions      = [];
+    if (!Array.isArray(state.weightHistory)) state.weightHistory = [];
+    if (!state.weeklyMissions) state.weeklyMissions = { wm1:false, wm2:false, wm3:false };
+    if (!state.objetivos)      state.objetivos      = { obj1:false, obj2:false, obj3:false, obj4:false };
+    if (!state.schedule)       state.schedule       = [];
+    if (!state.pillar)         state.pillar         = { adapt:74, endure:88, strike:69 };
+  } catch(e) { console.warn('No se pudo cargar el estado:', e); }
+}
+
+// ──────────────────────────────────────────
+// 17. RENDER GLOBAL
+// ──────────────────────────────────────────
+function renderAll() {
+  renderSidebar();
+  renderDashboard();
+  renderMissions();
+  renderOrganizer();
+  renderPerformance();
+  renderChampion();
+  renderCoach();
+  renderSettings();
+}
+
+// ──────────────────────────────────────────
+// 18. INIT
+// ──────────────────────────────────────────
+// ══════════════════════════════════════════
+// CONTADOR DE GOLPES
+// ══════════════════════════════════════════
+let punches = { jab:0, cross:0, hook:0, uppercut:0 };
+
+function registerPunch(type) {
+  punches[type]++;
+  const total = punches.jab + punches.cross + punches.hook + punches.uppercut;
+
+  // Update big counters
+  document.getElementById('cnt-'+type).textContent = punches[type];
+  document.getElementById('cnt-total').textContent  = total;
+
+  // Update stat rows
+  document.getElementById('stat-jab').textContent   = punches.jab;
+  document.getElementById('stat-cross').textContent = punches.cross;
+  document.getElementById('stat-hook').textContent  = punches.hook;
+  document.getElementById('stat-upper').textContent = punches.uppercut;
+
+  // Button flash
+  const btn = document.querySelector(`[data-punch="${type}"]`);
+  if (btn) {
+    btn.style.transform = 'scale(.93)';
+    btn.style.filter    = 'brightness(1.4)';
+    setTimeout(() => { btn.style.transform=''; btn.style.filter=''; }, 120);
+  }
+
+  renderPunchBars(total);
+  renderPunchAnalysis(total);
+
+  // Milestone XP
+  if (total > 0 && total % 100 === 0) {
+    ganarXP(20);
+    showToast(`👊 ${total} golpes! +20 XP`);
+  }
+
+  checkLogros();
+}
+
+function renderPunchBars(total) {
+  const bars = document.getElementById('punch-bars');
+  if (!bars) return;
+  const items = [
+    { label:'JAB',      count:punches.jab,      color:'#ff2233' },
+    { label:'CROSS',    count:punches.cross,     color:'#ff6600' },
+    { label:'HOOK',     count:punches.hook,      color:'#aa00ff' },
+    { label:'UPPERCUT', count:punches.uppercut,  color:'#00cc88' }
+  ];
+  bars.innerHTML = items.map(it => {
+    const pct = total > 0 ? Math.round((it.count/total)*100) : 0;
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+        <span style="color:${it.color};font-weight:700">${it.label}</span>
+        <span style="color:var(--gray)">${it.count} (${pct}%)</span>
+      </div>
+      <div style="height:10px;background:#1a1a22;border-radius:50px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${it.color};border-radius:50px;transition:width .4s ease"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPunchAnalysis(total) {
+  const el = document.getElementById('punch-analysis');
+  if (!el || total === 0) return;
+  const jabPct = Math.round((punches.jab/total)*100);
+  let msg = '';
+  if (jabPct > 60) msg = 'Buen uso del jab como arma principal. Combina mas con cross y hook.';
+  else if (jabPct < 20) msg = 'Estas usando poco el jab. Es tu golpe mas importante — aumentalo.';
+  else if (punches.uppercut > punches.hook) msg = 'Muchos uppercuts. Recuerda que son para corta distancia.';
+  else msg = `Distribucion equilibrada. Total: ${total} golpes. Sigue adelante Campeon!`;
+  el.textContent = msg;
+}
+
+function resetPunches() {
+  punches = { jab:0, cross:0, hook:0, uppercut:0 };
+  ['jab','cross','hook','uppercut'].forEach(t => {
+    const el = document.getElementById('cnt-'+t);
+    if (el) el.textContent = '0';
+  });
+  document.getElementById('cnt-total').textContent = '0';
+  ['stat-jab','stat-cross','stat-hook','stat-upper'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.textContent = '0';
+  });
+  renderPunchBars(0);
+  const an = document.getElementById('punch-analysis');
+  if (an) an.textContent = 'Empieza a golpear para ver el analisis.';
+  showToast('↺ Contador reiniciado');
+}
+
+// ══════════════════════════════════════════
+// COMBINACIONES
+// ══════════════════════════════════════════
+const COMBOS = [
+  {
+    id:'c1', name:'1-2', level:'Basico', color:'#4ade80',
+    seq:['JAB','CROSS'],
+    desc:'La combinacion mas fundamental del boxeo. El jab abre la guardia, el cross cierra con potencia.',
+    pasos:[
+      'Jab rapido para medir distancia y abrir defensa',
+      'Cross inmediato aprovechando el espacio creado',
+      'Regresa a guardia en linea recta'
+    ],
+    tip:'Practica este combo 200 veces al dia. La velocidad del 1-2 es mas importante que la fuerza.',
+    xp:15
+  },
+  {
+    id:'c2', name:'1-2-3', level:'Intermedio', color:'#fb923c',
+    seq:['JAB','CROSS','HOOK'],
+    desc:'El combo clasico que agrega el hook izquierdo despues del 1-2. Devastador cuando se ejecuta con fluidez.',
+    pasos:[
+      'Jab para establecer distancia',
+      'Cross para atacar en linea recta',
+      'Hook izquierdo girando desde la cintura al abrir el rival'
+    ],
+    tip:'El hook sale cuando el cross hace que el rival se mueva hacia la derecha — el angulo se abre solo.',
+    xp:25
+  },
+  {
+    id:'c3', name:'1-2-3-2', level:'Avanzado', color:'#ff2233',
+    seq:['JAB','CROSS','HOOK','CROSS'],
+    desc:'Extension del 1-2-3 con un segundo cross final. Requiere excelente balance y retorno rapido.',
+    pasos:[
+      'Jab de sondeo',
+      'Cross potente',
+      'Hook para cambiar el angulo',
+      'Cross final aprovechando la apertura del rival'
+    ],
+    tip:'El segundo cross es el golpe KO en este combo. El rival no lo espera despues del hook.',
+    xp:35
+  },
+  {
+    id:'c4', name:'Body-Head', level:'Intermedio', color:'#a855f7',
+    seq:['HOOK','HOOK'],
+    desc:'Hook al cuerpo para bajar la guardia, hook a la cabeza para conectar el KO.',
+    pasos:[
+      'Hook izquierdo al higado — baja el codo del rival',
+      'Hook izquierdo a la cabeza en el mismo movimiento circular',
+      'Salir hacia la derecha despues del combo'
+    ],
+    tip:'El hook al cuerpo debe ser convincente. Si el rival no baja la guardia, el segundo no conecta.',
+    xp:30
+  },
+  {
+    id:'c5', name:'Upper-Hook', level:'Avanzado', color:'#00cc88',
+    seq:['UPPERCUT','HOOK'],
+    desc:'Uppercut al cuerpo que dobla al rival y hook a la cabeza mientras esta expuesto.',
+    pasos:[
+      'Uppercut derecho al cuerpo — el rival se dobla hacia adelante',
+      'Hook izquierdo inmediato a la sien expuesta',
+      'Clinch o salida lateral rapidamente'
+    ],
+    tip:'Solo funciona en corta distancia. Necesitas estar dentro primero — usa el jab para entrar.',
+    xp:40
+  },
+  {
+    id:'c6', name:'1-2-1-2', level:'Basico', color:'#38bdf8',
+    seq:['JAB','CROSS','JAB','CROSS'],
+    desc:'Double jab-cross. Presion constante que no le da respiro al rival.',
+    pasos:[
+      'Primer 1-2 a velocidad media para testear',
+      'Segundo 1-2 mas rapido y con mas intencion',
+      'Mantener el ritmo sin telegrafiar'
+    ],
+    tip:'Varia la velocidad entre el primer y segundo 1-2. El cambio de ritmo es lo que confunde al rival.',
+    xp:20
+  }
+];
+
+function renderCombos() {
+  const list = document.getElementById('combo-list');
+  if (!list) return;
+  list.innerHTML = COMBOS.map(c => `
+    <div class="combo-item" id="combo-${c.id}" onclick="verCombo('${c.id}')">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <strong style="font-size:16px">${c.name}</strong>
+          <span class="combo-badge" style="background:${c.color}22;color:${c.color};border:1px solid ${c.color}44">${c.level}</span>
+        </div>
+        <div class="combo-seq">
+          ${c.seq.map(s => `<span style="border-color:${c.color}44;color:${c.color}">${s}</span>`).join('')}
+        </div>
+      </div>
+      <span style="color:var(--gold);font-size:12px;font-weight:700;margin-left:auto;flex-shrink:0">+${c.xp} XP</span>
+    </div>
+  `).join('');
+}
+
+function verCombo(id) {
+  const c = COMBOS.find(x => x.id === id);
+  if (!c) return;
+  document.querySelectorAll('.combo-item').forEach(el => el.classList.remove('active'));
+  const el = document.getElementById('combo-'+id);
+  if (el) el.classList.add('active');
+
+  const card = document.getElementById('combo-detail-card');
+  if (!card) return;
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <h2 style="font-family:'Bebas Neue';font-size:40px;margin-bottom:0">${c.name}</h2>
+      <span class="combo-badge" style="background:${c.color}22;color:${c.color};border:1px solid ${c.color}44;font-size:13px;padding:6px 14px">${c.level}</span>
+    </div>
+    <div class="combo-seq" style="margin-bottom:20px">
+      ${c.seq.map((s,i) => `
+        <span style="border-color:${c.color}66;color:${c.color};padding:8px 16px;font-size:14px">
+          ${i+1}. ${s}
+        </span>
+        ${i < c.seq.length-1 ? '<span style="color:var(--gray);align-self:center">→</span>' : ''}
+      `).join('')}
+    </div>
+    <div class="info-box" style="margin-bottom:16px">
+      <h3>Descripcion</h3>
+      <p style="margin-top:6px">${c.desc}</p>
+    </div>
+    <div class="info-box" style="margin-bottom:16px">
+      <h3>Ejecucion paso a paso</h3>
+      <ul style="list-style:none;padding:0;margin-top:8px">
+        ${c.pasos.map((p,i) => `<li style="padding:5px 0;font-size:13px;color:#ccc;display:flex;gap:8px">
+          <span style="color:${c.color};font-weight:700">${i+1}.</span>${p}
+        </li>`).join('')}
+      </ul>
+    </div>
+    <div class="info-box" style="margin-bottom:16px">
+      <h3 style="color:${c.color}">🧠 Coach dice:</h3>
+      <p style="margin-top:6px">${c.tip}</p>
+    </div>
+    <button onclick="practicarCombo('${c.id}')"
+      style="width:100%;padding:14px;background:linear-gradient(90deg,${c.color},${c.color}88);
+      border:none;border-radius:12px;color:white;font-weight:700;font-size:15px;
+      cursor:pointer;font-family:'Space Grotesk'">
+      Practicar este combo (+${c.xp} XP)
+    </button>
+  `;
+}
+
+function practicarCombo(id) {
+  const c = COMBOS.find(x => x.id === id);
+  if (!c) return;
+  ganarXP(c.xp);
+  showToast(`🔥 Combo ${c.name} practicado! +${c.xp} XP`);
+  registrarSesion(`Combo: ${c.name}`, c.xp);
+  checkLogros();
+}
+
+// ══════════════════════════════════════════
+// LOGROS
+// ══════════════════════════════════════════
+const LOGROS_DEF = [
+  { id:'l1',  icon:'🥊', name:'Primer Golpe',      desc:'Registra tu primer jab',               req: () => punches.jab >= 1,             xp:50  },
+  { id:'l2',  icon:'💯', name:'100 Jabs',           desc:'Completa 100 jabs en una sesion',      req: () => punches.jab >= 100,           xp:100 },
+  { id:'l3',  icon:'🔥', name:'Racha de 3',         desc:'Mantener racha de 3 dias',             req: () => state.racha >= 3,             xp:75  },
+  { id:'l4',  icon:'⚡', name:'Racha de 7',         desc:'Mantener racha de 7 dias',             req: () => state.racha >= 7,             xp:150 },
+  { id:'l5',  icon:'👑', name:'Racha de 14',        desc:'Mantener racha de 14 dias',            req: () => state.racha >= 14,            xp:300 },
+  { id:'l6',  icon:'🎯', name:'Primera Mision',     desc:'Completa tu primera mision',           req: () => misionesCompletadas() >= 1,   xp:30  },
+  { id:'l7',  icon:'✅', name:'Dia Perfecto',       desc:'Completa todas las misiones del dia',  req: () => misionesCompletadas() >= 5,   xp:200 },
+  { id:'l8',  icon:'📈', name:'Subida de Nivel',    desc:'Llega al nivel 5',                     req: () => getLevel(state.xp) >= 5,     xp:100 },
+  { id:'l9',  icon:'🥇', name:'Campeon',            desc:'Llega al nivel 10',                    req: () => getLevel(state.xp) >= 10,    xp:250 },
+  { id:'l10', icon:'⚖️', name:'Peso Objetivo',      desc:'Llega a tu peso objetivo',             req: () => state.peso <= state.objetivo, xp:200 },
+  { id:'l11', icon:'🌀', name:'Combo Master',       desc:'Practica 3 combos diferentes',         req: () => (state.combosPracticados||0) >= 3, xp:150 },
+  { id:'l12', icon:'💪', name:'500 Golpes',         desc:'Registra 500 golpes en total',         req: () => (punches.jab+punches.cross+punches.hook+punches.uppercut) >= 500, xp:175 }
+];
+
+function checkLogros() {
+  if (!state.logros) state.logros = {};
+  let nuevos = 0;
+  LOGROS_DEF.forEach(l => {
+    if (!state.logros[l.id] && l.req()) {
+      state.logros[l.id] = true;
+      ganarXP(l.xp);
+      setTimeout(() => showToast(`🏅 Logro desbloqueado: ${l.name}! +${l.xp} XP`), 600);
+      nuevos++;
+    }
+  });
+  if (nuevos > 0) renderLogros();
+}
+
+function renderLogros() {
+  const unEl = document.getElementById('logros-unlocked');
+  const lkEl = document.getElementById('logros-locked');
+  if (!unEl || !lkEl) return;
+  if (!state.logros) state.logros = {};
+
+  const unlocked = LOGROS_DEF.filter(l => state.logros[l.id]);
+  const locked   = LOGROS_DEF.filter(l => !state.logros[l.id]);
+
+  unEl.innerHTML = unlocked.length === 0
+    ? '<p style="color:var(--gray);font-size:13px;padding:10px 0">Aun no has desbloqueado logros. Empieza a entrenar!</p>'
+    : unlocked.map(l => `
+        <div class="logro-item unlocked">
+          <div class="logro-icon">${l.icon}</div>
+          <div class="logro-info"><h4>${l.name}</h4><p>${l.desc}</p></div>
+          <div class="logro-xp">+${l.xp} XP</div>
+        </div>`).join('');
+
+  lkEl.innerHTML = locked.map(l => `
+    <div class="logro-item locked">
+      <div class="logro-icon">🔒</div>
+      <div class="logro-info"><h4>${l.name}</h4><p>${l.desc}</p></div>
+      <div class="logro-xp">${l.xp} XP</div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// NUTRICION
+// ══════════════════════════════════════════
+let activityFactor = 1.55;
+
+function setActivity(btn, factor) {
+  activityFactor = factor;
+  document.querySelectorAll('.activity-btn').forEach(b => b.classList.remove('active-act'));
+  btn.classList.add('active-act');
+  renderNutricion();
+}
+
+function renderNutricion() {
+  // Harris-Benedict para hombres (asumimos)
+  const bmr         = 88.36 + (13.4 * state.peso) + (4.8 * state.talla) - (5.7 * 20);
+  const maintenance = Math.round(bmr * activityFactor);
+  const deficit     = maintenance - 300;
+  const protein     = Math.round(state.peso * 1.6);
+  const water       = parseFloat((state.peso * 0.035).toFixed(1));
+
+  setText('cal-maintenance', maintenance);
+  setText('cal-deficit',     deficit);
+  setText('cal-protein',     protein);
+  setText('cal-water',       water);
+
+  renderNutritionTips(maintenance, deficit, protein);
+  renderMacros(deficit, protein);
+}
+
+function renderNutritionTips(maint, deficit, protein) {
+  const el = document.getElementById('nutrition-tips');
+  if (!el) return;
+  const diff = parseFloat((state.peso - state.objetivo).toFixed(1));
+  const tips = [
+    { icon:'🍗', text:`Proteina: ${protein}g/dia. Priorizala en cada comida — pollo, huevo, atun.` },
+    { icon:'💧', text:`Hidratacion: ${(state.peso*0.035).toFixed(1)}L/dia. Mas si entrenas fuerte.` },
+    { icon:'🕐', text:'Timing: come proteina dentro de los 30 min post-entrenamiento.' },
+    { icon:'🚫', text:'Evita azucares procesados y alcohol — interfieren con la recuperacion.' },
+    diff > 0
+      ? { icon:'⚖️', text:`Para bajar ${diff} KG: mantente en ${deficit} kcal/dia con deficit de 300.` }
+      : { icon:'✅', text:'Ya estas en tu peso objetivo! Mantente en mantenimiento.' }
+  ];
+  el.innerHTML = tips.map(t => `
+    <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <span>${t.icon}</span><span style="color:#ccc">${t.text}</span>
+    </div>`).join('');
+}
+
+function renderMacros(calories, protein) {
+  const el = document.getElementById('macros-display');
+  if (!el) return;
+  const proteinCal = protein * 4;
+  const fat        = Math.round(calories * 0.25 / 9);
+  const fatCal     = fat * 9;
+  const carbCal    = calories - proteinCal - fatCal;
+  const carbs      = Math.round(carbCal / 4);
+  const macros = [
+    { name:'Proteina', grams:protein, kcal:proteinCal, color:'#4ade80', pct:Math.round(proteinCal/calories*100) },
+    { name:'Grasas',   grams:fat,     kcal:fatCal,     color:'#fb923c', pct:Math.round(fatCal/calories*100) },
+    { name:'Carbos',   grams:carbs,   kcal:carbCal,    color:'#38bdf8', pct:Math.round(carbCal/calories*100) }
+  ];
+  el.innerHTML = macros.map(m => `
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
+        <span style="color:${m.color};font-weight:700">${m.name}</span>
+        <span style="color:var(--gray)">${m.grams}g · ${m.kcal} kcal · ${m.pct}%</span>
+      </div>
+      <div style="height:8px;background:#1a1a22;border-radius:50px;overflow:hidden">
+        <div style="height:100%;width:${m.pct}%;background:${m.color};transition:width .5s ease;border-radius:50px"></div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// HISTORIAL & GRAFICA
+// ══════════════════════════════════════════
+function renderHistorial() {
+  renderWeightChart();
+  renderWeeklySummary();
+  renderSessionLog();
+}
+
+function renderWeightChart() {
+  const canvas = document.getElementById('weight-chart');
+  if (!canvas) return;
+  const ctx    = canvas.getContext('2d');
+  const hist   = state.weightHistory;
+  if (hist.length < 2) {
+    ctx.fillStyle = '#6a6a7a';
+    ctx.font      = '14px Space Grotesk';
+    ctx.fillText('Necesitas al menos 2 registros de peso', 20, 100);
+    return;
+  }
+
+  const W     = canvas.offsetWidth || 400;
+  const H     = 200;
+  canvas.width  = W;
+  canvas.height = H;
+
+  const pesos = hist.map(h => h.peso);
+  const minP  = Math.min(...pesos) - 1;
+  const maxP  = Math.max(...pesos) + 1;
+  const pad   = { top:20, right:20, bottom:30, left:40 };
+  const cw    = W - pad.left - pad.right;
+  const ch    = H - pad.top  - pad.bottom;
+
+  // Background
+  ctx.fillStyle = '#111118';
+  ctx.roundRect(0, 0, W, H, 14);
+  ctx.fill();
+
+  // Grid lines
+  ctx.strokeStyle = 'rgba(255,255,255,.05)';
+  ctx.lineWidth   = 1;
+  for (let i=0; i<=4; i++) {
+    const y = pad.top + (ch/4)*i;
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke();
+  }
+
+  // Objetivo line
+  const objY = pad.top + ch - ((state.objetivo - minP) / (maxP - minP)) * ch;
+  ctx.strokeStyle = 'rgba(74,222,128,.4)';
+  ctx.setLineDash([5,5]);
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(pad.left, objY); ctx.lineTo(W-pad.right, objY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.top, 0, H-pad.bottom);
+  grad.addColorStop(0,   'rgba(255,34,51,.35)');
+  grad.addColorStop(1,   'rgba(255,34,51,.02)');
+
+  // Line path
+  ctx.beginPath();
+  hist.forEach((h, i) => {
+    const x = pad.left + (i/(hist.length-1))*cw;
+    const y = pad.top  + ch - ((h.peso - minP) / (maxP - minP)) * ch;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+
+  // Fill
+  const lastX = pad.left + cw;
+  const lastY = pad.top  + ch - ((hist[hist.length-1].peso - minP) / (maxP - minP)) * ch;
+  ctx.lineTo(lastX, H-pad.bottom);
+  ctx.lineTo(pad.left, H-pad.bottom);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  hist.forEach((h, i) => {
+    const x = pad.left + (i/(hist.length-1))*cw;
+    const y = pad.top  + ch - ((h.peso - minP) / (maxP - minP)) * ch;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = '#ff2233';
+  ctx.lineWidth   = 2.5;
+  ctx.lineJoin    = 'round';
+  ctx.stroke();
+
+  // Dots + labels
+  hist.forEach((h, i) => {
+    const x = pad.left + (i/(hist.length-1))*cw;
+    const y = pad.top  + ch - ((h.peso - minP) / (maxP - minP)) * ch;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI*2);
+    ctx.fillStyle   = '#ff2233';
+    ctx.shadowBlur  = 8;
+    ctx.shadowColor = '#ff2233';
+    ctx.fill();
+    ctx.shadowBlur  = 0;
+    // Label
+    ctx.fillStyle   = '#f0f0f5';
+    ctx.font        = '11px Space Grotesk';
+    ctx.textAlign   = 'center';
+    ctx.fillText(h.peso+'kg', x, y-10);
+    // Date
+    ctx.fillStyle = '#6a6a7a';
+    ctx.font      = '10px Space Grotesk';
+    ctx.fillText(h.date.slice(5), x, H-pad.bottom+16);
+  });
+
+  // Y axis labels
+  ctx.textAlign = 'right';
+  ctx.fillStyle = '#6a6a7a';
+  ctx.font      = '10px Space Grotesk';
+  for (let i=0; i<=4; i++) {
+    const val = minP + ((maxP - minP)/4)*(4-i);
+    const y   = pad.top + (ch/4)*i;
+    ctx.fillText(val.toFixed(1), pad.left-6, y+4);
+  }
+
+  // Legend
+  const leg = document.getElementById('weight-chart-legend');
+  if (leg) {
+    const first = hist[0].peso;
+    const last  = hist[hist.length-1].peso;
+    const total = (last - first).toFixed(1);
+    const color = total <= 0 ? '#4ade80' : '#f87171';
+    leg.innerHTML = `
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:3px;background:#ff2233;display:inline-block;border-radius:2px"></span>Peso real</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:2px;background:#4ade80;display:inline-block;border-radius:2px;border-top:2px dashed #4ade80"></span>Objetivo ${state.objetivo}kg</span>
+      <span style="color:${color}">Cambio total: ${total > 0 ? '+' : ''}${total} KG</span>
+    `;
+  }
+}
+
+function renderWeeklySummary() {
+  const el = document.getElementById('weekly-summary');
+  if (!el) return;
+  const nivel    = getLevel(state.xp);
+  const doneM    = misionesCompletadas();
+  const total    = (punches.jab + punches.cross + punches.hook + punches.uppercut);
+  el.innerHTML = `
+    <div class="stat-row"><span>XP esta semana</span><strong style="color:var(--gold)">${state.xpWeek}</strong></div>
+    <div class="stat-row"><span>Nivel actual</span><strong>${nivel}</strong></div>
+    <div class="stat-row"><span>Racha actual</span><strong>${state.racha} dias</strong></div>
+    <div class="stat-row"><span>Misiones completadas</span><strong>${doneM} / ${state.missions.length}</strong></div>
+    <div class="stat-row"><span>Golpes registrados</span><strong>${total}</strong></div>
+    <div class="stat-row"><span>Logros desbloqueados</span><strong>${Object.keys(state.logros||{}).length} / ${LOGROS_DEF.length}</strong></div>
+    <div class="stat-row"><span>Combos practicados</span><strong>${state.combosPracticados||0}</strong></div>
+  `;
+}
+
+function renderSessionLog() {
+  const el = document.getElementById('session-log');
+  if (!el) return;
+  const sessions = state.sessionLog || [];
+  if (sessions.length === 0) {
+    el.innerHTML = '<p style="color:var(--gray);font-size:13px;padding:10px 0">Aun no hay sesiones registradas. Completa el dia para ver el historial.</p>';
+    return;
+  }
+  el.innerHTML = [...sessions].reverse().slice(0, 15).map(s => `
+    <div class="session-row">
+      <span class="sr-date">${s.date}</span>
+      <span style="flex:1;padding:0 14px;color:#ccc">${s.tipo}</span>
+      <span class="sr-xp">+${s.xp} XP</span>
+    </div>`).join('');
+}
+
+function registrarSesion(tipo, xp) {
+  if (!state.sessionLog) state.sessionLog = [];
+  state.sessionLog.push({
+    date: new Date().toLocaleDateString('es-PE'),
+    tipo, xp
+  });
+  guardarDatos();
+}
+
+
+
+// ══════════════════════════════════════════
+// PATCH renderAll y navegacion con nuevas paginas
+// ══════════════════════════════════════════
+const _origNavLinks = () => {
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+      link.classList.add('active');
+      const target = document.getElementById(link.dataset.page);
+      if (target) target.classList.add('active-page');
+      const page = link.dataset.page;
+      const map = {
+        dashboard:   renderDashboard,
+        missions:    renderMissions,
+        organizer:   renderOrganizer,
+        performance: renderPerformance,
+        boxing:      renderBoxing,
+        champion:    renderChampion,
+        coach:       renderCoach,
+        settings:    renderSettings,
+        golpes:      () => { renderPunchBars(punches.jab+punches.cross+punches.hook+punches.uppercut); },
+        combos:      renderCombos,
+        logros:      renderLogros,
+        nutricion:   renderNutricion,
+        historial:   renderHistorial
+      };
+      if (map[page]) map[page]();
+    });
+  });
+};
+
+// Re-bind all nav links (overrides the earlier binding)
+
+// ═══════════════════════════════════════════════════
+// NUEVAS FUNCIONES — ENDURA STRIKE V6
+// Sparring IA · Analisis Post-sesion · Reflejos
+// Estrategia IA · Prediccion de Peso
+// ═══════════════════════════════════════════════════
+
+// ── ANTHROPIC API CALL ──
+async function callAI(prompt, systemPrompt) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt || 'Eres el AI Coach de Endura Strike, una app de boxeo. Responde siempre en espanol. Eres directo, motivador y tecnico. Usa terminologia de boxeo correcta.',
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    return data.content?.[0]?.text || 'Error al conectar con la IA.';
+  } catch(e) {
+    return 'Error de conexion. Verifica tu internet e intenta de nuevo.';
+  }
+}
+
+// ══════════════════════════════════
+// SPARRING CON IA
+// ══════════════════════════════════
+const RIVALES = [
+  { name:'El Serpiente', style:'Contragolpeador', guard:'Zurdo',    strength:'Defensa',    weakness:'Cuerpo',    level:'Intermedio' },
+  { name:'El Torito',    style:'Presionador',     guard:'Ortodoxo', strength:'Potencia',   weakness:'Movilidad', level:'Principiante' },
+  { name:'La Sombra',    style:'Boxeador puro',   guard:'Ortodoxo', strength:'Jab',        weakness:'Cuerpo',    level:'Avanzado' },
+  { name:'El Buitre',    style:'Brawler',          guard:'Zurdo',    strength:'Gancho',     weakness:'Jab largo', level:'Intermedio' },
+  { name:'El Rapido',    style:'Swarmer',          guard:'Ortodoxo', strength:'Velocidad',  weakness:'Uppercut',  level:'Avanzado' },
+];
+
+let sparState = {
+  rival: RIVALES[0],
+  round: 1,
+  attacks: 0,
+  dodges: 0,
+  roundsDone: 0,
+  active: false,
+  history: [],
+  awaitingResponse: false
+};
+
+function cambiarRival() {
+  const idx = RIVALES.indexOf(sparState.rival);
+  sparState.rival = RIVALES[(idx + 1) % RIVALES.length];
+  renderRival();
+}
+
+function renderRival() {
+  const r = sparState.rival;
+  setText('rival-name',        r.name);
+  setText('rival-style',       r.style + ' · ' + r.guard);
+  setText('rival-style-stat',  r.style);
+  setText('rival-guard',       r.guard);
+  setText('rival-strength',    r.strength);
+  setText('rival-weakness',    r.weakness);
+  setText('rival-level',       r.level);
+}
+
+async function iniciarSparring() {
+  if (sparState.active) return;
+  sparState.active = true;
+  sparState.round++;
+  setText('spar-round-badge', `ROUND ${sparState.round}`);
+
+  const msgs = document.getElementById('spar-messages');
+  if (msgs) msgs.innerHTML = '';
+
+  addSparMsg('coach', `🔔 ROUND ${sparState.round} — ${sparState.rival.name} entra al ring`);
+
+  const prompt = `Eres ${sparState.rival.name}, un boxeador ${sparState.rival.style} con guardia ${sparState.rival.guard}.
+Tu fortaleza es ${sparState.rival.strength} y tu debilidad es ${sparState.rival.weakness}.
+Nivel: ${sparState.rival.level}.
+
+Inicia el round lanzando una accion de boxeo al atleta. 
+Responde EXACTAMENTE en este formato JSON (sin markdown, sin backticks):
+{"accion":"descripcion de lo que haces en 1-2 oraciones cinematicas","opciones":["opcion1","opcion2","opcion3","opcion4"]}
+
+Las opciones deben ser respuestas tacticas reales de boxeo (esquivar, contra-atacar, clinch, etc).`;
+
+  showSparLoading(true);
+  const resp = await callAI(prompt);
+  showSparLoading(false);
+
+  try {
+    const clean = resp.replace(/```json|```/g,'').trim();
+    const data  = JSON.parse(clean);
+    addSparMsg('rival', `🥊 ${sparState.rival.name}: "${data.accion}"`);
+    showSparOptions(data.opciones);
+  } catch(e) {
+    addSparMsg('rival', `🥊 ${sparState.rival.name} lanza un jab rapido a tu guardia.`);
+    showSparOptions(['Esquivar hacia derecha','Bloquear y contra con jab','Clinch','Saltar atras y resetear']);
+  }
+}
+
+function showSparOptions(opts) {
+  const grid = document.getElementById('spar-btn-grid');
+  const panel = document.getElementById('spar-options');
+  if (!grid || !panel) return;
+  panel.style.display = 'block';
+  grid.innerHTML = opts.map(o => `
+    <button onclick="respondSparring(this,'${o.replace(/'/g,"\\'")}'')"
+      style="padding:10px 8px;background:var(--s2);border:1px solid var(--border);
+      border-radius:var(--r-sm);color:var(--white);font-size:12px;cursor:pointer;
+      transition:.15s;text-align:left;font-family:var(--body)"
+      onmouseover="this.style.borderColor='var(--red-border)'"
+      onmouseout="this.style.borderColor='var(--border)'">${o}</button>
+  `).join('');
+}
+
+async function respondSparring(btn, opcion) {
+  if (sparState.awaitingResponse) return;
+  sparState.awaitingResponse = true;
+
+  const panel = document.getElementById('spar-options');
+  if (panel) panel.style.display = 'none';
+
+  addSparMsg('player', `Yo: "${opcion}"`);
+  sparState.history.push(opcion);
+  sparState.attacks++;
+  setText('spar-attacks', sparState.attacks);
+
+  const prompt = `Eres ${sparState.rival.name}, boxeador ${sparState.rival.style} (${sparState.rival.guard}).
+El atleta respondio: "${opcion}".
+Historial de acciones: ${sparState.history.slice(-4).join(' → ')}.
+
+Evalua la respuesta del atleta y reacciona. 
+Responde EXACTAMENTE en este formato JSON (sin markdown):
+{"resultado":"bueno o malo","feedback":"evaluacion corta tecnica en 1 oracion","reaccion":"lo que haces como rival en 1 oracion cinematica","opciones":["opcion1","opcion2","opcion3","opcion4"],"terminar":false}
+
+Si llevamos mas de 5 intercambios, pon "terminar":true y en reaccion escribe el resultado del round.`;
+
+  showSparLoading(true);
+  const resp = await callAI(prompt);
+  showSparLoading(false);
+  sparState.awaitingResponse = false;
+
+  try {
+    const clean = resp.replace(/```json|```/g,'').trim();
+    const data  = JSON.parse(clean);
+
+    const isGood = data.resultado === 'bueno';
+    if (isGood) sparState.dodges++;
+    setText('spar-dodges', sparState.dodges);
+
+    addSparMsg(isGood ? 'result-good' : 'result-bad',
+      (isGood ? '✅' : '⚠️') + ' ' + data.feedback);
+
+    if (data.terminar) {
+      sparState.roundsDone++;
+      setText('spar-rounds-done', sparState.roundsDone);
+      sparState.active = false;
+      addSparMsg('coach', `🔔 FIN DEL ROUND — ${data.reaccion}`);
+      addSparMsg('coach', `Precision: ${Math.round((sparState.dodges/sparState.attacks)*100)}% · +${sparState.dodges * 10} XP`);
+      ganarXP(sparState.dodges * 10);
+      registrarSesion('Sparring IA', sparState.dodges * 10);
+    } else {
+      addSparMsg('rival', `🥊 ${sparState.rival.name}: "${data.reaccion}"`);
+      showSparOptions(data.opciones);
+    }
+  } catch(e) {
+    addSparMsg('coach', '⚠️ Error de conexion. Intenta de nuevo.');
+    sparState.active = false;
+  }
+}
+
+function addSparMsg(type, text) {
+  const msgs = document.getElementById('spar-messages');
+  if (!msgs) return;
+  const div = document.createElement('div');
+  div.className = 'spar-msg ' + type;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showSparLoading(show) {
+  const el = document.getElementById('spar-loading');
+  if (el) el.style.display = show ? 'block' : 'none';
+}
+
+// ══════════════════════════════════
+// ANALISIS POST-SESION CON IA
+// ══════════════════════════════════
+function renderAnalisisPage() {
+  const total = punches.jab + punches.cross + punches.hook + punches.uppercut;
+  setText('an-missions', `${misionesCompletadas()} / ${state.missions.length}`);
+  setText('an-xp',       `${state.xpToday} XP`);
+  setText('an-punches',  total);
+  setText('an-racha',    `${state.racha} dias`);
+  setText('an-peso',     `${state.peso} KG`);
+}
+
+async function generarAnalisis() {
+  const btn = document.getElementById('btn-analisis');
+  if (btn) { btn.textContent = 'ANALIZANDO...'; btn.style.opacity = '.6'; btn.disabled = true; }
+
+  const total = punches.jab + punches.cross + punches.hook + punches.uppercut;
+  const doneM = misionesCompletadas();
+
+  const prompt = `Analiza la sesion de entrenamiento de este boxeador y genera un reporte detallado:
+
+DATOS DE HOY:
+- Misiones completadas: ${doneM} de ${state.missions.length}
+- XP ganado hoy: ${state.xpToday}
+- Golpes registrados: ${total} (Jabs: ${punches.jab}, Cross: ${punches.cross}, Hooks: ${punches.hook}, Uppercuts: ${punches.uppercut})
+- Racha actual: ${state.racha} dias
+- Peso actual: ${state.peso} KG | Objetivo: ${state.objetivo} KG
+- Nivel: ${getLevel(state.xp)} | Pilar STRIKE: ${state.pillar.strike}% | ENDURE: ${state.pillar.endure}%
+
+Genera un reporte con estas secciones exactas (en espanol):
+1. EVALUACION GENERAL (1 parrafo, sé directo)
+2. FORTALEZAS DE HOY (3 puntos especificos con datos)  
+3. AREAS DE MEJORA (2-3 puntos criticos)
+4. PLAN DE MANANA (5 acciones concretas con numeros)
+5. MENSAJE MOTIVACIONAL (1 frase poderosa)`;
+
+  const resp = await callAI(prompt);
+
+  if (btn) { btn.textContent = 'GENERAR REPORTE CON IA'; btn.style.opacity = '1'; btn.disabled = false; }
+
+  const output = document.getElementById('analisis-output');
+  if (!output) return;
+
+  // Parse and render nicely
+  const sections = {
+    'EVALUACION GENERAL': 'general',
+    'FORTALEZAS DE HOY':  'fortalezas',
+    'AREAS DE MEJORA':    'mejora',
+    'PLAN DE MANANA':     'plan',
+    'MENSAJE MOTIVACIONAL':'motivacion'
+  };
+
+  output.innerHTML = `<div style="padding:4px 0">${
+    resp.split('\n').filter(l => l.trim()).map(line => {
+      const isHeader = /^\d\./.test(line.trim()) || line.includes('EVALUACION') || line.includes('FORTALEZAS') || line.includes('AREAS') || line.includes('PLAN') || line.includes('MENSAJE');
+      if (isHeader) {
+        return `<div class="ai-section"><h4>${line.replace(/^\d\.\s*/,'').replace(/\*\*/g,'')}</h4>`;
+      }
+      if (line.startsWith('-') || line.startsWith('•') || line.match(/^\d+\./)) {
+        return `<p style="display:flex;gap:8px;padding:3px 0;font-size:13px;color:#b0b0c0"><span style="color:var(--red);flex-shrink:0">→</span>${line.replace(/^[-•]\s*/,'').replace(/^\d+\.\s*/,'')}</p>`;
+      }
+      return `<p style="font-size:13px;color:#b0b0c0;line-height:1.7;margin-bottom:8px">${line}</p>`;
+    }).join('') + '</div>'
+  }</div>`;
+
+  // Plan for tomorrow card
+  const planCard = document.getElementById('analisis-plan-card');
+  if (planCard) planCard.style.display = 'block';
+  const planEl = document.getElementById('analisis-plan');
+  if (planEl) {
+    const planMatch = resp.match(/PLAN DE MANANA([\s\S]*?)(MENSAJE|$)/i);
+    if (planMatch) {
+      const items = planMatch[1].trim().split('\n').filter(l => l.trim() && (l.startsWith('-') || l.match(/^\d+\./)));
+      planEl.innerHTML = items.map(item => `
+        <div class="sr" style="padding:8px 0">
+          <span class="sr-l">${item.replace(/^[-\d.]\s*/,'').substring(0,60)}</span>
+        </div>`).join('');
+    }
+  }
+
+  ganarXP(50);
+  showToast('🔬 Reporte generado! +50 XP');
+  registrarSesion('Analisis IA', 50);
+}
+
+// ══════════════════════════════════
+// TEST DE REFLEJOS
+// ══════════════════════════════════
+let refState = {
+  active:    false,
+  current:   null,
+  startTime: 0,
+  attempts:  0,
+  correct:   0,
+  times:     [],
+  bestTime:  Infinity,
+  timeoutId: null,
+  intervalId:null
+};
+
+const GOLPES_REF = ['JAB','CROSS','HOOK','UPPERCUT'];
+
+function iniciarReflejos() {
+  const btn = document.getElementById('btn-reflejos');
+  if (refState.active) {
+    detenerReflejos();
+    return;
+  }
+  refState.active = true;
+  if (btn) { btn.textContent = 'DETENER'; btn.style.background = 'var(--s3)'; btn.style.color = 'var(--muted)'; }
+
+  // Enable buttons
+  GOLPES_REF.forEach(g => {
+    const b = document.getElementById('rbtn-' + g);
+    if (b) b.style.opacity = '1';
+  });
+
+  setText('reflejos-badge', 'ACTIVO');
+  siguienteReflejos();
+}
+
+function detenerReflejos() {
+  refState.active = false;
+  clearTimeout(refState.timeoutId);
+  const btn = document.getElementById('btn-reflejos');
+  if (btn) { btn.textContent = 'INICIAR TEST'; btn.style.background = 'var(--red)'; btn.style.color = 'white'; }
+  GOLPES_REF.forEach(g => {
+    const b = document.getElementById('rbtn-' + g);
+    if (b) b.style.opacity = '.5';
+  });
+  setText('reflejos-badge', 'LISTO');
+  setText('reflejos-command', 'ESPERA...');
+  setText('reflejos-sub', 'Test detenido');
+  setText('reflejos-timer-display', '');
+  setText('reflejos-signal', '👁️');
+  refState.current = null;
+}
+
+function siguienteReflejos() {
+  if (!refState.active) return;
+  refState.current = null;
+  setText('reflejos-command', '...');
+  setText('reflejos-signal', '⏳');
+  setText('reflejos-timer-display', '');
+  setText('reflejos-sub', 'Prepárate...');
+
+  // Random delay 1-3s
+  const delay = 1000 + Math.random() * 2000;
+  refState.timeoutId = setTimeout(() => {
+    if (!refState.active) return;
+    refState.current   = GOLPES_REF[Math.floor(Math.random() * GOLPES_REF.length)];
+    refState.startTime = Date.now();
+
+    const colors = { JAB:'var(--red)', CROSS:'#ea580c', HOOK:'#9333ea', UPPERCUT:'var(--green)' };
+    const icons  = { JAB:'👊', CROSS:'💥', HOOK:'🌀', UPPERCUT:'⬆️' };
+
+    const cmdEl = document.getElementById('reflejos-command');
+    if (cmdEl) { cmdEl.textContent = refState.current; cmdEl.style.color = colors[refState.current]; }
+    setText('reflejos-signal', icons[refState.current]);
+    setText('reflejos-sub', 'Presiona el golpe correcto!');
+
+    // Auto-fail after 2s
+    refState.timeoutId = setTimeout(() => {
+      if (refState.current && refState.active) {
+        refState.attempts++;
+        addRefHistory(refState.current, '—', false);
+        updateRefStats();
+        siguienteReflejos();
+      }
+    }, 2000);
+  }, delay);
+}
+
+function respondReflejos(golpe) {
+  if (!refState.active || !refState.current) return;
+  clearTimeout(refState.timeoutId);
+
+  const elapsed = Date.now() - refState.startTime;
+  const correct = golpe === refState.current;
+
+  refState.attempts++;
+  if (correct) {
+    refState.correct++;
+    refState.times.push(elapsed);
+    if (elapsed < refState.bestTime) refState.bestTime = elapsed;
+    ganarXP(5);
+  }
+
+  addRefHistory(refState.current, elapsed + 'ms', correct);
+  updateRefStats();
+
+  // Flash
+  const page = document.getElementById('reflejos');
+  if (page) {
+    page.classList.add(correct ? 'flash-green' : 'flash-red');
+    setTimeout(() => page.classList.remove('flash-green','flash-red'), 300);
+  }
+
+  const cmdEl = document.getElementById('reflejos-command');
+  if (cmdEl) { cmdEl.textContent = correct ? '✅' : '❌'; cmdEl.style.color = correct ? 'var(--green)' : 'var(--red)'; }
+  setText('reflejos-timer-display', elapsed + ' ms');
+
+  refState.current = null;
+  setTimeout(siguienteReflejos, 800);
+}
+
+function updateRefStats() {
+  setText('ref-attempts', refState.attempts);
+  setText('ref-correct',  refState.correct);
+  const acc = refState.attempts > 0 ? Math.round((refState.correct/refState.attempts)*100) : 0;
+  setText('ref-accuracy', acc + '%');
+  if (refState.times.length > 0) {
+    const avg = Math.round(refState.times.reduce((a,b)=>a+b,0)/refState.times.length);
+    setText('ref-avg-time', avg + ' ms');
+    setText('ref-best-time', refState.bestTime + ' ms');
+  }
+}
+
+function addRefHistory(golpe, time, correct) {
+  const el = document.getElementById('ref-history');
+  if (!el) return;
+  const div = document.createElement('div');
+  div.style.cssText = `display:flex;justify-content:space-between;padding:5px 8px;background:var(--s2);border-radius:6px;margin-bottom:4px;font-size:11px;border:1px solid ${correct?'rgba(34,197,94,.2)':'rgba(232,25,44,.2)'}`;
+  div.innerHTML = `<span style="font-family:var(--mono);color:${correct?'var(--green)':'var(--red)'}">${correct?'✓':'✗'} ${golpe}</span><span style="color:var(--muted);font-family:var(--mono)">${time}</span>`;
+  el.insertBefore(div, el.firstChild);
+  if (el.children.length > 8) el.removeChild(el.lastChild);
+}
+
+// ══════════════════════════════════
+// ESTRATEGIA CON IA
+// ══════════════════════════════════
+let estState = { myStyle:'Presionador', myGuard:'Ortodoxo', rivalStyle:'Contragolpeador', rivalLevel:'Intermedio' };
+
+function pickStyle(btn, style) {
+  document.querySelectorAll('#my-style-btns .style-pick').forEach(b => b.classList.remove('active-style'));
+  btn.classList.add('active-style');
+  estState.myStyle = style;
+}
+function pickGuard(guard) {
+  ['guard-ort','guard-zur'].forEach(id => { const el=document.getElementById(id); if(el) el.classList.remove('active-style'); });
+  const id = guard === 'Ortodoxo' ? 'guard-ort' : 'guard-zur';
+  const el = document.getElementById(id); if(el) el.classList.add('active-style');
+  estState.myGuard = guard;
+}
+function pickRivalStyle(btn, style) {
+  document.querySelectorAll('#rival-style-btns .style-pick').forEach(b => b.classList.remove('active-style'));
+  btn.classList.add('active-style');
+  estState.rivalStyle = style;
+}
+function pickRivalLevel(btn, level) {
+  document.querySelectorAll('#rival-style-btns ~ div .style-pick').forEach(b => b.classList.remove('active-style'));
+  btn.classList.add('active-style');
+  estState.rivalLevel = level;
+}
+
+async function generarEstrategia() {
+  const btn = event.target;
+  btn.textContent = 'ANALIZANDO...'; btn.style.opacity = '.6'; btn.disabled = true;
+
+  const prompt = `Analiza este matchup de boxeo y genera una estrategia completa:
+
+MI PERFIL:
+- Estilo: ${estState.myStyle}
+- Guardia: ${estState.myGuard}
+- Peso: ${state.peso} KG | Categoria: Welterweight
+- Nivel: ${getLevel(state.xp)} | STRIKE: ${state.pillar.strike}% | ENDURE: ${state.pillar.endure}%
+
+RIVAL:
+- Estilo: ${estState.rivalStyle}
+- Nivel: ${estState.rivalLevel}
+
+Genera una estrategia tactica completa con:
+1. ANALISIS DEL MATCHUP (ventajas y desventajas)
+2. ESTRATEGIA PRINCIPAL (como pelear esta pelea)
+3. COMBINACIONES CLAVE (2-3 combos especificos para este rival)
+4. QUE EVITAR (errores fatales contra este estilo)
+5. AJUSTE POR ROUND (como cambiar si el plan no funciona)`;
+
+  const resp = await callAI(prompt);
+  btn.textContent = 'ANALIZAR CON IA'; btn.style.opacity = '1'; btn.disabled = false;
+
+  const output = document.getElementById('estrategia-output');
+  if (!output) return;
+
+  output.innerHTML = `<div style="padding:4px 0">${
+    resp.split('\n').filter(l => l.trim()).map(line => {
+      const isHeader = /^\d\./.test(line.trim());
+      if (isHeader) return `<div class="ai-section"><h4>${line.replace(/^\d\.\s*/,'').replace(/\*\*/g,'')}</h4>`;
+      if (line.startsWith('-') || line.startsWith('•')) {
+        return `<p style="display:flex;gap:8px;padding:3px 0;font-size:13px;color:#b0b0c0"><span style="color:var(--red);flex-shrink:0">→</span>${line.replace(/^[-•]\s*/,'')}</p>`;
+      }
+      return `<p style="font-size:13px;color:#b0b0c0;line-height:1.7;margin-bottom:6px">${line}</p>`;
+    }).join('') + '</div>'
+  }</div>`;
+
+  ganarXP(30);
+  showToast('⚔️ Estrategia generada! +30 XP');
+}
+
+// ══════════════════════════════════
+// PREDICCION DE PESO
+// ══════════════════════════════════
+let predState = { deficit:300, diasSemana:5 };
+
+function setDeficit(btn, val) {
+  predState.deficit = val;
+  document.querySelectorAll('#deficit-btns .style-pick').forEach(b => b.classList.remove('active-style'));
+  btn.classList.add('active-style');
+  calcPrediccion();
+}
+function setDias(btn, val) {
+  predState.diasSemana = val;
+  document.querySelectorAll('#dias-btns .style-pick').forEach(b => b.classList.remove('active-style'));
+  btn.classList.add('active-style');
+  calcPrediccion();
+}
+
+function calcPrediccion() {
+  const diff = state.peso - state.objetivo;
+  if (diff <= 0) {
+    setText('pred-diff',   '¡Ya en objetivo!');
+    setText('pred-date',   'Objetivo logrado');
+    setText('pred-weeks',  '0');
+    return;
+  }
+
+  // 7700 kcal = 1 kg grasa
+  const kgPerWeek  = (predState.deficit * 7) / 7700;
+  const weeks      = Math.ceil(diff / kgPerWeek);
+  const date       = new Date();
+  date.setDate(date.getDate() + weeks * 7);
+
+  setText('pred-current',   `${state.peso} KG`);
+  setText('pred-target',    `${state.objetivo} KG`);
+  setText('pred-diff',      `${diff.toFixed(1)} KG`);
+  setText('pred-deficit',   `${predState.deficit} kcal`);
+  setText('pred-week-loss', `${kgPerWeek.toFixed(2)} KG`);
+  setText('pred-weeks',     `${weeks} semanas`);
+  setText('pred-date',      date.toLocaleDateString('es-PE', { day:'numeric', month:'long', year:'numeric' }));
+
+  renderPredChart(diff, kgPerWeek, weeks);
+  renderMilestones(kgPerWeek);
+}
+
+function renderPredChart(diff, kgPerWeek, weeks) {
+  const canvas = document.getElementById('pred-chart');
+  if (!canvas) return;
+  const ctx  = canvas.getContext('2d');
+  const maxW = Math.min(weeks, 16);
+  const W    = canvas.offsetWidth || 400;
+  const H    = 220;
+  canvas.width = W; canvas.height = H;
+
+  const pad = { top:20, right:20, bottom:35, left:45 };
+  const cw  = W - pad.left - pad.right;
+  const ch  = H - pad.top  - pad.bottom;
+
+  const points = [];
+  for (let i=0; i<=maxW; i++) {
+    points.push({ week:i, peso: Math.max(state.objetivo, state.peso - kgPerWeek*i) });
+  }
+  const minP = state.objetivo - 0.5;
+  const maxP = state.peso + 0.5;
+
+  // BG
+  ctx.fillStyle = '#12121a'; ctx.roundRect(0,0,W,H,12); ctx.fill();
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,.04)'; ctx.lineWidth = 1;
+  for (let i=0;i<=4;i++) {
+    const y = pad.top + (ch/4)*i;
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke();
+  }
+
+  // Objetivo line
+  const objY = pad.top + ch;
+  ctx.strokeStyle = 'rgba(34,197,94,.35)'; ctx.setLineDash([4,4]); ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(pad.left,objY); ctx.lineTo(W-pad.right,objY); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0,pad.top,0,H-pad.bottom);
+  grad.addColorStop(0,'rgba(232,25,44,.3)'); grad.addColorStop(1,'rgba(232,25,44,.02)');
+
+  // Path
+  ctx.beginPath();
+  points.forEach((p,i) => {
+    const x = pad.left + (i/maxW)*cw;
+    const y = pad.top  + ch - ((p.peso-minP)/(maxP-minP))*ch;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  const lx = pad.left+cw, ly = pad.top+ch-((points[points.length-1].peso-minP)/(maxP-minP))*ch;
+  ctx.lineTo(lx,H-pad.bottom); ctx.lineTo(pad.left,H-pad.bottom); ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  ctx.beginPath();
+  points.forEach((p,i) => {
+    const x = pad.left + (i/maxW)*cw;
+    const y = pad.top  + ch - ((p.peso-minP)/(maxP-minP))*ch;
+    i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle='#e8192c'; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.stroke();
+
+  // Dots
+  [0, Math.floor(maxW/2), maxW].forEach(i => {
+    if (!points[i]) return;
+    const x = pad.left + (i/maxW)*cw;
+    const y = pad.top  + ch - ((points[i].peso-minP)/(maxP-minP))*ch;
+    ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
+    ctx.fillStyle='#e8192c'; ctx.shadowBlur=8; ctx.shadowColor='#e8192c'; ctx.fill(); ctx.shadowBlur=0;
+    ctx.fillStyle='#f2f2f8'; ctx.font='10px JetBrains Mono'; ctx.textAlign='center';
+    ctx.fillText(points[i].peso.toFixed(1)+'kg',x,y-10);
+    ctx.fillStyle='#5a5a70'; ctx.font='9px JetBrains Mono';
+    ctx.fillText('S'+i,x,H-pad.bottom+16);
+  });
+
+  // Y axis
+  ctx.textAlign='right'; ctx.fillStyle='#5a5a70'; ctx.font='9px JetBrains Mono';
+  for (let i=0;i<=4;i++) {
+    const val = minP + ((maxP-minP)/4)*(4-i);
+    ctx.fillText(val.toFixed(1), pad.left-6, pad.top+(ch/4)*i+4);
+  }
+}
+
+function renderMilestones(kgPerWeek) {
+  const el = document.getElementById('pred-milestones');
+  if (!el) return;
+  const checkpoints = [0.25, 0.5, 0.75, 1.0];
+  const diff = state.peso - state.objetivo;
+  el.innerHTML = checkpoints.filter(c => c * diff > 0.1).map(c => {
+    const kg    = (diff * c).toFixed(1);
+    const weeks = Math.ceil((diff * c) / kgPerWeek);
+    const date  = new Date(); date.setDate(date.getDate() + weeks*7);
+    return `<div class="milestone">
+      <span class="ms-date">${date.toLocaleDateString('es-PE',{day:'numeric',month:'short'})}</span>
+      <span class="ms-peso">-${kg} KG (${Math.round(c*100)}%)</span>
+      <span class="tag tag-${c===1?'green':'red'}">${weeks}w</span>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════
+// PATCH RENDER ALL + NAV
+// ══════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  cargarDatos();
+  if (!state.logros)            state.logros            = {};
+  if (!state.sessionLog)        state.sessionLog        = [];
+  if (!state.combosPracticados) state.combosPracticados = 0;
+  renderAll();
+  renderCombos();
+  renderLogros();
+  renderNutricion();
+  verTecnica('JAB');
+  renderRival();
+  calcPrediccion();
+
+  // Full nav binding
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active-page'));
+      link.classList.add('active');
+      const target = document.getElementById(link.dataset.page);
+      if (target) target.classList.add('active-page');
+      const page = link.dataset.page;
+      const map = {
+        dashboard:   renderDashboard,
+        missions:    renderMissions,
+        organizer:   renderOrganizer,
+        performance: renderPerformance,
+        boxing:      renderBoxing,
+        champion:    renderChampion,
+        coach:       renderCoach,
+        settings:    renderSettings,
+        golpes:      () => renderPunchBars(punches.jab+punches.cross+punches.hook+punches.uppercut),
+        combos:      renderCombos,
+        logros:      renderLogros,
+        nutricion:   renderNutricion,
+        historial:   renderHistorial,
+        sparring:    renderRival,
+        analisis:    renderAnalisisPage,
+        reflejos:    () => {},
+        estrategia:  () => {},
+        prediccion:  calcPrediccion,
+      };
+      if (map[page]) map[page]();
+    });
+  });
+
+  setInterval(guardarDatos, 3000);
+  setInterval(checkLogros,  10000);
+});
+
+</script>
+</body>
+</html>
