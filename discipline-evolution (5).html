@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discipline Evolution</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#080a0e;--dark:#0d1117;--dark2:#131920;--dark3:#1a2230;
+  --card:#151c27;--border:#1e2d42;
+  --red:#e63946;--green:#2ecc71;--blue:#3b82f6;--purple:#8b5cf6;
+  --cyan:#06b6d4;--yellow:#f59e0b;--orange:#f97316;
+  --white:#fff;--gray:#8892a4;--text:#c9d4e0;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:'Montserrat',sans-serif;overflow-x:hidden}
+.page{display:none;min-height:100vh}
+.page.active{display:block}
+#page-app{display:none;flex-direction:row}
+#page-app.active{display:flex}
+
+.top-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(8,10,14,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;letter-spacing:2px;color:var(--white);text-transform:uppercase;display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo span{color:var(--yellow)}
+.logo-icon{width:32px;height:32px;background:var(--yellow);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--black);font-weight:900}
+.top-nav-links{display:flex;gap:4px}
+.top-nav-links a{color:var(--gray);font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:6px;cursor:pointer;transition:.2s}
+.top-nav-links a:hover{color:var(--yellow);background:rgba(245,158,11,0.1)}
+.nav-btn{background:var(--yellow);color:var(--black);font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 20px;border-radius:6px;border:none;cursor:pointer;transition:.2s;font-family:'Montserrat',sans-serif}
+.nav-btn:hover{background:#d97706;transform:translateY(-1px)}
+
+#hero{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;padding-top:64px}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 60%,rgba(230,57,70,.12),transparent 70%),radial-gradient(ellipse 40% 30% at 80% 20%,rgba(245,158,11,.08),transparent 60%),linear-gradient(180deg,#080a0e,#0d1320 50%,#080a0e)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(30,45,66,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(30,45,66,.4) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 40%,transparent 100%)}
+.hero-content{position:relative;z-index:2;text-align:center;max-width:900px;padding:0 40px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--yellow);font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;padding:6px 16px;border-radius:4px;margin-bottom:32px}
+.hero-eyebrow::before{content:'';width:6px;height:6px;background:var(--yellow);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(245,158,11,.7)}70%{box-shadow:0 0 0 8px rgba(245,158,11,0)}100%{box-shadow:0 0 0 0 rgba(245,158,11,0)}}
+.hero-title{font-family:'Oswald',sans-serif;font-size:clamp(56px,9vw,112px);font-weight:700;line-height:.9;letter-spacing:-2px;text-transform:uppercase;margin-bottom:24px}
+.hero-title .l1{display:block;color:var(--white)}
+.hero-title .l2{display:block;-webkit-text-stroke:2px var(--red);color:transparent;filter:drop-shadow(0 0 30px rgba(230,57,70,.5))}
+.hero-title .l3{display:block;color:var(--yellow)}
+.hero-sub{font-size:16px;color:var(--gray);letter-spacing:3px;text-transform:uppercase;margin-bottom:48px}
+.hero-sub span{color:var(--white);font-weight:600}
+.hero-btns{display:flex;align-items:center;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-p{background:var(--red);color:var(--white);font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:16px 40px;border-radius:6px;border:none;cursor:pointer;transition:.25s}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(230,57,70,.4)}
+.btn-s{background:transparent;color:var(--white);font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:15px 40px;border-radius:6px;border:1px solid var(--border);cursor:pointer;transition:.25s}
+.btn-s:hover{border-color:var(--yellow);color:var(--yellow)}
+.hero-stats{display:flex;gap:48px;justify-content:center;margin-top:64px;padding-top:48px;border-top:1px solid var(--border);flex-wrap:wrap}
+.hs .num{font-family:'Oswald',sans-serif;font-size:36px;font-weight:700;color:var(--white)}
+.hs .num span{color:var(--yellow)}
+.hs .lbl{font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+
+.ls{padding:96px 40px}
+.lsmax{max-width:1200px;margin:0 auto}
+.sl{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+.st2{font-family:'Oswald',sans-serif;font-size:clamp(34px,5vw,54px);font-weight:700;text-transform:uppercase;letter-spacing:-1px;line-height:1;margin-bottom:16px}
+.sd{font-size:15px;color:var(--gray);max-width:560px;line-height:1.7}
+
+.qg{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;margin-top:56px}
+.big-q{font-family:'Oswald',sans-serif;font-size:clamp(24px,3.5vw,38px);font-weight:700;line-height:1.1;text-transform:uppercase;letter-spacing:-1px;margin-bottom:28px}
+.big-q em{color:var(--yellow);font-style:normal}
+.qg p{font-size:14px;color:var(--text);line-height:1.8;margin-bottom:14px}
+.pilares{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:28px}
+.pilar{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:.3s}
+.pilar:hover{transform:translateY(-3px)}
+.pi{font-size:22px;margin-bottom:8px}
+.pt{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.pd{font-size:12px;color:var(--gray);line-height:1.6}
+.ayc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;gap:12px;align-items:flex-start;transition:.3s;margin-bottom:14px}
+.ayc:hover{border-color:rgba(245,158,11,.3);transform:translateX(5px)}
+.ayn{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:var(--yellow);opacity:.4;line-height:1;flex-shrink:0}
+.ayt{font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.ayd{font-size:13px;color:var(--gray);line-height:1.6}
+
+.cc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:56px}
+.cc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:28px 22px;text-align:center;transition:.3s;position:relative;overflow:hidden}
+.cc::before{content:'';position:absolute;inset:0;opacity:0;transition:.3s}
+.cc:hover{transform:translateY(-5px)}
+.cc:hover::before{opacity:1}
+.cc1::before{background:linear-gradient(135deg,rgba(230,57,70,.1),transparent)}
+.cc2::before{background:linear-gradient(135deg,rgba(139,92,246,.1),transparent)}
+.cc3::before{background:linear-gradient(135deg,rgba(6,182,212,.1),transparent)}
+.cci{font-size:42px;margin-bottom:16px;display:block}
+.cct{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.ccd{font-size:13px;color:var(--gray);line-height:1.7}
+.camino-steps{display:flex;align-items:center;justify-content:center;flex-wrap:wrap}
+.cs-step{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 18px}
+.csc{width:50px;height:50px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--dark2);transition:.3s}
+.cs-step:hover .csc{border-color:var(--yellow);background:rgba(245,158,11,.1)}
+.csn{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray)}
+.ca{color:var(--border);font-size:18px}
+
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:44px}
+.mc{background:var(--card);padding:24px 20px;transition:.3s;position:relative;overflow:hidden;border:1px solid var(--border)}
+.mc::before{content:'';position:absolute;inset:0;opacity:0;transition:.3s}
+.mc:hover{transform:translateY(-4px);z-index:2}
+.mc:hover::before{opacity:1}
+.mc-r::before{background:linear-gradient(135deg,rgba(230,57,70,.12),transparent)}
+.mc-g::before{background:linear-gradient(135deg,rgba(46,204,113,.12),transparent)}
+.mc-b::before{background:linear-gradient(135deg,rgba(59,130,246,.12),transparent)}
+.mc-p::before{background:linear-gradient(135deg,rgba(139,92,246,.12),transparent)}
+.mc-c::before{background:linear-gradient(135deg,rgba(6,182,212,.12),transparent)}
+.mc-y::before{background:linear-gradient(135deg,rgba(245,158,11,.12),transparent)}
+.mc-o::before{background:linear-gradient(135deg,rgba(249,115,22,.12),transparent)}
+.mc-gr::before{background:linear-gradient(135deg,rgba(136,146,164,.12),transparent)}
+.mi{font-size:24px;margin-bottom:12px;display:block}
+.mt{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-bottom:9px;display:inline-block}
+.mn{font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.md{font-size:12px;color:var(--gray);line-height:1.6}
+
+#cta-l{background:var(--black);text-align:center;padding:96px 40px;position:relative;overflow:hidden}
+#cta-l::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(230,57,70,.1),transparent)}
+.ctat{font-family:'Oswald',sans-serif;font-size:clamp(42px,7vw,74px);font-weight:700;text-transform:uppercase;letter-spacing:-2px;margin-bottom:20px;position:relative}
+.ctas{font-size:15px;color:var(--gray);margin-bottom:40px;position:relative}
+.sfoot{background:var(--black);border-top:1px solid var(--border);padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.fl{font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.fl span{color:var(--yellow)}
+.fc{font-size:12px;color:var(--gray)}
+
+/* LOGIN */
+#page-login{background:var(--black);display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;overflow:hidden}
+.lbg{position:absolute;inset:0;background:radial-gradient(ellipse 60% 60% at 50% 50%,rgba(230,57,70,.08),transparent)}
+.lgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(30,45,66,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(30,45,66,.3) 1px,transparent 1px);background-size:50px 50px;mask-image:radial-gradient(ellipse 70% 70% at 50% 50%,black 30%,transparent 100%)}
+.lb{position:relative;z-index:2;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px 36px;width:100%;max-width:430px;text-align:center}
+.llogo{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.llogo span{color:var(--yellow)}
+.ltag{font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:32px}
+.ldiv{height:1px;background:var(--border);margin-bottom:32px}
+.ltit{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.lsub{font-size:13px;color:var(--gray);margin-bottom:24px;line-height:1.6}
+.avpick{display:flex;gap:9px;justify-content:center;margin-bottom:22px;flex-wrap:wrap}
+.avo{width:48px;height:48px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:.2s;background:var(--dark2)}
+.avo:hover,.avo.sel{border-color:var(--yellow);background:rgba(245,158,11,.12)}
+.ninp{width:100%;background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:13px 16px;color:var(--white);font-size:15px;font-family:'Montserrat',sans-serif;outline:none;transition:.2s;text-align:center;letter-spacing:1px;margin-bottom:12px}
+.ninp:focus{border-color:var(--yellow)}
+.ninp::placeholder{color:var(--gray)}
+.nprev{height:26px;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px;font-size:13px;color:var(--gray)}
+.nprev .pn{color:var(--white);font-weight:700;font-family:'Oswald',sans-serif;font-size:15px;letter-spacing:1px}
+.btn-login{width:100%;background:var(--red);color:var(--white);font-family:'Oswald',sans-serif;font-size:17px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:14px;border-radius:8px;border:none;cursor:pointer;transition:.25s}
+.btn-login:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 24px rgba(230,57,70,.4)}
+.btn-login:disabled{opacity:.4;cursor:not-allowed}
+.lhint{font-size:11px;color:var(--gray);margin-top:12px;line-height:1.6}
+
+/* ONBOARDING */
+#page-onboarding{background:var(--black);display:flex;align-items:center;justify-content:center;min-height:100vh;position:relative;overflow:hidden}
+.obbg{position:absolute;inset:0;background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(139,92,246,.08),transparent)}
+.obbox{position:relative;z-index:2;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px 36px;width:100%;max-width:500px}
+.obprog{display:flex;gap:8px;margin-bottom:28px}
+.obps{flex:1;height:3px;background:var(--dark3);border-radius:2px;transition:.4s}
+.obps.done{background:var(--yellow)}
+.obs{display:none}
+.obs.active{display:block}
+.obsl{font-size:11px;color:var(--gray);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:9px}
+.obt{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;text-transform:uppercase;letter-spacing:-1px;margin-bottom:7px}
+.obsub{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:24px}
+.obopts{display:grid;gap:10px}
+.obopt{background:var(--dark2);border:1px solid var(--border);border-radius:10px;padding:14px 18px;cursor:pointer;transition:.25s;display:flex;align-items:center;gap:12px}
+.obopt:hover{border-color:rgba(245,158,11,.4)}
+.obopt.sel{border-color:var(--yellow);background:rgba(245,158,11,.08)}
+.oboi{font-size:22px;width:32px;text-align:center;flex-shrink:0}
+.obot{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.obod{font-size:12px;color:var(--gray);margin-top:2px}
+.obdg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.obdo{background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:12px 8px;cursor:pointer;transition:.25s;text-align:center}
+.obdo:hover{border-color:rgba(245,158,11,.4)}
+.obdo.sel{border-color:var(--yellow);background:rgba(245,158,11,.08)}
+.obdn{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;color:var(--yellow);line-height:1}
+.obdl{font-size:10px;color:var(--gray);margin-top:3px}
+.obsg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.obso{background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:12px 6px;cursor:pointer;transition:.25s;text-align:center}
+.obso:hover{border-color:rgba(245,158,11,.4)}
+.obso.sel{border-color:var(--yellow);background:rgba(245,158,11,.08)}
+.obse{font-size:24px;margin-bottom:4px}
+.obsn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.obft{display:flex;justify-content:space-between;align-items:center;margin-top:24px}
+.btn-obn{background:var(--yellow);color:var(--black);font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:10px 24px;border-radius:7px;border:none;cursor:pointer;transition:.2s}
+.btn-obn:hover{background:#d97706}
+.btn-obb{background:none;border:none;color:var(--gray);font-size:12px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-family:'Montserrat',sans-serif}
+.btn-obb:hover{color:var(--white)}
+
+/* APP */
+.sidebar{width:232px;flex-shrink:0;background:var(--dark);border-right:1px solid var(--border);min-height:100vh;position:fixed;left:0;top:0;bottom:0;display:flex;flex-direction:column;z-index:50;overflow-y:auto}
+.sbh{padding:16px 18px;border-bottom:1px solid var(--border)}
+.sbl{font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:8px;cursor:pointer}
+.sbl span{color:var(--yellow)}
+.sbi{width:26px;height:26px;background:var(--yellow);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--black);font-weight:900;flex-shrink:0}
+.sbu{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.uav{width:36px;height:36px;border-radius:50%;background:var(--dark3);border:2px solid var(--yellow);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.unm{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.ulv{font-size:10px;color:var(--yellow);font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.sbxp{padding:9px 18px;border-bottom:1px solid var(--border)}
+.xpl{display:flex;justify-content:space-between;font-size:10px;color:var(--gray);margin-bottom:5px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.xpb{height:4px;background:var(--dark3);border-radius:2px;overflow:hidden}
+.xpf{height:100%;background:var(--purple);border-radius:2px;width:70%}
+.sbnav{flex:1;padding:8px 0}
+.ngl{font-size:10px;color:var(--gray);font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:12px 18px 4px}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 18px;cursor:pointer;transition:.2s;color:var(--gray);font-size:12px;font-weight:500;border-left:2px solid transparent}
+.ni:hover{color:var(--white);background:rgba(255,255,255,.04)}
+.ni.active{color:var(--white);background:rgba(255,255,255,.06);border-left-color:var(--yellow)}
+.ni .nic{font-size:15px;width:19px;text-align:center;flex-shrink:0}
+.ni .nib{margin-left:auto;font-size:10px;font-weight:700;background:var(--red);color:var(--white);padding:1px 5px;border-radius:10px}
+.sbft{padding:12px 18px;border-top:1px solid var(--border)}
+.lout{display:flex;align-items:center;gap:8px;color:var(--gray);font-size:12px;cursor:pointer;transition:.2s;padding:6px 0;width:100%;background:none;border:none;font-family:'Montserrat',sans-serif;font-weight:500}
+.lout:hover{color:var(--red)}
+
+.appmain{margin-left:232px;min-height:100vh;background:var(--black)}
+.atb{height:56px;background:rgba(8,10,14,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 26px;gap:14px;position:sticky;top:0;z-index:40}
+.atbt{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;text-transform:uppercase;letter-spacing:1px;flex:1}
+.atbd{font-size:11px;color:var(--gray);letter-spacing:1px}
+
+.nbtn{position:relative;background:none;border:none;cursor:pointer;color:var(--gray);font-size:19px;padding:6px;transition:.2s}
+.nbtn:hover{color:var(--white)}
+.ndot{position:absolute;top:4px;right:4px;width:8px;height:8px;background:var(--red);border-radius:50%;border:2px solid var(--black);animation:pulse 2s infinite}
+.npanel{position:absolute;top:56px;right:0;width:300px;background:var(--card);border:1px solid var(--border);border-radius:12px;box-shadow:0 20px 40px rgba(0,0,0,.5);z-index:200;display:none}
+.npanel.open{display:block}
+.nph{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.npt{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.npc{font-size:11px;color:var(--gray);cursor:pointer;background:none;border:none;font-family:'Montserrat',sans-serif;transition:.2s}
+.npc:hover{color:var(--red)}
+.nlist{max-height:300px;overflow-y:auto}
+.nitem{padding:12px 18px;border-bottom:1px solid rgba(30,45,66,.5);display:flex;gap:10px;align-items:flex-start;transition:.2s}
+.nitem:hover{background:rgba(255,255,255,.03)}
+.nitem.unr{background:rgba(245,158,11,.04)}
+.niic{font-size:19px;width:30px;text-align:center;flex-shrink:0}
+.nitx{font-size:12px;line-height:1.5}
+.nitm{font-size:10px;color:var(--gray);margin-top:3px}
+.niud{width:6px;height:6px;background:var(--yellow);border-radius:50%;margin-top:6px;flex-shrink:0}
+
+.apg{display:none;padding:26px}
+.apg.active{display:block}
+
+/* DASHBOARD */
+.dgreet{margin-bottom:22px}
+.dgreet h2{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;text-transform:uppercase;letter-spacing:-1px}
+.dgreet h2 span{color:var(--yellow)}
+.dgreet p{font-size:13px;color:var(--gray);margin-top:3px}
+.d4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.dtc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:.3s}
+.dtc:hover{transform:translateY(-2px)}
+.dtcl{font-size:10px;color:var(--gray);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.dtcv{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;line-height:1}
+.dtcs{font-size:11px;color:var(--gray);margin-top:3px}
+.d2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+.db{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px}
+.dbt{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.dbt span{color:var(--gray);font-size:11px;font-weight:400;text-transform:none;letter-spacing:0;font-family:'Montserrat',sans-serif}
+.mxb{margin-bottom:11px}
+.mxl{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.mxt{height:5px;background:var(--dark3);border-radius:2px;overflow:hidden}
+.mxf{height:100%;border-radius:2px}
+.rlist{display:flex;flex-direction:column;gap:8px}
+.ritem{display:flex;align-items:center;gap:10px;padding:9px;background:var(--dark2);border-radius:8px;border:1px solid var(--border)}
+.riic{font-size:17px;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rin{font-size:12px;font-weight:600;flex:1}
+.rid{font-size:11px;color:var(--gray)}
+.rix{font-size:12px;font-weight:700;color:var(--yellow)}
+.d3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.chm{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;transition:.3s}
+.chm:hover{border-color:rgba(249,115,22,.3);transform:translateY(-2px)}
+.chmt{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-bottom:8px;display:inline-block}
+.chmn{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.chmb{height:4px;background:var(--dark3);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.chmf{height:100%;border-radius:2px}
+.chmp{font-size:11px;color:var(--gray)}
+.jbar{display:flex;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;overflow-x:auto;gap:0}
+.jbs{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;min-width:68px}
+.jbd{width:10px;height:10px;border-radius:50%}
+.jbn{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray);text-align:center}
+.jbl{flex:1;height:2px;background:var(--border);margin-bottom:14px;min-width:16px}
+
+/* CALENDAR */
+.calh{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.calm{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.caln{background:none;border:1px solid var(--border);border-radius:6px;color:var(--gray);font-size:13px;padding:5px 11px;cursor:pointer;transition:.2s}
+.caln:hover{color:var(--white);border-color:var(--yellow)}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.caldn{text-align:center;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gray);padding:5px 0}
+.cald{aspect-ratio:1;border-radius:7px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;background:var(--dark2)}
+.cald:hover{border-color:var(--yellow)}
+.cald.today{border-color:var(--yellow);color:var(--yellow)}
+.cald.trained{background:rgba(46,204,113,.15);border-color:rgba(46,204,113,.4);color:var(--green)}
+.cald.rest{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.3);color:var(--blue)}
+.cald.empty{opacity:.15;pointer-events:none}
+.calleg{display:flex;gap:18px;margin-top:14px;flex-wrap:wrap}
+.calleg-i{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--gray)}
+.calleg-d{width:10px;height:10px;border-radius:3px}
+
+/* TRAINING */
+.spick{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:18px}
+.spc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:13px;text-align:center;cursor:pointer;transition:.3s}
+.spc:hover{border-color:var(--red);transform:translateY(-2px)}
+.spc.active{border-color:var(--red);background:rgba(230,57,70,.08)}
+.spce{font-size:24px;margin-bottom:6px}
+.spcn{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.tp{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;flex-wrap:wrap}
+.tpb{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:17px}
+.tpt{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:13px}
+.exr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.exr:last-of-type{border-bottom:none}
+.exb{font-size:11px;font-weight:700;color:var(--yellow);background:rgba(245,158,11,.1);padding:2px 6px;border-radius:3px}
+.intr{margin-bottom:9px}
+.intl{display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-bottom:3px}
+.intt{height:4px;background:var(--dark3);border-radius:2px;overflow:hidden}
+.intf{height:100%;border-radius:2px}
+.tbig{font-family:'Oswald',sans-serif;font-size:44px;font-weight:700;letter-spacing:2px;text-align:center;line-height:1;margin:9px 0}
+.tsub{font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;text-align:center}
+.tg2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.tgc{background:var(--dark2);border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center}
+.tgcl{font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase}
+.tgcv{font-family:'Oswald',sans-serif;font-size:16px;font-weight:700}
+.tbtns{display:flex;gap:7px;justify-content:center;margin-top:9px}
+.tbtn{background:transparent;border:1px solid var(--border);border-radius:6px;color:var(--gray);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;cursor:pointer;transition:.2s;font-family:'Montserrat',sans-serif}
+.tbtn:hover,.tbtn.on{background:var(--red);border-color:var(--red);color:var(--white)}
+.sess-btn{width:100%;background:var(--red);color:var(--white);font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;letter-spacing:2px;text-transform:uppercase;padding:12px;border-radius:8px;border:none;cursor:pointer;transition:.25s;margin-top:12px}
+.sess-btn:hover{box-shadow:0 6px 20px rgba(230,57,70,.4);transform:translateY(-1px)}
+
+/* SESSION */
+.sover{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:none;align-items:center;justify-content:center}
+.sover.open{display:flex}
+.sbox{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:520px}
+.ssn{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;text-transform:uppercase;letter-spacing:-1px;margin-bottom:3px}
+.ssw{font-size:12px;color:var(--gray);margin-bottom:24px}
+.stimer{font-family:'Oswald',sans-serif;font-size:64px;font-weight:700;letter-spacing:4px;text-align:center;color:var(--white);line-height:1;margin:16px 0}
+.sphase{font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:24px}
+.sexs{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;max-height:200px;overflow-y:auto}
+.seitem{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--dark2);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:.2s}
+.seitem:hover{border-color:var(--green)}
+.seitem.done{background:rgba(46,204,113,.08);border-color:rgba(46,204,113,.3)}
+.seck{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;font-size:12px}
+.seitem.done .seck{background:var(--green);border-color:var(--green)}
+.senm{font-size:13px;font-weight:600;flex:1}
+.sest{font-size:11px;color:var(--yellow);font-weight:700}
+.sxb{height:5px;background:var(--dark3);border-radius:3px;margin-top:12px;overflow:hidden}
+.sxf{height:100%;background:var(--purple);border-radius:3px;transition:width .5s}
+.sbtns{display:flex;gap:10px;margin-top:14px}
+.btn-se{flex:1;background:var(--green);color:var(--black);font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:13px;border-radius:8px;border:none;cursor:pointer;transition:.2s}
+.btn-se:hover{background:#27ae60}
+.btn-sc{background:transparent;color:var(--gray);font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:13px 18px;border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:.2s}
+.btn-sc:hover{border-color:var(--red);color:var(--red)}
+
+/* XP MODAL */
+.xpover{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;display:none;align-items:center;justify-content:center}
+.xpover.open{display:flex}
+.xpbox{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px 32px;width:100%;max-width:380px;text-align:center;position:relative;overflow:hidden}
+.xpbar{position:absolute;top:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green),var(--blue),var(--purple))}
+.xpt{font-family:'Oswald',sans-serif;font-size:30px;font-weight:700;text-transform:uppercase;letter-spacing:-1px;margin-bottom:7px}
+.xps{font-size:13px;color:var(--gray);margin-bottom:24px}
+.xpnum{font-family:'Oswald',sans-serif;font-size:60px;font-weight:700;color:var(--yellow);line-height:1;margin-bottom:7px}
+.xplbl{font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}
+.xpst{display:flex;gap:18px;justify-content:center;margin-bottom:24px}
+.xpsti .v{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;line-height:1}
+.xpsti .l{font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.btn-xp{width:100%;background:var(--yellow);color:var(--black);font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px;border-radius:8px;border:none;cursor:pointer;transition:.2s}
+.btn-xp:hover{background:#d97706}
+
+/* NUTRICIÓN */
+.nl{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.macr{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--border)}
+.macr:last-child{border-bottom:none}
+.mri{font-size:17px;width:30px;text-align:center}
+.mrinf{flex:1}
+.mrn{font-size:11px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.mrb{height:4px;background:var(--dark3);border-radius:2px;overflow:hidden;margin-bottom:3px}
+.mrf{height:100%;border-radius:2px}
+.mrv{font-size:11px;color:var(--gray)}
+.mrv b{color:var(--white)}
+.ww{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:17px;margin-top:12px}
+.wwh{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
+.wwt{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.wwc{font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--blue)}
+.gls{display:flex;gap:5px}
+.wg{width:29px;height:36px;border-radius:4px;border:1px solid var(--border);cursor:pointer;transition:.2s;background:var(--dark2);display:flex;align-items:flex-end;overflow:hidden}
+.wg.full{border-color:var(--blue);background:rgba(59,130,246,.1)}
+.wgf{width:100%;border-radius:2px;background:var(--blue);transition:.3s}
+.hitem{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--border)}
+.hitem:last-child{border-bottom:none}
+.hiic{font-size:16px;width:28px;text-align:center}
+.hiinf{flex:1}
+.hin{font-size:12px;font-weight:600;margin-bottom:2px}
+.his{font-size:11px;color:var(--orange)}
+.hid{display:flex;gap:3px}
+.hd{width:21px;height:21px;border-radius:4px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--gray);cursor:pointer;transition:.2s}
+.hd.ok{background:rgba(46,204,113,.2);border-color:var(--green);color:var(--green)}
+
+/* PROGRESO */
+.pl{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.abc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:12px}
+.abh{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.abav{width:50px;height:50px;border-radius:50%;background:var(--dark3);border:2px solid var(--yellow);display:flex;align-items:center;justify-content:center;font-size:22px}
+.abnm{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700}
+.ablv{font-size:10px;color:var(--yellow);font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.abxl{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px}
+.abxb{height:7px;background:var(--dark3);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.abxf{height:100%;border-radius:4px;background:var(--purple)}
+.s3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.s3i{background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.s3v{font-family:'Oswald',sans-serif;font-size:21px;font-weight:700;line-height:1}
+.s3l{font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.medr{display:flex;gap:6px;flex-wrap:wrap}
+.med{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid rgba(255,255,255,.1)}
+.jvs{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid rgba(30,45,66,.5)}
+.jvs:last-child{border-bottom:none}
+.jvd{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.jvd.done{background:var(--yellow)}
+.jvd.now{background:var(--yellow);animation:ring 2s infinite}
+.jvd.lock{background:var(--dark3);border:2px solid var(--border)}
+.jvn{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.jvdesc{font-size:11px;color:var(--gray);margin-top:1px}
+.jvb{margin-left:auto;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:3px;flex-shrink:0}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:17px}
+.chtit{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.chw{position:relative;height:170px}
+
+/* RÉCORDS */
+.recg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.recc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;transition:.3s}
+.recc:hover{transform:translateY(-2px)}
+.recsp{font-size:10px;color:var(--gray);font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.recnm{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.recv{font-family:'Oswald',sans-serif;font-size:34px;font-weight:700;line-height:1}
+.recu{font-size:12px;font-weight:400;color:var(--gray)}
+.recd{font-size:11px;color:var(--gray);margin-top:7px}
+.recp{font-size:11px;margin-top:3px}
+
+/* IA */
+.ial{display:grid;grid-template-columns:1fr 280px;gap:12px}
+.cw{background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;height:560px}
+.cwh{background:var(--dark2);border-bottom:1px solid var(--border);padding:11px 15px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.cwav{width:32px;height:32px;border-radius:8px;background:rgba(6,182,212,.15);border:1px solid rgba(6,182,212,.3);display:flex;align-items:center;justify-content:center;font-size:16px}
+.cwn{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px}
+.cwst{font-size:11px;color:var(--cyan)}
+.cwdot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:pulse 1.5s infinite;margin-left:auto}
+.cwb{flex:1;padding:13px;display:flex;flex-direction:column;gap:11px;overflow-y:auto}
+.msg{max-width:85%;padding:10px 13px;border-radius:10px;font-size:13px;line-height:1.6}
+.mu{align-self:flex-end;background:rgba(230,57,70,.12);border:1px solid rgba(230,57,70,.2);color:var(--white);border-radius:10px 10px 2px 10px}
+.ma{align-self:flex-start;background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.15);color:var(--text);border-radius:2px 10px 10px 10px}
+.ma strong{color:var(--cyan)}
+.cwf{border-top:1px solid var(--border);padding:10px 13px;display:flex;gap:8px;flex-shrink:0}
+.cwi{flex:1;background:var(--dark2);border:1px solid var(--border);border-radius:6px;padding:7px 11px;color:var(--white);font-size:13px;font-family:'Montserrat',sans-serif;outline:none}
+.cwsend{background:var(--cyan);border:none;border-radius:6px;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;color:var(--black);font-weight:700}
+.cwsend:hover{background:#0891b2}
+.iaside{display:flex;flex-direction:column;gap:9px}
+.iaf{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;display:flex;gap:10px;align-items:flex-start;transition:.3s}
+.iaf:hover{border-color:rgba(6,182,212,.3)}
+.iafic{width:32px;height:32px;border-radius:8px;background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.iaft{font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.iafd{font-size:11px;color:var(--gray);line-height:1.5}
+
+/* DESAFÍOS */
+.chg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.chc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;transition:.3s;cursor:pointer}
+.chc:hover{transform:translateY(-3px)}
+.chct{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:2px 6px;border-radius:3px;margin-bottom:9px;display:inline-block}
+.chci{font-size:28px;margin-bottom:9px}
+.chcn{font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.chcd{font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:11px}
+.chcr{font-size:11px;color:var(--yellow);font-weight:700;margin-bottom:10px}
+.chcbw{display:flex;justify-content:space-between;font-size:11px;color:var(--gray);margin-bottom:4px}
+.chcb{height:4px;background:var(--dark3);border-radius:2px;overflow:hidden}
+.chcf{height:100%;border-radius:2px}
+
+/* RECUPERACIÓN */
+.rag{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.rac{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:19px;transition:.3s}
+.rac:hover{border-color:rgba(59,130,246,.3);transform:translateY(-2px)}
+.raci{font-size:26px;margin-bottom:9px}
+.ract{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.racd{font-size:12px;color:var(--gray);line-height:1.6;margin-bottom:11px}
+.racm{display:flex;align-items:center;gap:7px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.15);border-radius:6px;padding:9px 11px}
+.racv{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--blue)}
+.racl{font-size:11px;color:var(--gray);line-height:1.4}
+
+/* PERFIL */
+.pfg{display:grid;grid-template-columns:280px 1fr;gap:12px}
+.pfc{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:22px}
+.pfavbig{width:76px;height:76px;border-radius:50%;background:var(--dark3);border:3px solid var(--yellow);display:flex;align-items:center;justify-content:center;font-size:34px;margin:0 auto 10px}
+.pfnmd{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:1px;text-align:center;margin-bottom:3px}
+.pflvl{font-size:10px;color:var(--yellow);font-weight:700;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:18px}
+.pfsr{display:flex;justify-content:space-around;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.pfsrv{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700;text-align:center;line-height:1}
+.pfsrl{font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;text-align:center;margin-top:3px}
+.avgbig{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px}
+.avbo{width:50px;height:50px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;transition:.2s;background:var(--dark2)}
+.avbo:hover,.avbo.sel{border-color:var(--yellow);background:rgba(245,158,11,.1)}
+.pfform{display:flex;flex-direction:column;gap:12px}
+.fgrp{display:flex;flex-direction:column;gap:5px}
+.flbl{font-size:11px;color:var(--gray);font-weight:700;letter-spacing:1.5px;text-transform:uppercase}
+.finp{background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--white);font-size:14px;font-family:'Montserrat',sans-serif;outline:none;transition:.2s;width:100%}
+.finp:focus{border-color:var(--yellow)}
+.fsel{background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;color:var(--white);font-size:14px;font-family:'Montserrat',sans-serif;outline:none;transition:.2s;width:100%;cursor:pointer}
+.fsel:focus{border-color:var(--yellow)}
+.btn-sv{background:var(--yellow);color:var(--black);font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px 24px;border-radius:7px;border:none;cursor:pointer;transition:.2s}
+.btn-sv:hover{background:#d97706}
+.svc{display:none;color:var(--green);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;align-items:center;gap:5px}
+.svc.show{display:flex}
+
+.c-r{color:var(--red)}.c-g{color:var(--green)}.c-b{color:var(--blue)}
+.c-p{color:var(--purple)}.c-c{color:var(--cyan)}.c-y{color:var(--yellow)}
+.c-o{color:var(--orange)}.c-gr{color:var(--gray)}
+.fade-in{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+@media(max-width:960px){
+  .sidebar{width:190px}.appmain{margin-left:190px}
+  .d4,.d3{grid-template-columns:repeat(2,1fr)}
+  .d2,.pl,.nl,.ial,.charts-grid,.pfg{grid-template-columns:1fr}
+  .tp,.spick,.chg,.rag,.recg{grid-template-columns:repeat(2,1fr)}
+  .qg,.cc-grid,.mg{grid-template-columns:repeat(2,1fr)}
+}
+
+/* ============ PREMIUM ANIMATIONS & GRADIENTS ============ */
+
+/* Gradient text utility */
+.grad-r{background:linear-gradient(135deg,#e63946,#f97316);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grad-y{background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grad-p{background:linear-gradient(135deg,#8b5cf6,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.grad-g{background:linear-gradient(135deg,#2ecc71,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Card glow on hover */
+.glow-r:hover{box-shadow:0 0 28px rgba(230,57,70,.18),0 4px 20px rgba(0,0,0,.4)}
+.glow-y:hover{box-shadow:0 0 28px rgba(245,158,11,.18),0 4px 20px rgba(0,0,0,.4)}
+.glow-p:hover{box-shadow:0 0 28px rgba(139,92,246,.18),0 4px 20px rgba(0,0,0,.4)}
+.glow-g:hover{box-shadow:0 0 28px rgba(46,204,113,.18),0 4px 20px rgba(0,0,0,.4)}
+.glow-b:hover{box-shadow:0 0 28px rgba(59,130,246,.18),0 4px 20px rgba(0,0,0,.4)}
+.glow-c:hover{box-shadow:0 0 28px rgba(6,182,212,.18),0 4px 20px rgba(0,0,0,.4)}
+
+/* Animated gradient border */
+@keyframes borderFlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.border-grad{position:relative}
+.border-grad::before{content:'';position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(135deg,#e63946,#f59e0b,#8b5cf6,#06b6d4,#2ecc71,#e63946);background-size:400% 400%;animation:borderFlow 4s ease infinite;z-index:-1;opacity:0;transition:.3s}
+.border-grad:hover::before{opacity:1}
+
+/* Shine sweep animation */
+@keyframes shine{0%{transform:translateX(-100%) skewX(-15deg)}100%{transform:translateX(300%) skewX(-15deg)}}
+.shine{position:relative;overflow:hidden}
+.shine::after{content:'';position:absolute;top:0;left:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);transform:translateX(-100%) skewX(-15deg);animation:shine 3s ease-in-out infinite}
+
+/* Float animation */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.float-anim{animation:float 3s ease-in-out infinite}
+
+/* Fade up entry */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .5s ease forwards}
+
+/* Stat number count effect (CSS only pulse) */
+@keyframes statPop{0%{transform:scale(1)}50%{transform:scale(1.08)}100%{transform:scale(1)}}
+
+/* Gradient backgrounds for cards */
+.card-grad-r{background:linear-gradient(135deg,rgba(230,57,70,.12) 0%,rgba(13,17,23,0) 60%),var(--card)}
+.card-grad-y{background:linear-gradient(135deg,rgba(245,158,11,.1) 0%,rgba(13,17,23,0) 60%),var(--card)}
+.card-grad-p{background:linear-gradient(135deg,rgba(139,92,246,.12) 0%,rgba(13,17,23,0) 60%),var(--card)}
+.card-grad-g{background:linear-gradient(135deg,rgba(46,204,113,.1) 0%,rgba(13,17,23,0) 60%),var(--card)}
+.card-grad-b{background:linear-gradient(135deg,rgba(59,130,246,.1) 0%,rgba(13,17,23,0) 60%),var(--card)}
+.card-grad-c{background:linear-gradient(135deg,rgba(6,182,212,.1) 0%,rgba(13,17,23,0) 60%),var(--card)}
+
+/* Progress bar animated fill */
+@keyframes fillBar{from{width:0}to{width:var(--w)}}
+.bar-anim{animation:fillBar .9s cubic-bezier(.4,0,.2,1) forwards}
+
+/* Sidebar nav item hover shimmer */
+.ni{position:relative;overflow:hidden}
+.ni::after{content:'';position:absolute;left:-100%;top:0;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(245,158,11,.06),transparent);transition:.4s}
+.ni:hover::after,.ni.active::after{left:120%}
+
+/* Topbar gradient underline */
+.atb{border-bottom:none;position:relative}
+.atb::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,.4) 30%,rgba(139,92,246,.4) 70%,transparent)}
+
+/* Sidebar gradient top accent */
+.sbh{position:relative}
+.sbh::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--yellow),var(--purple))}
+
+/* Hero title shimmer */
+.hero-title .l3{background:linear-gradient(135deg,#f59e0b,#fbbf24,#f59e0b);background-size:200%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:borderFlow 3s ease infinite}
+
+/* XP bar gradient */
+.xpf{background:linear-gradient(90deg,var(--purple),var(--cyan))}
+
+/* Section gradient dividers */
+.sec-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(30,45,66,.8) 20%,rgba(139,92,246,.3) 50%,rgba(30,45,66,.8) 80%,transparent);margin:0}
+
+/* Dashboard metric card gradient borders */
+.dtc{position:relative;overflow:hidden}
+.dtc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);transition:.3s}
+.dtc:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--red),transparent)}
+.dtc:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--yellow),transparent)}
+.dtc:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--purple),transparent)}
+.dtc:nth-child(4)::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+
+/* Notif panel gradient header */
+.nph{background:linear-gradient(135deg,rgba(245,158,11,.06),rgba(139,92,246,.06))}
+
+/* Session overlay gradient */
+.sover{background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(230,57,70,.08),rgba(0,0,0,.9))}
+.sbox{background:linear-gradient(135deg,rgba(30,45,66,.3) 0%,var(--card) 40%)}
+
+/* XP modal gradient */
+.xpover{background:radial-gradient(ellipse 80% 80% at 50% 50%,rgba(139,92,246,.12),rgba(0,0,0,.9))}
+.xpnum{background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Journey step active glow */
+.jvd.now{box-shadow:0 0 12px rgba(245,158,11,.6)}
+
+/* Record cards gradient top */
+.recc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:10px 10px 0 0}
+.recc{position:relative;overflow:hidden}
+.recc:nth-child(1)::before{background:var(--red)}
+.recc:nth-child(2)::before{background:var(--green)}
+.recc:nth-child(3)::before{background:var(--blue)}
+.recc:nth-child(4)::before{background:var(--yellow)}
+.recc:nth-child(5)::before{background:var(--purple)}
+.recc:nth-child(6)::before{background:var(--cyan)}
+
+/* Challenge cards gradient border on hover */
+.chc{position:relative}
+
+/* Scroll thumb gradient */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--dark)}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--red),var(--purple));border-radius:3px}
+
+/* Button gradients */
+.btn-p{background:linear-gradient(135deg,#e63946,#c0392b)}
+.btn-p:hover{background:linear-gradient(135deg,#ff4d5a,#e63946)}
+.btn-login{background:linear-gradient(135deg,#e63946,#c0392b)}
+.btn-login:hover:not(:disabled){background:linear-gradient(135deg,#ff4d5a,#e63946)}
+.sess-btn{background:linear-gradient(135deg,#e63946,#f97316)}
+.sess-btn:hover{background:linear-gradient(135deg,#ff4d5a,#fb923c)}
+.btn-se{background:linear-gradient(135deg,#2ecc71,#16a34a)}
+.btn-xp{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.btn-sv{background:linear-gradient(135deg,#f59e0b,#d97706)}
+
+/* Login box gradient */
+.lb{background:linear-gradient(145deg,rgba(21,28,39,.97),rgba(13,17,23,.98));backdrop-filter:blur(20px)}
+
+/* Onboarding box gradient */
+.obbox{background:linear-gradient(145deg,rgba(21,28,39,.97),rgba(13,17,23,.98));backdrop-filter:blur(20px)}
+
+/* App page fade in on switch */
+.apg.active{animation:fadeUp .3s ease}
+
+/* Sidebar logo gradient */
+.sbi{background:linear-gradient(135deg,#f59e0b,#f97316)}
+
+/* Navigation dots gradient */
+.nav-btn{background:linear-gradient(135deg,#f59e0b,#f97316)}
+.nav-btn:hover{background:linear-gradient(135deg,#fbbf24,#f59e0b)}
+
+/* Macro bars gradient */
+.mrf{background:linear-gradient(90deg,var(--c1,var(--red)),var(--c2,var(--orange)))}
+
+/* Chart cards gradient top border */
+.chcard{position:relative;overflow:hidden}
+.chcard::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.chcard:nth-child(1)::before{background:linear-gradient(90deg,var(--purple),var(--cyan))}
+.chcard:nth-child(2)::before{background:linear-gradient(90deg,var(--red),var(--orange))}
+.chcard:nth-child(3)::before{background:linear-gradient(90deg,var(--green),var(--cyan))}
+.chcard:nth-child(4)::before{background:linear-gradient(90deg,var(--blue),var(--purple))}
+
+/* Onboarding progress steps gradient */
+.obps.done{background:linear-gradient(90deg,var(--yellow),var(--orange))}
+
+/* Hero eyebrow animation */
+.hero-eyebrow{animation:fadeUp .8s ease .2s both}
+.hero-title{animation:fadeUp .8s ease .4s both}
+.hero-sub{animation:fadeUp .8s ease .6s both}
+.hero-btns{animation:fadeUp .8s ease .8s both}
+.hero-stats{animation:fadeUp .8s ease 1s both}
+
+/* Glow on XP fill */
+.abxf{background:linear-gradient(90deg,var(--purple),var(--cyan));box-shadow:0 0 12px rgba(139,92,246,.4)}
+
+/* Pulse dot on status */
+@keyframes statusPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(46,204,113,.5)}50%{opacity:.8;box-shadow:0 0 0 5px rgba(46,204,113,0)}}
+.cwdot{animation:statusPulse 2s infinite}
+
+/* Floating particle background for hero */
+@keyframes drift{0%{transform:translateY(0) translateX(0) rotate(0deg);opacity:.6}33%{transform:translateY(-30px) translateX(15px) rotate(120deg);opacity:.3}66%{transform:translateY(-15px) translateX(-10px) rotate(240deg);opacity:.5}100%{transform:translateY(0) translateX(0) rotate(360deg);opacity:.6}}
+.particle{position:absolute;border-radius:50%;pointer-events:none;animation:drift linear infinite}
+
+/* Logros section in profile */
+.med{transition:.3s;cursor:pointer}
+.med:hover{transform:scale(1.2) rotate(5deg)}
+
+/* Recuperación cards color accents */
+.rac:nth-child(1){border-top:2px solid rgba(59,130,246,.4)}
+.rac:nth-child(2){border-top:2px solid rgba(139,92,246,.4)}
+.rac:nth-child(3){border-top:2px solid rgba(245,158,11,.4)}
+.rac:nth-child(4){border-top:2px solid rgba(6,182,212,.4)}
+.rac:nth-child(5){border-top:2px solid rgba(46,204,113,.4)}
+.rac:nth-child(6){border-top:2px solid rgba(230,57,70,.4)}
+
+/* Desafios cards color accents */
+.chc{transition:transform .25s,box-shadow .25s}
+.chc:hover{box-shadow:0 8px 32px rgba(0,0,0,.3)}
+
+/* ab card gradient */
+.abc{background:linear-gradient(145deg,rgba(26,34,48,.6),var(--card))}
+
+/* Heatmap cells */
+#actHeat>div{transition:transform .2s, filter .2s}
+#actHeat>div:hover{filter:brightness(1.4)}
+
+/* Journey bar line gradient */
+.jbl{background:linear-gradient(90deg,var(--yellow),var(--border))}
+
+/* Topbar date subtle */
+.atbd{background:linear-gradient(135deg,var(--gray),rgba(136,146,164,.6));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Macro bar gradients */
+#tab-nutricion .mrf:nth-child(1){background:linear-gradient(90deg,var(--red),var(--orange))}
+
+/* Back to top smooth */
+html{scroll-behavior:smooth}
+
+/* Perfil avatar border animated */
+.pfavbig,.abav,.uav{transition:.3s}
+.pfavbig:hover,.abav:hover{box-shadow:0 0 0 4px rgba(245,158,11,.3),0 0 20px rgba(245,158,11,.15)}
+</style>
+</head>
+<body>
+
+<!-- ============ LANDING ============ -->
+<div id="page-landing" class="page active">
+  <nav class="top-nav">
+    <div class="logo" onclick="scrollTo(0,0)"><div class="logo-icon">D</div>DISCIPLINE <span>EVOLUTION</span></div>
+    <div class="top-nav-links">
+      <a onclick="document.getElementById('sec-q').scrollIntoView({behavior:'smooth'})">¿Qué somos?</a>
+      <a onclick="document.getElementById('sec-c').scrollIntoView({behavior:'smooth'})">Concepto</a>
+      <a onclick="document.getElementById('sec-m').scrollIntoView({behavior:'smooth'})">Módulos</a>
+    </div>
+    <button class="nav-btn" onclick="showPage('login')">Entrar →</button>
+  </nav>
+  <section id="hero">
+    <div class="hero-bg"></div><div class="hero-grid"></div>
+    <div id="particles" style="position:absolute;inset:0;pointer-events:none;overflow:hidden"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">⚡ Plataforma deportiva de alto rendimiento</div>
+      <h1 class="hero-title"><span class="l1">DISCIPLINE</span><span class="l2">EVOLUTION</span><span class="l3">ÉLITE</span></h1>
+      <p class="hero-sub"><span>"La evolución</span> nace de la disciplina."</p>
+      <div class="hero-btns">
+        <button class="btn-p" onclick="showPage('login')">🚀 Comienza tu evolución</button>
+        <button class="btn-s" onclick="document.getElementById('sec-q').scrollIntoView({behavior:'smooth'})">¿Qué somos?</button>
+      </div>
+      <div class="hero-stats">
+        <div class="hs"><div class="num">12<span>+</span></div><div class="lbl">Deportes</div></div>
+        <div class="hs"><div class="num">6</div><div class="lbl">Niveles</div></div>
+        <div class="hs"><div class="num">50<span>k+</span></div><div class="lbl">Atletas</div></div>
+        <div class="hs"><div class="num">∞</div><div class="lbl">Evolución</div></div>
+      </div>
+    </div>
+  </section>
+  <div class="sec-divider"></div>
+  <section class="ls" id="sec-q" style="background:var(--dark)">
+    <div class="lsmax">
+      <div class="fade-in" style="text-align:center;max-width:640px;margin:0 auto 48px">
+        <div class="sl c-y" style="text-align:center">✦ Nuestra identidad</div>
+        <h2 class="st2" style="text-align:center">¿QUÉ ES<br><span class="c-y">DISCIPLINE EVOLUTION?</span></h2>
+        <p class="sd" style="margin:14px auto 0;text-align:center">No somos solo una app de entrenamiento. Somos un sistema completo de transformación personal que combina deporte, tecnología e inteligencia artificial.</p>
+      </div>
+      <div class="qg fade-in">
+        <div>
+          <div class="big-q">"El esfuerzo diario se convierte en <em>grandeza</em> cuando existe <em>disciplina</em>."</div>
+          <p>Discipline Evolution nació con una convicción simple: cualquier persona tiene el potencial de convertirse en una mejor versión de sí misma.</p>
+          <p>Somos la plataforma que acompaña al atleta en cada etapa — desde el primer entrenamiento hasta alcanzar el nivel élite — con herramientas de alto rendimiento accesibles para todos.</p>
+          <div class="pilares">
+            <div class="pilar" style="border-color:rgba(230,57,70,.3)"><div class="pi">💪</div><div class="pt">Deporte</div><div class="pd">Rutinas y metodología profesional para cada disciplina.</div></div>
+            <div class="pilar" style="border-color:rgba(6,182,212,.3)"><div class="pi">🧠</div><div class="pt">Tecnología</div><div class="pd">IA que analiza tu rendimiento y adapta tu plan.</div></div>
+            <div class="pilar" style="border-color:rgba(46,204,113,.3)"><div class="pi">🥗</div><div class="pt">Nutrición</div><div class="pd">Alimentación estratégica alineada con tus metas.</div></div>
+            <div class="pilar" style="border-color:rgba(139,92,246,.3)"><div class="pi">📈</div><div class="pt">Evolución</div><div class="pd">Seguimiento preciso para que nunca dejes de avanzar.</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="ayc"><div class="ayn">01</div><div><div class="ayt">Personalizamos tu entrenamiento</div><div class="ayd">Analizamos tu nivel, deporte y objetivos para crear un plan diseñado específicamente para ti — no una rutina genérica.</div></div></div>
+          <div class="ayc"><div class="ayn">02</div><div><div class="ayt">Medimos tu evolución real</div><div class="ayd">Registramos cada sesión, cada récord y cada hábito para mostrarte exactamente cómo estás creciendo.</div></div></div>
+          <div class="ayc"><div class="ayn">03</div><div><div class="ayt">Te mantenemos motivado</div><div class="ayd">El sistema de XP, desafíos y medallas transforma cada entrenamiento en un logro concreto.</div></div></div>
+          <div class="ayc"><div class="ayn">04</div><div><div class="ayt">Optimizamos tu recuperación</div><div class="ayd">Monitoreamos sueño, fatiga y bienestar para que siempre rindas al máximo.</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="sec-divider"></div>
+  <section class="ls" id="sec-c" style="background:var(--black)">
+    <div class="lsmax">
+      <div class="fade-in" style="text-align:center;max-width:640px;margin:0 auto 44px">
+        <div class="sl c-r" style="text-align:center">🔥 Filosofía</div>
+        <h2 class="st2" style="text-align:center">EL CONCEPTO<br><span class="c-r">DE LA EVOLUCIÓN</span></h2>
+      </div>
+      <div class="cc-grid fade-in">
+        <div class="cc cc1"><span class="cci">⚡</span><div class="cct">Disciplina</div><div class="ccd">El puente entre tus metas y tus logros. Cada día que entrenas cuando no quieres es un día que te separa del atleta que eras.</div></div>
+        <div class="cc cc2"><span class="cci">🔄</span><div class="cct">Constancia</div><div class="ccd">Los resultados extraordinarios nacen de acciones ordinarias repetidas con consistencia extraordinaria, día tras día.</div></div>
+        <div class="cc cc3"><span class="cci">🚀</span><div class="cct">Evolución</div><div class="ccd">El destino natural de quien se compromete. No importa el punto de partida — lo que importa es la dirección.</div></div>
+      </div>
+      <div class="fade-in" style="margin-top:48px;text-align:center">
+        <div style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;letter-spacing:-1px;margin-bottom:28px">EL CAMINO DEL ATLETA</div>
+        <div class="camino-steps">
+          <div class="cs-step"><div class="csc">🌱</div><div class="csn">Principiante</div></div><div class="ca">→</div>
+          <div class="cs-step"><div class="csc">📚</div><div class="csn">Aprendiz</div></div><div class="ca">→</div>
+          <div class="cs-step"><div class="csc">🥋</div><div class="csn">Amateur</div></div><div class="ca">→</div>
+          <div class="cs-step"><div class="csc">⚡</div><div class="csn">Avanzado</div></div><div class="ca">→</div>
+          <div class="cs-step"><div class="csc">🏅</div><div class="csn">Élite</div></div><div class="ca">→</div>
+          <div class="cs-step"><div class="csc">🏆</div><div class="csn">Leyenda</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="sec-divider"></div>
+  <section class="ls" id="sec-m" style="background:var(--dark)">
+    <div class="lsmax">
+      <div class="fade-in"><div class="sl c-y">⚡ Todo en un solo lugar</div><h2 class="st2">OCHO MÓDULOS.<br><span class="c-y">UNA PLATAFORMA.</span></h2></div>
+      <div class="mg fade-in">
+        <div class="mc mc-r"><span class="mi">💪</span><div class="mt" style="background:rgba(230,57,70,.15);color:var(--red);border:1px solid rgba(230,57,70,.3)">Fuerza</div><div class="mn">Entrenamiento</div><div class="md">Rutinas para cada deporte y nivel.</div></div>
+        <div class="mc mc-g"><span class="mi">🥗</span><div class="mt" style="background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)">Salud</div><div class="mn">Nutrición</div><div class="md">Alimentación alineada con tus metas.</div></div>
+        <div class="mc mc-p"><span class="mi">📊</span><div class="mt" style="background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3)">Evolución</div><div class="mn">Progreso</div><div class="md">Estadísticas y análisis de crecimiento.</div></div>
+        <div class="mc mc-y"><span class="mi">🏅</span><div class="mt" style="background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.3)">Victoria</div><div class="mn">Logros</div><div class="md">XP, niveles y medallas.</div></div>
+        <div class="mc mc-c"><span class="mi">🧠</span><div class="mt" style="background:rgba(6,182,212,.15);color:var(--cyan);border:1px solid rgba(6,182,212,.3)">Tecnología</div><div class="mn">IA Coach</div><div class="md">Entrenador inteligente 24/7.</div></div>
+        <div class="mc mc-b"><span class="mi">😴</span><div class="mt" style="background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)">Recuperación</div><div class="mn">Bienestar</div><div class="md">Sueño, descanso y movilidad.</div></div>
+        <div class="mc mc-o"><span class="mi">🔥</span><div class="mt" style="background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3)">Superación</div><div class="mn">Desafíos</div><div class="md">Retos que empujan tus límites.</div></div>
+        <div class="mc mc-gr"><span class="mi">👤</span><div class="mt" style="background:rgba(136,146,164,.15);color:var(--gray);border:1px solid rgba(136,146,164,.3)">Control</div><div class="mn">Perfil</div><div class="md">Tu experiencia personalizada.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="cta-l">
+    <div class="lsmax">
+      <h2 class="ctat">¿LISTO PARA<br><span class="c-r">EVOLUCIONAR?</span></h2>
+      <p class="ctas">El único límite eres tú. Comienza hoy, conviértete en leyenda.</p>
+      <div class="hero-btns"><button class="btn-p" onclick="showPage('login')">🚀 Crear mi perfil gratis</button></div>
+    </div>
+  </section>
+  <footer class="sfoot"><div class="fl">DISCIPLINE <span>EVOLUTION</span></div><div class="fc">© 2025 Discipline Evolution — La evolución nace de la disciplina.</div></footer>
+</div>
+
+<!-- LOGIN -->
+<div id="page-login" class="page">
+  <div class="lbg"></div><div class="lgrid"></div>
+  <div class="lb">
+    <div class="llogo">DISCIPLINE <span>EVOLUTION</span></div>
+    <div class="ltag">La evolución nace de la disciplina</div>
+    <div class="ldiv"></div>
+    <div class="ltit">ELIGE TU AVATAR</div>
+    <div class="lsub">Selecciona un avatar que te represente como atleta</div>
+    <div class="avpick" id="avPick">
+      <div class="avo sel" data-av="🥊" onclick="selAv(this)">🥊</div>
+      <div class="avo" data-av="🏃" onclick="selAv(this)">🏃</div>
+      <div class="avo" data-av="⚽" onclick="selAv(this)">⚽</div>
+      <div class="avo" data-av="🏋️" onclick="selAv(this)">🏋️</div>
+      <div class="avo" data-av="🏊" onclick="selAv(this)">🏊</div>
+      <div class="avo" data-av="🚴" onclick="selAv(this)">🚴</div>
+      <div class="avo" data-av="🏅" onclick="selAv(this)">🏅</div>
+      <div class="avo" data-av="🔥" onclick="selAv(this)">🔥</div>
+    </div>
+    <div class="ltit">TU NOMBRE DE ATLETA</div>
+    <input class="ninp" id="nameInp" type="text" maxlength="20" placeholder="Escribe tu nombre..." oninput="updPrev()">
+    <div class="nprev">Bienvenido, <span class="pn" id="prevName">—</span></div>
+    <button class="btn-login" id="loginBtn" onclick="doLogin()" disabled>COMENZAR EVOLUCIÓN →</button>
+    <p class="lhint">Sin contraseña · Sin complicaciones · Solo disciplina.</p>
+    <div style="margin-top:16px"><button onclick="showPage('landing')" style="background:none;border:none;color:var(--gray);font-size:11px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-family:Montserrat,sans-serif">← Volver al inicio</button></div>
+  </div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="page-onboarding" class="page">
+  <div class="obbg"></div>
+  <div class="obbox">
+    <div class="obprog">
+      <div class="obps done" id="obp1"></div>
+      <div class="obps" id="obp2"></div>
+      <div class="obps" id="obp3"></div>
+    </div>
+    <div class="obs active" id="obs1">
+      <div class="obsl">Paso 1 de 3</div>
+      <div class="obt">¿CUÁL ES TU OBJETIVO?</div>
+      <div class="obsub">Personalizamos tu plan desde el primer día.</div>
+      <div class="obopts">
+        <div class="obopt sel" onclick="selObOpt(this)"><div class="oboi">🔥</div><div><div class="obot">Perder peso y grasa</div><div class="obod">Reducir grasa corporal mejorando la composición</div></div></div>
+        <div class="obopt" onclick="selObOpt(this)"><div class="oboi">💪</div><div><div class="obot">Ganar fuerza y músculo</div><div class="obod">Aumentar masa muscular y potencia física</div></div></div>
+        <div class="obopt" onclick="selObOpt(this)"><div class="oboi">🏅</div><div><div class="obot">Rendimiento deportivo</div><div class="obod">Mejorar en mi disciplina y competir mejor</div></div></div>
+        <div class="obopt" onclick="selObOpt(this)"><div class="oboi">🧘</div><div><div class="obot">Salud y bienestar</div><div class="obod">Mejorar calidad de vida y sentirme mejor</div></div></div>
+      </div>
+      <div class="obft"><div></div><button class="btn-obn" onclick="obNext(2)">Siguiente →</button></div>
+    </div>
+    <div class="obs" id="obs2">
+      <div class="obsl">Paso 2 de 3</div>
+      <div class="obt">¿CUÁNTOS DÍAS ENTRENAS?</div>
+      <div class="obsub">Diseñaremos tu plan con los días disponibles.</div>
+      <div class="obdg" style="margin-bottom:10px">
+        <div class="obdo" onclick="selObDay(this)"><div class="obdn">2</div><div class="obdl">días/sem</div></div>
+        <div class="obdo sel" onclick="selObDay(this)"><div class="obdn">3</div><div class="obdl">días/sem</div></div>
+        <div class="obdo" onclick="selObDay(this)"><div class="obdn">4</div><div class="obdl">días/sem</div></div>
+        <div class="obdo" onclick="selObDay(this)"><div class="obdn">5</div><div class="obdl">días/sem</div></div>
+      </div>
+      <div style="text-align:center"><div class="obdo" onclick="selObDay(this)" style="display:inline-block;padding:10px 28px"><div class="obdn">6+</div><div class="obdl">días · Élite</div></div></div>
+      <div class="obft"><button class="btn-obb" onclick="obBack(1)">← Atrás</button><button class="btn-obn" onclick="obNext(3)">Siguiente →</button></div>
+    </div>
+    <div class="obs" id="obs3">
+      <div class="obsl">Paso 3 de 3</div>
+      <div class="obt">TU DEPORTE PRINCIPAL</div>
+      <div class="obsub">Enfocaremos tus rutinas y desafíos en tu disciplina.</div>
+      <div class="obsg">
+        <div class="obso sel" onclick="selObSport(this)"><div class="obse">🥊</div><div class="obsn">Boxeo</div></div>
+        <div class="obso" onclick="selObSport(this)"><div class="obse">⚽</div><div class="obsn">Fútbol</div></div>
+        <div class="obso" onclick="selObSport(this)"><div class="obse">🏃</div><div class="obsn">Atletismo</div></div>
+        <div class="obso" onclick="selObSport(this)"><div class="obse">🏋️</div><div class="obsn">Calistenia</div></div>
+        <div class="obso" onclick="selObSport(this)"><div class="obse">🏊</div><div class="obsn">Natación</div></div>
+        <div class="obso" onclick="selObSport(this)"><div class="obse">🚴</div><div class="obsn">Ciclismo</div></div>
+        <div class="obso" onclick="selObSport(this)"><div class="obse">🏀</div><div class="obsn">Basket</div></div>
+        <div class="obso" onclick="selObSport(this)"><div class="obse">🏐</div><div class="obsn">Vóleibol</div></div>
+      </div>
+      <div class="obft"><button class="btn-obb" onclick="obBack(2)">← Atrás</button><button class="btn-obn" onclick="finishOb()" style="background:var(--green);color:var(--black)">¡Comenzar! 🚀</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="page-app" class="page">
+  <aside class="sidebar">
+    <div class="sbh"><div class="sbl" onclick="showPage('landing')"><div class="sbi">D</div>DE<span>EVOL</span></div></div>
+    <div class="sbu"><div class="uav" id="sbAv">🥊</div><div><div class="unm" id="sbName">Atleta</div><div class="ulv">⭐ Amateur</div></div></div>
+    <div class="sbxp"><div class="xpl"><span>XP</span><span class="c-y">847/1200</span></div><div class="xpb"><div class="xpf"></div></div></div>
+    <nav class="sbnav">
+      <div class="ngl">Principal</div>
+      <div class="ni active" onclick="sw('dashboard',this)"><span class="nic">🏠</span> Dashboard</div>
+      <div class="ngl">Entrenamiento</div>
+      <div class="ni" onclick="sw('entrenamiento',this)"><span class="nic">💪</span> Entrenamiento</div>
+      <div class="ni" onclick="sw('calendario',this)"><span class="nic">📅</span> Calendario</div>
+      <div class="ni" onclick="sw('desafios',this)"><span class="nic">🔥</span> Desafíos <span class="nib">3</span></div>
+      <div class="ni" onclick="sw('records',this)"><span class="nic">🏆</span> Récords</div>
+      <div class="ni" onclick="sw('logros',this)"><span class="nic">🏅</span> Logros</div>
+      <div class="ngl">Salud</div>
+      <div class="ni" onclick="sw('nutricion',this)"><span class="nic">🥗</span> Nutrición</div>
+      <div class="ni" onclick="sw('recuperacion',this)"><span class="nic">😴</span> Recuperación</div>
+      <div class="ngl">Inteligencia</div>
+      <div class="ni" onclick="sw('ia',this)"><span class="nic">🧠</span> IA Coach</div>
+      <div class="ngl">Mi cuenta</div>
+      <div class="ni" onclick="sw('progreso',this)"><span class="nic">📊</span> Mi Progreso</div>
+      <div class="ni" onclick="sw('perfil',this)"><span class="nic">👤</span> Perfil</div>
+    </nav>
+    <div class="sbft"><button class="lout" onclick="showPage('login')"><span>🚪</span> Cerrar sesión</button></div>
+  </aside>
+  <main class="appmain">
+    <div class="atb">
+      <div class="atbt" id="tbTitle">Dashboard</div>
+      <div class="atbd" id="tbDate"></div>
+      <div style="position:relative">
+        <button class="nbtn" onclick="toggleNotif()" id="notifBtn">🔔<div class="ndot" id="notifDot"></div></button>
+        <div class="npanel" id="notifPanel">
+          <div class="nph"><div class="npt">Notificaciones</div><button class="npc" onclick="clearNotifs()">Leer todas</button></div>
+          <div class="nlist" id="notifList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="apg active" id="tab-dashboard">
+      <div class="dgreet"><h2>HOLA, <span id="grName">ATLETA</span> 👊</h2><p>Día 23 de racha · Nivel Amateur · 353 XP para Avanzado</p></div>
+      <div class="d4">
+        <div class="dtc glow-r"><div class="dtcl">Sesiones totales</div><div class="dtcv grad-r" style="-webkit-text-fill-color:unset">47</div><div class="dtcs">+3 esta semana</div></div>
+        <div class="dtc glow-y"><div class="dtcl">Racha actual</div><div class="dtcv grad-y" style="-webkit-text-fill-color:unset">23 🔥</div><div class="dtcs">días consecutivos</div></div>
+        <div class="dtc glow-p"><div class="dtcl">XP total</div><div class="dtcv grad-p" style="-webkit-text-fill-color:unset">847</div><div class="dtcs">nivel Amateur</div></div>
+        <div class="dtc glow-g"><div class="dtcl">Logros</div><div class="dtcv grad-g" style="-webkit-text-fill-color:unset">8 🏅</div><div class="dtcs">2 nuevos esta semana</div></div>
+      </div>
+      <div class="d2">
+        <div class="db">
+          <div class="dbt">📈 Rendimiento <span>esta semana</span></div>
+          <div class="mxb"><div class="mxl"><span class="c-r">💪 Entrenamiento</span><span class="c-r">92%</span></div><div class="mxt"><div class="mxf" style="width:92%;background:var(--red)"></div></div></div>
+          <div class="mxb"><div class="mxl"><span class="c-g">🥗 Nutrición</span><span class="c-g">78%</span></div><div class="mxt"><div class="mxf" style="width:78%;background:var(--green)"></div></div></div>
+          <div class="mxb"><div class="mxl"><span class="c-b">😴 Recuperación</span><span class="c-b">85%</span></div><div class="mxt"><div class="mxf" style="width:85%;background:var(--blue)"></div></div></div>
+          <div class="mxb"><div class="mxl"><span class="c-p">🏅 Disciplina</span><span class="c-p">96%</span></div><div class="mxt"><div class="mxf" style="width:96%;background:var(--purple)"></div></div></div>
+        </div>
+        <div class="db">
+          <div class="dbt">⏱ Sesiones recientes</div>
+          <div class="rlist">
+            <div class="ritem"><div class="riic" style="background:rgba(230,57,70,.12)">🥊</div><div><div class="rin">Boxeo — Round training</div><div class="rid">Hoy · 48 min</div></div><div class="rix">+45 XP</div></div>
+            <div class="ritem"><div class="riic" style="background:rgba(46,204,113,.12)">🏃</div><div><div class="rin">Cardio — Fartlek 5km</div><div class="rid">Ayer · 35 min</div></div><div class="rix">+30 XP</div></div>
+            <div class="ritem"><div class="riic" style="background:rgba(59,130,246,.12)">🏋️</div><div><div class="rin">Fuerza — Upper body</div><div class="rid">Hace 2 días · 55 min</div></div><div class="rix">+52 XP</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="d3">
+        <div class="chm"><span class="chmt" style="background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3)">Diario</span><div class="chmn">200 Golpes al Saco</div><div class="chmb"><div class="chmf" style="width:70%;background:var(--orange)"></div></div><div class="chmp">140/200 · +50 XP</div></div>
+        <div class="chm"><span class="chmt" style="background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)">Diario</span><div class="chmn">Hidratación Perfecta</div><div class="chmb"><div class="chmf" style="width:75%;background:var(--blue)"></div></div><div class="chmp">6/8 vasos · +30 XP</div></div>
+        <div class="chm"><span class="chmt" style="background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3)">Semanal</span><div class="chmn">50km en 7 Días</div><div class="chmb"><div class="chmf" style="width:68%;background:var(--purple)"></div></div><div class="chmp">34/50 km · +200 XP</div></div>
+      </div>
+      <!-- Weekly Activity Heatmap -->
+      <div class="db" style="margin-bottom:18px">
+        <div class="dbt">📅 Actividad semanal <span>últimas 4 semanas</span></div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px">
+          <div style="font-size:10px;color:var(--gray);text-align:center;letter-spacing:1px">L</div>
+          <div style="font-size:10px;color:var(--gray);text-align:center;letter-spacing:1px">M</div>
+          <div style="font-size:10px;color:var(--gray);text-align:center;letter-spacing:1px">X</div>
+          <div style="font-size:10px;color:var(--gray);text-align:center;letter-spacing:1px">J</div>
+          <div style="font-size:10px;color:var(--gray);text-align:center;letter-spacing:1px">V</div>
+          <div style="font-size:10px;color:var(--gray);text-align:center;letter-spacing:1px">S</div>
+          <div style="font-size:10px;color:var(--gray);text-align:center;letter-spacing:1px">D</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px" id="actHeat">
+        </div>
+        <div style="display:flex;gap:12px;margin-top:10px;align-items:center">
+          <span style="font-size:10px;color:var(--gray)">Menos</span>
+          <div style="width:12px;height:12px;border-radius:3px;background:var(--dark3)"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(230,57,70,.3)"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:rgba(230,57,70,.6)"></div>
+          <div style="width:12px;height:12px;border-radius:3px;background:var(--red)"></div>
+          <span style="font-size:10px;color:var(--gray)">Más</span>
+        </div>
+      </div>
+      <!-- Mini charts row -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+        <div class="dtc" style="text-align:center">
+          <div class="dtcl">Calorias quemadas</div>
+          <div class="dtcv c-o">2,840</div>
+          <div class="dtcs">esta semana</div>
+          <div style="margin-top:8px;height:3px;background:var(--dark3);border-radius:2px"><div style="width:71%;height:100%;background:var(--orange);border-radius:2px"></div></div>
+        </div>
+        <div class="dtc" style="text-align:center">
+          <div class="dtcl">Tiempo activo</div>
+          <div class="dtcv c-c">4h 32m</div>
+          <div class="dtcs">esta semana</div>
+          <div style="margin-top:8px;height:3px;background:var(--dark3);border-radius:2px"><div style="width:64%;height:100%;background:var(--cyan);border-radius:2px"></div></div>
+        </div>
+        <div class="dtc" style="text-align:center">
+          <div class="dtcl">Hidratación</div>
+          <div class="dtcv c-b">6/8 💧</div>
+          <div class="dtcs">vasos hoy</div>
+          <div style="margin-top:8px;height:3px;background:var(--dark3);border-radius:2px"><div style="width:75%;height:100%;background:var(--blue);border-radius:2px"></div></div>
+        </div>
+        <div class="dtc" style="text-align:center">
+          <div class="dtcl">Sueño anoche</div>
+          <div class="dtcv c-p">7.5h 😴</div>
+          <div class="dtcs">objetivo 8h</div>
+          <div style="margin-top:8px;height:3px;background:var(--dark3);border-radius:2px"><div style="width:94%;height:100%;background:var(--purple);border-radius:2px"></div></div>
+        </div>
+      </div>
+      <div class="jbar">
+        <div class="jbs"><div class="jbd" style="background:var(--yellow)"></div><div class="jbn" style="color:var(--yellow)">Principiante ✓</div></div>
+        <div class="jbl"></div>
+        <div class="jbs"><div class="jbd" style="background:var(--yellow)"></div><div class="jbn" style="color:var(--yellow)">Aprendiz ✓</div></div>
+        <div class="jbl"></div>
+        <div class="jbs"><div class="jbd" style="background:var(--yellow);animation:ring 2s infinite"></div><div class="jbn" style="color:var(--white)">Amateur ◀ Tú</div></div>
+        <div class="jbl"></div>
+        <div class="jbs"><div class="jbd" style="background:var(--dark3);border:2px solid var(--border)"></div><div class="jbn">Avanzado</div></div>
+        <div class="jbl"></div>
+        <div class="jbs"><div class="jbd" style="background:var(--dark3);border:2px solid var(--border)"></div><div class="jbn">Élite</div></div>
+        <div class="jbl"></div>
+        <div class="jbs"><div class="jbd" style="background:var(--dark3);border:2px solid var(--border)"></div><div class="jbn">Leyenda</div></div>
+      </div>
+    </div>
+
+    <!-- ENTRENAMIENTO -->
+    <div class="apg" id="tab-entrenamiento">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">💪 Entrenamiento</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">Selecciona tu deporte y accede a tu plan de hoy</p></div>
+      <div class="spick" id="spPick">
+        <div class="spc active border-grad" onclick="pSport(this)"><div class="spce">🥊</div><div class="spcn">Boxeo</div></div>
+        <div class="spc" onclick="pSport(this)"><div class="spce">⚽</div><div class="spcn">Fútbol</div></div>
+        <div class="spc" onclick="pSport(this)"><div class="spce">🏀</div><div class="spcn">Basket</div></div>
+        <div class="spc" onclick="pSport(this)"><div class="spce">🏋️</div><div class="spcn">Calistenia</div></div>
+        <div class="spc" onclick="pSport(this)"><div class="spce">🏃</div><div class="spcn">Atletismo</div></div>
+        <div class="spc" onclick="pSport(this)"><div class="spce">🏊</div><div class="spcn">Natación</div></div>
+        <div class="spc" onclick="pSport(this)"><div class="spce">🚴</div><div class="spcn">Ciclismo</div></div>
+        <div class="spc" onclick="pSport(this)"><div class="spce">🏐</div><div class="spcn">Vóleibol</div></div>
+      </div>
+      <div class="tp">
+        <div class="tpb"><div class="tpt">🥊 Boxeo — Semana 3</div>
+          <div class="exr"><span>Jab-Cross combo</span><span class="exb">4×12</span></div>
+          <div class="exr"><span>Trabajo de pies</span><span class="exb">3×3min</span></div>
+          <div class="exr"><span>Shadow boxing</span><span class="exb">5×2min</span></div>
+          <div class="exr"><span>Saco pesado</span><span class="exb">6×2min</span></div>
+          <div class="exr"><span>Cuerda de saltar</span><span class="exb">10min</span></div>
+          <button class="sess-btn" onclick="openSession()">▶ INICIAR SESIÓN EN VIVO</button>
+        </div>
+        <div class="tpb"><div class="tpt">📈 Intensidad</div>
+          <div class="intr"><div class="intl"><span>Cardio</span><span class="c-r">Alta</span></div><div class="intt"><div class="intf" style="width:82%;background:var(--red)"></div></div></div>
+          <div class="intr"><div class="intl"><span>Fuerza</span><span class="c-o">Media-Alta</span></div><div class="intt"><div class="intf" style="width:65%;background:var(--orange)"></div></div></div>
+          <div class="intr"><div class="intl"><span>Técnica</span><span class="c-y">Media</span></div><div class="intt"><div class="intf" style="width:50%;background:var(--yellow)"></div></div></div>
+          <div class="intr"><div class="intl"><span>Recuperación</span><span class="c-b">Baja</span></div><div class="intt"><div class="intf" style="width:30%;background:var(--blue)"></div></div></div>
+        </div>
+        <div class="tpb"><div class="tpt">⏱ Temporizador</div>
+          <div class="tbig" id="timerD">03:00</div>
+          <div class="tsub">Round 1 de 6</div>
+          <div class="tg2"><div class="tgc"><div class="tgcl">Trabajo</div><div class="tgcv c-r">3:00</div></div><div class="tgc"><div class="tgcl">Descanso</div><div class="tgcv c-g">1:00</div></div></div>
+          <div class="tbtns"><button class="tbtn on" id="timerBtn" onclick="togTimer()">INICIAR</button><button class="tbtn" onclick="resTimer()">RESET</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDARIO -->
+    <div class="apg" id="tab-calendario">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">📅 Calendario</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">Historial de entrenamientos y días de descanso</p></div>
+      <div class="db">
+        <div class="calh">
+          <button class="caln" onclick="calNav(-1)">← Anterior</button>
+          <div class="calm" id="calMonth">Junio 2025</div>
+          <button class="caln" onclick="calNav(1)">Siguiente →</button>
+        </div>
+        <div class="calgrid" id="calGrid"></div>
+        <div class="calleg">
+          <div class="calleg-i"><div class="calleg-d" style="background:rgba(46,204,113,.4)"></div>Entrenamiento</div>
+          <div class="calleg-i"><div class="calleg-d" style="background:rgba(59,130,246,.3)"></div>Descanso activo</div>
+          <div class="calleg-i"><div class="calleg-d" style="background:rgba(245,158,11,.5);border-radius:50%"></div>Hoy</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NUTRICIÓN -->
+    <div class="apg" id="tab-nutricion">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">🥗 Nutrición</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">Macros, hidratación y hábitos del día</p></div>
+      <div class="nl">
+        <div>
+          <div class="db" style="margin-bottom:12px"><div class="dbt">🍽 Macros de hoy <span>2,340 kcal</span></div>
+            <div class="macr"><div class="mri">🥩</div><div class="mrinf"><div class="mrn">Proteína</div><div class="mrb"><div class="mrf" style="width:78%;background:var(--red)"></div></div><div class="mrv"><b>156g</b> / 200g</div></div></div>
+            <div class="macr"><div class="mri">🍞</div><div class="mrinf"><div class="mrn">Carbohidratos</div><div class="mrb"><div class="mrf" style="width:92%;background:var(--yellow)"></div></div><div class="mrv"><b>276g</b> / 300g</div></div></div>
+            <div class="macr"><div class="mri">🥑</div><div class="mrinf"><div class="mrn">Grasas saludables</div><div class="mrb"><div class="mrf" style="width:60%;background:var(--blue)"></div></div><div class="mrv"><b>54g</b> / 90g</div></div></div>
+          </div>
+          <div class="ww"><div class="wwh"><div class="wwt">💧 Hidratación</div><div class="wwc" id="wCnt">6/8</div></div><div class="gls" id="glsApp"></div></div>
+        </div>
+        <div class="db"><div class="dbt">✅ Hábitos</div>
+          <div class="hitem"><div class="hiic">🍳</div><div class="hiinf"><div class="hin">Desayuno proteico</div><div class="his">🔥 18 días</div></div><div class="hid"><div class="hd ok">L</div><div class="hd ok">M</div><div class="hd ok">X</div><div class="hd ok">J</div><div class="hd ok">V</div><div class="hd">S</div><div class="hd">D</div></div></div>
+          <div class="hitem"><div class="hiic">🚫</div><div class="hiinf"><div class="hin">Sin azúcar añadida</div><div class="his">🔥 7 días</div></div><div class="hid"><div class="hd ok">L</div><div class="hd ok">M</div><div class="hd ok">X</div><div class="hd ok">J</div><div class="hd ok">V</div><div class="hd">S</div><div class="hd">D</div></div></div>
+          <div class="hitem"><div class="hiic">💊</div><div class="hiinf"><div class="hin">Suplementación</div><div class="his">✅ 12 días</div></div><div class="hid"><div class="hd ok">L</div><div class="hd ok">M</div><div class="hd ok">X</div><div class="hd ok">J</div><div class="hd">V</div><div class="hd">S</div><div class="hd">D</div></div></div>
+          <div class="hitem"><div class="hiic">🥦</div><div class="hiinf"><div class="hin">5 porciones verduras</div><div class="his">🔥 5 días</div></div><div class="hid"><div class="hd ok">L</div><div class="hd ok">M</div><div class="hd ok">X</div><div class="hd ok">J</div><div class="hd ok">V</div><div class="hd">S</div><div class="hd">D</div></div></div>
+        </div>
+      </div>
+    </div>
+
+      <!-- Meal Plan del día -->
+      <div class="db" style="margin-top:12px">
+        <div class="dbt">🍴 Plan alimenticio · Hoy</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+          <div style="background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">☀️ Desayuno</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">Avena + proteína</div>
+            <div style="font-size:11px;color:var(--gray);margin-bottom:8px">Huevos revueltos · Frutas</div>
+            <div style="font-size:11px;font-weight:700;color:var(--green)">420 kcal ✓</div>
+          </div>
+          <div style="background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🌤 Almuerzo</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">Pollo + arroz</div>
+            <div style="font-size:11px;color:var(--gray);margin-bottom:8px">Ensalada verde · Aceite oliva</div>
+            <div style="font-size:11px;font-weight:700;color:var(--green)">680 kcal ✓</div>
+          </div>
+          <div style="background:var(--dark2);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🌆 Cena</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">Salmón + quinoa</div>
+            <div style="font-size:11px;color:var(--gray);margin-bottom:8px">Vegetales al vapor</div>
+            <div style="font-size:11px;font-weight:700;color:var(--yellow)">⏳ Pendiente</div>
+          </div>
+          <div style="background:var(--dark2);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">💪 Pre/Post</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px">Suplementos</div>
+            <div style="font-size:11px;color:var(--gray);margin-bottom:8px">Proteína · Creatina · BCAA</div>
+            <div style="font-size:11px;font-weight:700;color:var(--green)">4/4 tomados ✓</div>
+          </div>
+        </div>
+      </div>
+    <!-- IA COACH -->
+    <div class="apg" id="tab-ia">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">🧠 IA Coach</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">Tu entrenador inteligente personal, disponible 24/7</p></div>
+      <div class="ial">
+        <div class="cw">
+          <div class="cwh"><div class="cwav">🧠</div><div><div class="cwn">DE COACH AI</div><div class="cwst">Analizando tu rendimiento...</div></div><div class="cwdot"></div></div>
+          <div class="cwb" id="chatB">
+            <div class="msg ma">¡Hola atleta! Analicé tus últimas <strong>6 sesiones</strong>. Tu cardio mejoró un <strong>+18%</strong> pero la técnica pierde precisión en el round 4. ¿Ajusto tu plan?</div>
+            <div class="msg mu">Sí, ajusta el plan. Siento fatiga en los hombros.</div>
+            <div class="msg ma">Perfecto. Reduje el volumen un <strong>20%</strong> y agregué <strong>10min de movilidad</strong>. También recomiendo <strong>magnesio</strong> antes de dormir.</div>
+          </div>
+          <div class="cwf"><input class="cwi" id="chatI" placeholder="Pregunta al Coach IA..." onkeydown="if(event.key==='Enter')sendChat()"><button class="cwsend" onclick="sendChat()">➤</button></div>
+        </div>
+        <div class="iaside">
+          <div class="iaf"><div class="iafic">📊</div><div><div class="iaft">Análisis de rendimiento</div><div class="iafd">Procesa cada sesión para identificar patrones y mejoras.</div></div></div>
+          <div class="iaf"><div class="iafic">🎯</div><div><div class="iaft">Recomendaciones adaptativas</div><div class="iafd">Ajusta dificultad según tu progreso real.</div></div></div>
+          <div class="iaf"><div class="iafic">🔬</div><div><div class="iaft">Detección de fatiga</div><div class="iafd">Identifica sobreentrenamiento y propone recuperación.</div></div></div>
+          <div class="iaf"><div class="iafic">💡</div><div><div class="iaft">Consejos de técnica</div><div class="iafd">Retroalimentación continua sobre ejecución.</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESAFÍOS -->
+    <div class="apg" id="tab-desafios">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">🔥 Desafíos</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">6 desafíos activos — ¡no rompas la racha!</p></div>
+      <div class="chg">
+        <div class="chc border-grad shine"><span class="chct" style="background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3)">Diario</span><div class="chci">⚡</div><div class="chcn">200 Golpes al Saco</div><div class="chcd">Completa 200 golpes con correcta técnica antes de medianoche.</div><div class="chcr">🏅 +50 XP · Medalla "Golpeador"</div><div class="chcbw"><span>Progreso</span><span class="c-o">140/200</span></div><div class="chcb"><div class="chcf" style="width:70%;background:var(--orange)"></div></div></div>
+        <div class="chc border-grad shine"><span class="chct" style="background:rgba(59,130,246,.15);color:var(--blue);border:1px solid rgba(59,130,246,.3)">Diario</span><div class="chci">💧</div><div class="chcn">Hidratación Perfecta</div><div class="chcd">Bebe los 8 vasos recomendados durante el día.</div><div class="chcr">🏅 +30 XP · Racha +1</div><div class="chcbw"><span>Progreso</span><span class="c-b">6/8</span></div><div class="chcb"><div class="chcf" style="width:75%;background:var(--blue)"></div></div></div>
+        <div class="chc border-grad shine"><span class="chct" style="background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)">Diario</span><div class="chci">🧘</div><div class="chcn">Movilidad Matutina</div><div class="chcd">15 minutos de movilidad articular antes de las 8 AM.</div><div class="chcr">🏅 +25 XP · Bonus recuperación</div><div class="chcbw"><span>Progreso</span><span class="c-g">✓ Completado</span></div><div class="chcb"><div class="chcf" style="width:100%;background:var(--green)"></div></div></div>
+        <div class="chc border-grad shine"><span class="chct" style="background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3)">Semanal</span><div class="chci">🏃</div><div class="chcn">50KM en 7 Días</div><div class="chcd">Acumula 50km entre carrera, bicicleta y natación.</div><div class="chcr">🏆 +200 XP · Medalla "Resistencia"</div><div class="chcbw"><span>Progreso</span><span class="c-p">34/50 km</span></div><div class="chcb"><div class="chcf" style="width:68%;background:var(--purple)"></div></div></div>
+        <div class="chc border-grad shine"><span class="chct" style="background:rgba(245,158,11,.15);color:var(--yellow);border:1px solid rgba(245,158,11,.3)">Semanal</span><div class="chci">🔥</div><div class="chcn">Racha de Disciplina</div><div class="chcd">Entrena 7 días seguidos sin romper la racha.</div><div class="chcr">🏆 +350 XP · Rango +1</div><div class="chcbw"><span>Progreso</span><span class="c-y">5/7 días</span></div><div class="chcb"><div class="chcf" style="width:71%;background:var(--yellow)"></div></div></div>
+        <div class="chc border-grad shine"><span class="chct" style="background:rgba(230,57,70,.15);color:var(--red);border:1px solid rgba(230,57,70,.3)">Semanal</span><div class="chci">💪</div><div class="chcn">Maestro del Jab</div><div class="chcd">500 repeticiones técnicas del jab derecho.</div><div class="chcr">🏆 +180 XP · Habilidad desbloqueada</div><div class="chcbw"><span>Progreso</span><span class="c-r">280/500</span></div><div class="chcb"><div class="chcf" style="width:56%;background:var(--red)"></div></div></div>
+      </div>
+    </div>
+
+    <!-- RÉCORDS -->
+    <div class="apg" id="tab-records">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">🏆 Récords Personales</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">Tus mejores marcas — cada PR es una victoria</p></div>
+      <div class="recg">
+        <div class="recc border-grad" style="border-color:rgba(230,57,70,.2)"><div class="recsp">🥊 Boxeo</div><div class="recnm">Rounds consecutivos</div><div class="recv c-r">12 <span class="recu">rounds</span></div><div class="recd">📅 Hace 3 días</div><div class="recp" style="color:var(--green)">↑ +2 vs récord anterior</div></div>
+        <div class="recc border-grad" style="border-color:rgba(46,204,113,.2)"><div class="recsp">🏃 Atletismo</div><div class="recnm">5 kilómetros</div><div class="recv c-g">22:14 <span class="recu">min</span></div><div class="recd">📅 Semana pasada</div><div class="recp" style="color:var(--green)">↑ −1:32 vs récord anterior</div></div>
+        <div class="recc border-grad" style="border-color:rgba(59,130,246,.2)"><div class="recsp">🏋️ Fuerza</div><div class="recnm">Press de banca</div><div class="recv c-b">85 <span class="recu">kg</span></div><div class="recd">📅 Hace 5 días</div><div class="recp" style="color:var(--green)">↑ +5 kg vs récord anterior</div></div>
+        <div class="recc border-grad" style="border-color:rgba(245,158,11,.2)"><div class="recsp">🥊 Boxeo</div><div class="recnm">Golpes en 1 min</div><div class="recv c-y">87 <span class="recu">golpes</span></div><div class="recd">📅 Hace 1 semana</div><div class="recp" style="color:var(--green)">↑ +4 vs récord anterior</div></div>
+        <div class="recc border-grad" style="border-color:rgba(139,92,246,.2)"><div class="recsp">🚴 Ciclismo</div><div class="recnm">Distancia semanal</div><div class="recv c-p">87 <span class="recu">km</span></div><div class="recd">📅 Esta semana</div><div class="recp" style="color:var(--yellow)">→ Récord activo</div></div>
+        <div class="recc border-grad" style="border-color:rgba(6,182,212,.2)"><div class="recsp">🏊 Natación</div><div class="recnm">100m libre</div><div class="recv c-c">1:42 <span class="recu">min</span></div><div class="recd">📅 Hace 2 semanas</div><div class="recp" style="color:var(--green)">↑ −8s vs récord anterior</div></div>
+      </div>
+    </div>
+
+      <!-- Best week summary -->
+      <div class="db" style="margin-top:12px">
+        <div class="dbt">⭐ Tu mejor semana histórica <span>Semana 18 · Mayo 2025</span></div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+          <div style="background:var(--dark2);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Sesiones</div>
+            <div style="font-family:Oswald,sans-serif;font-size:26px;font-weight:700;color:var(--yellow)">6</div>
+          </div>
+          <div style="background:var(--dark2);border:1px solid rgba(230,57,70,.2);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">XP ganado</div>
+            <div style="font-family:Oswald,sans-serif;font-size:26px;font-weight:700;color:var(--red)">312</div>
+          </div>
+          <div style="background:var(--dark2);border:1px solid rgba(46,204,113,.2);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Tiempo total</div>
+            <div style="font-family:Oswald,sans-serif;font-size:26px;font-weight:700;color:var(--green)">6.2h</div>
+          </div>
+          <div style="background:var(--dark2);border:1px solid rgba(59,130,246,.2);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Km acumulados</div>
+            <div style="font-family:Oswald,sans-serif;font-size:26px;font-weight:700;color:var(--blue)">38</div>
+          </div>
+          <div style="background:var(--dark2);border:1px solid rgba(139,92,246,.2);border-radius:8px;padding:14px;text-align:center">
+            <div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">PRs batidos</div>
+            <div style="font-family:Oswald,sans-serif;font-size:26px;font-weight:700;color:var(--purple)">3</div>
+          </div>
+        </div>
+      </div>
+    <!-- RECUPERACIÓN -->
+    <div class="apg" id="tab-recuperacion">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">😴 Recuperación</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">El descanso es parte del entrenamiento</p></div>
+      <div class="rag">
+        <div class="rac"><div class="raci">😴</div><div class="ract">Sueño</div><div class="racd">Calidad y duración del descanso nocturno.</div><div class="racm"><div class="racv">7.5h</div><div class="racl">Esta noche<br><span class="c-g" style="font-size:10px">✓ Óptimo</span></div></div></div>
+        <div class="rac"><div class="raci">🧘</div><div class="ract">Movilidad</div><div class="racd">Rutinas de estiramiento y movilidad articular.</div><div class="racm"><div class="racv">15m</div><div class="racl">Rutina diaria<br><span class="c-y" style="font-size:10px">⏳ Pendiente</span></div></div></div>
+        <div class="rac"><div class="raci">⚡</div><div class="ract">Fatiga</div><div class="racd">Monitoreo del cansancio acumulado.</div><div class="racm"><div class="racv" style="color:var(--yellow)">6/10</div><div class="racl">Nivel<br><span class="c-o" style="font-size:10px">⚠ Descanso recom.</span></div></div></div>
+        <div class="rac"><div class="raci">🧊</div><div class="ract">Recuperación activa</div><div class="racd">Caminata, natación y stretching dinámico.</div><div class="racm"><div class="racv c-g">3</div><div class="racl">Sesiones semana<br><span class="c-g" style="font-size:10px">✓ Óptimo</span></div></div></div>
+        <div class="rac"><div class="raci">💊</div><div class="ract">Suplementación</div><div class="racd">Protocolo de suplementos y recuperación.</div><div class="racm"><div class="racv c-c">4/4</div><div class="racl">Tomas hoy<br><span class="c-g" style="font-size:10px">✓ Completado</span></div></div></div>
+        <div class="rac"><div class="raci">🏃</div><div class="ract">Estado corporal</div><div class="racd">Evaluación subjetiva para ajustar el plan.</div><div class="racm"><div class="racv c-g">8/10</div><div class="racl">Listo<br><span class="c-g" style="font-size:10px">✓ Excelente</span></div></div></div>
+      </div>
+    </div>
+
+      <!-- Sleep quality 7 days -->
+      <div class="db" style="margin-top:12px">
+        <div class="dbt">😴 Calidad de sueño <span>últimos 7 días</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-end;height:80px;margin-bottom:8px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div style="background:var(--blue);border-radius:3px 3px 0 0;width:100%;height:88%"></div><div style="font-size:10px;color:var(--gray)">L</div><div style="font-size:10px;color:var(--blue);font-weight:700">7h</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div style="background:rgba(59,130,246,.5);border-radius:3px 3px 0 0;width:100%;height:81%"></div><div style="font-size:10px;color:var(--gray)">M</div><div style="font-size:10px;color:var(--blue);font-weight:700">6.5h</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div style="background:var(--blue);border-radius:3px 3px 0 0;width:100%;height:94%"></div><div style="font-size:10px;color:var(--gray)">X</div><div style="font-size:10px;color:var(--blue);font-weight:700">7.5h</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div style="background:var(--cyan);border-radius:3px 3px 0 0;width:100%;height:100%"></div><div style="font-size:10px;color:var(--gray)">J</div><div style="font-size:10px;color:var(--cyan);font-weight:700">8h ⭐</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div style="background:rgba(59,130,246,.5);border-radius:3px 3px 0 0;width:100%;height:88%"></div><div style="font-size:10px;color:var(--gray)">V</div><div style="font-size:10px;color:var(--blue);font-weight:700">7h</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div style="background:var(--cyan);border-radius:3px 3px 0 0;width:100%;height:100%"></div><div style="font-size:10px;color:var(--gray)">S</div><div style="font-size:10px;color:var(--cyan);font-weight:700">9h 💤</div></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1"><div style="background:var(--blue);border-radius:3px 3px 0 0;width:100%;height:94%"></div><div style="font-size:10px;color:var(--gray)">D</div><div style="font-size:10px;color:var(--blue);font-weight:700">7.5h</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray);padding-top:8px;border-top:1px solid var(--border)">
+          <span>Promedio: <b style="color:var(--white)">7.5h</b></span>
+          <span>Objetivo: <b style="color:var(--cyan)">8h</b></span>
+          <span>Calidad: <b style="color:var(--green)">Muy buena ✓</b></span>
+          <span>Deuda: <b style="color:var(--yellow)">−3.5h semana</b></span>
+        </div>
+      </div>
+    <!-- PROGRESO -->
+    <div class="apg" id="tab-progreso">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">📊 Mi Progreso</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">Tu evolución como atleta</p></div>
+      <div class="pl">
+        <div>
+          <div class="abc">
+            <div class="abh"><div class="abav" id="progAv">🥊</div><div><div class="abnm" id="progNm">Atleta</div><div class="ablv">⭐ Amateur · 847 XP</div></div></div>
+            <div class="abxl"><span class="c-gr">XP</span><span class="c-y">847 / 1200</span></div>
+            <div class="abxb"><div class="abxf" style="width:70%"></div></div>
+            <div class="mxb" style="margin-top:12px"><div class="mxl"><span class="c-r">Entrenamiento</span><span class="c-r">92%</span></div><div class="mxt"><div class="mxf" style="width:92%;background:var(--red)"></div></div></div>
+            <div class="mxb"><div class="mxl"><span class="c-g">Nutrición</span><span class="c-g">78%</span></div><div class="mxt"><div class="mxf" style="width:78%;background:var(--green)"></div></div></div>
+            <div class="mxb"><div class="mxl"><span class="c-b">Recuperación</span><span class="c-b">85%</span></div><div class="mxt"><div class="mxf" style="width:85%;background:var(--blue)"></div></div></div>
+            <div class="s3"><div class="s3i"><div class="s3v c-r">47</div><div class="s3l">Sesiones</div></div><div class="s3i"><div class="s3v c-y">23🔥</div><div class="s3l">Racha</div></div><div class="s3i"><div class="s3v c-g">8</div><div class="s3l">Logros</div></div></div>
+            <div style="font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">Medallas</div>
+            <div class="medr">
+              <div class="med" style="background:rgba(245,158,11,.15)">🏆</div><div class="med" style="background:rgba(230,57,70,.15)">🔥</div>
+              <div class="med" style="background:rgba(46,204,113,.15)">💚</div><div class="med" style="background:rgba(59,130,246,.15)">💧</div>
+              <div class="med" style="background:rgba(139,92,246,.15)">⚡</div><div class="med" style="background:rgba(249,115,22,.15)">🎯</div>
+              <div class="med" style="opacity:.3">🔒</div><div class="med" style="opacity:.3">🔒</div>
+            </div>
+          </div>
+          <div class="abc" style="margin-top:12px">
+            <div class="dbt" style="margin-bottom:12px">🛤 Camino del atleta</div>
+            <div class="jvs"><div class="jvd done"></div><div><div class="jvn">Principiante</div><div class="jvdesc">La chispa inicial. Los primeros pasos.</div></div><span class="jvb" style="background:rgba(245,158,11,.15);color:var(--yellow)">✓</span></div>
+            <div class="jvs"><div class="jvd done"></div><div><div class="jvn">Aprendiz</div><div class="jvdesc">Bases sólidas. La consistencia empieza aquí.</div></div><span class="jvb" style="background:rgba(245,158,11,.15);color:var(--yellow)">✓</span></div>
+            <div class="jvs"><div class="jvd now"></div><div><div class="jvn c-y">Amateur ◀</div><div class="jvdesc">Tu nivel actual. Cada sesión cuenta.</div></div><span class="jvb" style="background:rgba(230,57,70,.15);color:var(--red)">▶</span></div>
+            <div class="jvs"><div class="jvd lock"></div><div><div class="jvn c-gr">Avanzado</div><div class="jvdesc">353 XP para desbloquear.</div></div><span class="jvb" style="background:rgba(30,45,66,.5);color:var(--gray)">🔒</span></div>
+            <div class="jvs"><div class="jvd lock"></div><div><div class="jvn c-gr">Élite</div><div class="jvdesc">Solo los más disciplinados llegan aquí.</div></div><span class="jvb" style="background:rgba(30,45,66,.5);color:var(--gray)">🔒</span></div>
+            <div class="jvs"><div class="jvd lock"></div><div><div class="jvn c-gr">Leyenda</div><div class="jvdesc">La cumbre de la evolución atlética.</div></div><span class="jvb" style="background:rgba(30,45,66,.5);color:var(--gray)">🔒</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="charts-grid">
+            <div class="chcard"><div class="chtit c-p">📈 XP por semana</div><div class="chw"><canvas id="chartXP"></canvas></div></div>
+            <div class="chcard"><div class="chtit c-r">💪 Sesiones por mes</div><div class="chw"><canvas id="chartSes"></canvas></div></div>
+            <div class="chcard"><div class="chtit c-g">🥗 Nutrición semana</div><div class="chw"><canvas id="chartNut"></canvas></div></div>
+            <div class="chcard"><div class="chtit c-b">😴 Sueño (horas)</div><div class="chw"><canvas id="chartSleep"></canvas></div></div>
+          </div>
+          <!-- Extra stats row -->
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">
+            <div class="chcard"><div class="chtit c-o" style="font-size:12px">🔥 Cal. quemadas/día</div>
+              <div style="display:flex;flex-direction:column;gap:5px;margin-top:4px">
+                <div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--gray)">Lunes</span><span class="c-o">420 kcal</span></div><div style="height:4px;background:var(--dark3);border-radius:2px"><div style="width:47%;height:100%;background:var(--orange);border-radius:2px"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--gray)">Martes</span><span class="c-o">380 kcal</span></div><div style="height:4px;background:var(--dark3);border-radius:2px"><div style="width:42%;height:100%;background:var(--orange);border-radius:2px"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--gray)">Miércoles</span><span class="c-o">510 kcal</span></div><div style="height:4px;background:var(--dark3);border-radius:2px"><div style="width:57%;height:100%;background:var(--orange);border-radius:2px"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--gray)">Jueves</span><span class="c-o">470 kcal</span></div><div style="height:4px;background:var(--dark3);border-radius:2px"><div style="width:52%;height:100%;background:var(--orange);border-radius:2px"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span style="color:var(--gray)">Viernes</span><span class="c-r">620 kcal</span></div><div style="height:4px;background:var(--dark3);border-radius:2px"><div style="width:69%;height:100%;background:var(--red);border-radius:2px"></div></div></div>
+              </div>
+            </div>
+            <div class="chcard"><div class="chtit c-c" style="font-size:12px">⏱ Duración sesiones</div>
+              <div style="display:flex;align-items:flex-end;gap:5px;height:90px;margin-top:4px">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="background:var(--cyan);border-radius:2px 2px 0 0;width:100%;height:60%"></div><div style="font-size:9px;color:var(--gray)">S1</div><div style="font-size:9px;color:var(--cyan)">35m</div></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="background:var(--cyan);border-radius:2px 2px 0 0;width:100%;height:75%"></div><div style="font-size:9px;color:var(--gray)">S2</div><div style="font-size:9px;color:var(--cyan)">45m</div></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="background:rgba(6,182,212,.4);border-radius:2px 2px 0 0;width:100%;height:50%"></div><div style="font-size:9px;color:var(--gray)">S3</div><div style="font-size:9px;color:var(--cyan)">30m</div></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="background:var(--cyan);border-radius:2px 2px 0 0;width:100%;height:85%"></div><div style="font-size:9px;color:var(--gray)">S4</div><div style="font-size:9px;color:var(--cyan)">51m</div></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="background:rgba(6,182,212,.9);border-radius:2px 2px 0 0;width:100%;height:100%"></div><div style="font-size:9px;color:var(--gray)">S5</div><div style="font-size:9px;color:var(--cyan)">60m</div></div>
+              </div>
+            </div>
+            <div class="chcard"><div class="chtit c-y" style="font-size:12px">⚡ Racha histórica</div>
+              <div style="text-align:center;padding:8px 0">
+                <div style="font-family:Oswald,sans-serif;font-size:52px;font-weight:700;color:var(--yellow);line-height:1">23</div>
+                <div style="font-size:11px;color:var(--gray);margin:4px 0 10px">días consecutivos actual</div>
+                <div style="font-size:11px;font-weight:700;color:var(--white);margin-bottom:5px">🏆 Récord: <span class="c-y">31 días</span></div>
+                <div style="height:4px;background:var(--dark3);border-radius:2px;overflow:hidden"><div style="width:74%;height:100%;background:linear-gradient(90deg,var(--yellow),var(--orange));border-radius:2px"></div></div>
+                <div style="font-size:10px;color:var(--gray);margin-top:4px">74% del récord personal</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="apg" id="tab-perfil">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">👤 Mi Perfil</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">Personaliza tu experiencia en Discipline Evolution</p></div>
+      <div class="pfg">
+        <div class="pfc">
+          <div class="pfavbig" id="perfilAvBig">🥊</div>
+          <div class="pfnmd" id="perfilNameDisp">Atleta</div>
+          <div class="pflvl">⭐ Amateur</div>
+          <div class="pfsr">
+            <div><div class="pfsrv c-r">47</div><div class="pfsrl">Sesiones</div></div>
+            <div><div class="pfsrv c-y">23</div><div class="pfsrl">Racha</div></div>
+            <div><div class="pfsrv c-g">8</div><div class="pfsrl">Logros</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;text-align:center">Cambia tu avatar</div>
+          <div class="avgbig" id="perfilAvGrid">
+            <div class="avbo sel" data-av="🥊" onclick="selPerfAv(this)">🥊</div>
+            <div class="avbo" data-av="🏃" onclick="selPerfAv(this)">🏃</div>
+            <div class="avbo" data-av="⚽" onclick="selPerfAv(this)">⚽</div>
+            <div class="avbo" data-av="🏋️" onclick="selPerfAv(this)">🏋️</div>
+            <div class="avbo" data-av="🏊" onclick="selPerfAv(this)">🏊</div>
+            <div class="avbo" data-av="🚴" onclick="selPerfAv(this)">🚴</div>
+            <div class="avbo" data-av="🏅" onclick="selPerfAv(this)">🏅</div>
+            <div class="avbo" data-av="🔥" onclick="selPerfAv(this)">🔥</div>
+          </div>
+        </div>
+        <div class="pfc">
+          <div class="dbt" style="margin-bottom:18px">⚙️ Datos personales</div>
+          <div class="pfform">
+            <div class="fgrp"><div class="flbl">Nombre de atleta</div><input class="finp" id="pfName" type="text" maxlength="20" placeholder="Tu nombre..."></div>
+            <div class="fgrp"><div class="flbl">Edad</div><input class="finp" id="pfAge" type="number" min="10" max="80" placeholder="Años"></div>
+            <div class="fgrp"><div class="flbl">Peso</div><input class="finp" id="pfWeight" type="number" placeholder="kg"></div>
+            <div class="fgrp"><div class="flbl">Altura</div><input class="finp" id="pfHeight" type="number" placeholder="cm"></div>
+            <div class="fgrp"><div class="flbl">Deporte principal</div>
+              <select class="fsel" id="pfSport">
+                <option>🥊 Boxeo</option><option>⚽ Fútbol</option><option>🏀 Baloncesto</option>
+                <option>🏋️ Calistenia</option><option>🏃 Atletismo</option><option>🏊 Natación</option>
+                <option>🚴 Ciclismo</option><option>🏐 Vóleibol</option>
+              </select>
+            </div>
+            <div class="fgrp"><div class="flbl">Objetivo</div>
+              <select class="fsel" id="pfObj">
+                <option>🔥 Perder peso y grasa</option><option>💪 Ganar fuerza y músculo</option>
+                <option>🏅 Rendimiento deportivo</option><option>🧘 Salud y bienestar</option>
+              </select>
+            </div>
+            <div class="fgrp"><div class="flbl">Unidades</div>
+              <select class="fsel" id="pfUnits"><option>Métrico (kg, km)</option><option>Imperial (lb, mi)</option></select>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;margin-top:4px">
+              <button class="btn-sv" onclick="savePerfil()">Guardar cambios</button>
+              <div class="svc" id="saveConf">✓ Guardado</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- LOGROS (nuevo módulo) -->
+    <div class="apg" id="tab-logros">
+      <div style="margin-bottom:18px"><h3 style="font-family:Oswald,sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;letter-spacing:-1px">🏅 Mis Logros</h3><p style="font-size:13px;color:var(--gray);margin-top:3px">Cada logro es una prueba de tu disciplina</p></div>
+      <!-- XP Level bar big -->
+      <div style="background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(6,182,212,.08)),var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:center">
+        <div>
+          <div style="font-size:11px;color:var(--gray);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Tu nivel actual</div>
+          <div style="font-family:Oswald,sans-serif;font-size:38px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1">AMATEUR</div>
+          <div style="font-size:12px;color:var(--gray);margin-top:4px">⭐ Nivel 3 de 6</div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px"><span style="color:var(--gray)">XP actual</span><span style="color:var(--yellow);font-weight:700">847 / 1200</span></div>
+          <div style="height:10px;background:var(--dark3);border-radius:5px;overflow:hidden;margin-bottom:8px">
+            <div style="width:70%;height:100%;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:5px;box-shadow:0 0 12px rgba(139,92,246,.4)"></div>
+          </div>
+          <div style="font-size:11px;color:var(--gray)">Faltan <b style="color:var(--white)">353 XP</b> para nivel Avanzado</div>
+        </div>
+        <div style="display:flex;gap:12px;justify-content:center">
+          <div style="text-align:center"><div style="font-family:Oswald,sans-serif;font-size:28px;font-weight:700;color:var(--red)">47</div><div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px">Sesiones</div></div>
+          <div style="text-align:center"><div style="font-family:Oswald,sans-serif;font-size:28px;font-weight:700;color:var(--yellow)">23🔥</div><div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px">Racha</div></div>
+          <div style="text-align:center"><div style="font-family:Oswald,sans-serif;font-size:28px;font-weight:700;color:var(--green)">8</div><div style="font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1px">Logros</div></div>
+        </div>
+      </div>
+      <!-- Logros desbloqueados -->
+      <div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;color:var(--yellow)">⭐ Logros desbloqueados (8)</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px">
+        <div class="db border-grad" style="text-align:center;padding:18px 14px;background:linear-gradient(135deg,rgba(245,158,11,.08),var(--card))">
+          <div style="font-size:36px;margin-bottom:8px">🏆</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Primer Golpe</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">Completa tu primera sesión de entrenamiento</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--yellow);font-weight:700">+100 XP · Desbloqueado</div>
+        </div>
+        <div class="db border-grad" style="text-align:center;padding:18px 14px;background:linear-gradient(135deg,rgba(230,57,70,.08),var(--card))">
+          <div style="font-size:36px;margin-bottom:8px">🔥</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Racha de Fuego</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">7 días de entrenamiento consecutivo</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--yellow);font-weight:700">+150 XP · Desbloqueado</div>
+        </div>
+        <div class="db border-grad" style="text-align:center;padding:18px 14px;background:linear-gradient(135deg,rgba(46,204,113,.08),var(--card))">
+          <div style="font-size:36px;margin-bottom:8px">💧</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Hidratado</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">8 vasos de agua por 5 días seguidos</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--yellow);font-weight:700">+75 XP · Desbloqueado</div>
+        </div>
+        <div class="db border-grad" style="text-align:center;padding:18px 14px;background:linear-gradient(135deg,rgba(59,130,246,.08),var(--card))">
+          <div style="font-size:36px;margin-bottom:8px">😴</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Descanso Élite</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">8 horas de sueño por 7 noches seguidas</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--yellow);font-weight:700">+120 XP · Desbloqueado</div>
+        </div>
+        <div class="db border-grad" style="text-align:center;padding:18px 14px;background:linear-gradient(135deg,rgba(139,92,246,.08),var(--card))">
+          <div style="font-size:36px;margin-bottom:8px">⚡</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Golpeador</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">200 golpes en una sola sesión de boxeo</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--yellow);font-weight:700">+50 XP · Desbloqueado</div>
+        </div>
+        <div class="db border-grad" style="text-align:center;padding:18px 14px;background:linear-gradient(135deg,rgba(249,115,22,.08),var(--card))">
+          <div style="font-size:36px;margin-bottom:8px">🎯</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Precisión</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">Completa 10 sesiones con todos los ejercicios</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--yellow);font-weight:700">+200 XP · Desbloqueado</div>
+        </div>
+        <div class="db border-grad" style="text-align:center;padding:18px 14px;background:linear-gradient(135deg,rgba(6,182,212,.08),var(--card))">
+          <div style="font-size:36px;margin-bottom:8px">🏊</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Anfibio</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">Entrena en 3 deportes distintos en una semana</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--yellow);font-weight:700">+180 XP · Desbloqueado</div>
+        </div>
+        <div class="db border-grad" style="text-align:center;padding:18px 14px;background:linear-gradient(135deg,rgba(46,204,113,.08),var(--card))">
+          <div style="font-size:36px;margin-bottom:8px">🥗</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Nutricionista</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">Cumple tus macros durante 7 días seguidos</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--yellow);font-weight:700">+160 XP · Desbloqueado</div>
+        </div>
+      </div>
+      <!-- Logros bloqueados -->
+      <div style="font-family:Oswald,sans-serif;font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;color:var(--gray)">🔒 Próximos logros</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div class="db" style="text-align:center;padding:18px 14px;opacity:.45;filter:grayscale(.8)">
+          <div style="font-size:36px;margin-bottom:8px">👑</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Rey del Ring</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">Completa 100 sesiones de boxeo</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--gray);font-weight:700">+500 XP · 53 sesiones restantes</div>
+          <div style="margin-top:6px;height:3px;background:var(--dark3);border-radius:2px"><div style="width:47%;height:100%;background:var(--yellow);border-radius:2px"></div></div>
+        </div>
+        <div class="db" style="text-align:center;padding:18px 14px;opacity:.45;filter:grayscale(.8)">
+          <div style="font-size:36px;margin-bottom:8px">🚀</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Avanzado</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">Llega al nivel Avanzado (1200 XP)</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--gray);font-weight:700">+300 XP · 353 XP restantes</div>
+          <div style="margin-top:6px;height:3px;background:var(--dark3);border-radius:2px"><div style="width:70%;height:100%;background:var(--purple);border-radius:2px"></div></div>
+        </div>
+        <div class="db" style="text-align:center;padding:18px 14px;opacity:.45;filter:grayscale(.8)">
+          <div style="font-size:36px;margin-bottom:8px">💪</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Fuerza Bruta</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">Press de banca: supera los 100 kg</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--gray);font-weight:700">+250 XP · 15 kg restantes</div>
+          <div style="margin-top:6px;height:3px;background:var(--dark3);border-radius:2px"><div style="width:85%;height:100%;background:var(--blue);border-radius:2px"></div></div>
+        </div>
+        <div class="db" style="text-align:center;padding:18px 14px;opacity:.45;filter:grayscale(.8)">
+          <div style="font-size:36px;margin-bottom:8px">🏆</div>
+          <div style="font-family:Oswald,sans-serif;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Racha Legendaria</div>
+          <div style="font-size:11px;color:var(--gray);line-height:1.5">30 días de entrenamiento consecutivos</div>
+          <div style="margin-top:8px;font-size:10px;color:var(--gray);font-weight:700">+400 XP · 7 días restantes</div>
+          <div style="margin-top:6px;height:3px;background:var(--dark3);border-radius:2px"><div style="width:76%;height:100%;background:var(--orange);border-radius:2px"></div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- SESSION LIVE OVERLAY -->
+<div class="sover" id="sessOver">
+  <div class="sbox">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+      <div>
+        <div class="ssn" id="sessTitle">🥊 Boxeo en Vivo</div>
+        <div class="ssw">Semana 3 · Plan personalizado · Sesión activa</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Ejercicios</div>
+        <div style="font-family:Oswald,sans-serif;font-size:18px;font-weight:700;color:var(--yellow)" id="sessExCount">0/5</div>
+      </div>
+    </div>
+    <div class="stimer" id="sessTimer">00:00</div>
+    <div class="sphase" id="sessPhase">Sesión en curso · ¡Tú puedes!</div>
+    <div class="sexs" id="sessExList">
+      <div class="seitem" onclick="toggleEx(this)"><div class="seck"></div><div class="senm">Jab-Cross combo</div><div class="sest">4×12</div></div>
+      <div class="seitem" onclick="toggleEx(this)"><div class="seck"></div><div class="senm">Trabajo de pies</div><div class="sest">3×3min</div></div>
+      <div class="seitem" onclick="toggleEx(this)"><div class="seck"></div><div class="senm">Shadow boxing</div><div class="sest">5×2min</div></div>
+      <div class="seitem" onclick="toggleEx(this)"><div class="seck"></div><div class="senm">Saco pesado</div><div class="sest">6×2min</div></div>
+      <div class="seitem" onclick="toggleEx(this)"><div class="seck"></div><div class="senm">Cuerda de saltar</div><div class="sest">10min</div></div>
+    </div>
+    <div style="font-size:10px;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Progreso XP</div>
+    <div class="sxb"><div class="sxf" id="sessXpFill" style="width:0%"></div></div>
+    <div class="sbtns">
+      <button class="btn-se" onclick="endSession()">✓ FINALIZAR SESIÓN</button>
+      <button class="btn-sc" onclick="closeSession()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- XP MODAL -->
+<div class="xpover" id="xpOver">
+  <div class="xpbox">
+    <div class="xpbar"></div>
+    <div style="font-size:52px;margin-bottom:12px">🎉</div>
+    <div class="xpt">¡SESIÓN COMPLETADA!</div>
+    <div class="xps">Excelente trabajo. Cada sesión te acerca más a la grandeza.</div>
+    <div class="xpnum" id="xpmXP">+85</div>
+    <div class="xplbl">puntos de experiencia ganados</div>
+    <div class="xpst">
+      <div class="xpsti"><div class="v c-r" id="xpmTime">48:32</div><div class="l">Duración</div></div>
+      <div class="xpsti"><div class="v c-g" id="xpmEx">5/5</div><div class="l">Ejercicios</div></div>
+      <div class="xpsti"><div class="v c-y">+1 🔥</div><div class="l">Racha</div></div>
+    </div>
+    <button class="btn-xp" onclick="closeXPModal()">¡SEGUIR EVOLUCIONANDO! 🚀</button>
+  </div>
+</div>
+
+<script>
+// ===== STATE =====
+let user = {name:'ATLETA', avatar:'🥊', sport:'Boxeo', obj:'Rendimiento', days:3};
+let selAvatar = '🥊', perfilSelAvatar = '🥊';
+let notifOpen = false;
+let notifs = [
+  {icon:'🔥',text:'¡Tu racha llega a 23 días! Sigue así campeón.',time:'Hace 2 min',unread:true},
+  {icon:'🧠',text:'IA Coach: Reduje tu plan un 20% por fatiga detectada.',time:'Hace 1h',unread:true},
+  {icon:'🏅',text:'Logro desbloqueado: "Golpeador de Élite"',time:'Hace 3h',unread:true},
+  {icon:'⚡',text:'Desafío diario: Te faltan 60 golpes para completarlo.',time:'Hace 5h',unread:false},
+  {icon:'📅',text:'Sesión de boxeo programada para mañana 6 AM.',time:'Ayer',unread:false},
+];
+let sessRunning=false, sessInterval=null, sessSeconds=0, sessExDone=0;
+let t2=180, tRun=false, tInt=null;
+let calOffset=0, chartsInit=false;
+const aiReplies=[
+  'Analizando tus datos... Tu rendimiento superó el promedio un 12% esta semana. 💪',
+  'Recomiendo aumentar la hidratación antes del entrenamiento matutino.',
+  'Rindes mejor entre las 6 y 9 AM. ¿Reorganizo tu plan para ese horario?',
+  'Tu racha de 23 días es excelente. En días de descanso haz al menos movilidad.',
+  'Según tu historial, el próximo PR está a 2 semanas de entrenamiento consistente. 🎯',
+  'He actualizado tu plan. La intensidad sube 10% gradualmente esta semana. ¿Confirmas?',
+  'Detecté que tu sueño promedio bajó a 6.2h. Eso puede afectar tu recuperación muscular.',
+];
+let rIdx=0;
+
+// ===== PAGES =====
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>{el.classList.remove('active');el.style.display='none';});
+  const pg=document.getElementById('page-'+p);
+  if(p==='landing'){pg.style.display='block';}
+  else if(p==='app'){pg.style.display='flex';}
+  else{pg.style.display='flex';pg.style.alignItems='center';pg.style.justifyContent='center';}
+  pg.classList.add('active');
+  if(p==='app'){updateAppUser();initAppWidgets();setDate();}
+  if(p==='landing'){setTimeout(initReveal,100);setTimeout(initParticles,200);}
+}
+
+// ===== LOGIN =====
+function selAv(el){
+  document.querySelectorAll('#avPick .avo').forEach(a=>a.classList.remove('sel'));
+  el.classList.add('sel'); selAvatar=el.dataset.av; updPrev();
+}
+function updPrev(){
+  const v=document.getElementById('nameInp').value.trim();
+  document.getElementById('prevName').textContent=v||'—';
+  document.getElementById('loginBtn').disabled=v.length<2;
+}
+function doLogin(){
+  const nm=document.getElementById('nameInp').value.trim();
+  if(nm.length<2)return;
+  user.name=nm.toUpperCase(); user.avatar=selAvatar;
+  showPage('onboarding');
+}
+
+// ===== ONBOARDING =====
+function selObOpt(el){el.closest('.obopts').querySelectorAll('.obopt').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');}
+function selObDay(el){document.querySelectorAll('.obdo').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');user.days=parseInt(el.querySelector('.obdn').textContent)||3;}
+function selObSport(el){document.querySelectorAll('.obso').forEach(o=>o.classList.remove('sel'));el.classList.add('sel');user.sport=el.querySelector('.obsn').textContent;}
+function obNext(step){
+  document.querySelectorAll('.obs').forEach(s=>s.classList.remove('active'));
+  document.getElementById('obs'+step).classList.add('active');
+  document.querySelectorAll('.obps').forEach((s,i)=>s.classList.toggle('done',i<step));
+}
+function obBack(step){obNext(step);}
+function finishOb(){
+  const objEl=document.querySelector('.obopts .obopt.sel');
+  if(objEl)user.obj=objEl.querySelector('.obot').textContent;
+  showPage('app');
+  addNotif('🚀','¡Bienvenido! Tu perfil personalizado está listo.','Ahora mismo');
+}
+
+// ===== APP USER =====
+function updateAppUser(){
+  document.getElementById('sbAv').textContent=user.avatar;
+  document.getElementById('sbName').textContent=user.name;
+  document.getElementById('grName').textContent=user.name;
+  document.getElementById('progAv').textContent=user.avatar;
+  document.getElementById('progNm').textContent=user.name;
+  document.getElementById('perfilAvBig').textContent=user.avatar;
+  document.getElementById('perfilNameDisp').textContent=user.name;
+  document.getElementById('pfName').value=user.name;
+  syncPerfilAvGrid();
+}
+function setDate(){
+  const d=new Date(),opts={weekday:'long',year:'numeric',month:'long',day:'numeric'};
+  document.getElementById('tbDate').textContent=d.toLocaleDateString('es-ES',opts);
+}
+
+// ===== TABS =====
+const tbTitles={dashboard:'Dashboard',entrenamiento:'Entrenamiento',calendario:'Calendario',nutricion:'Nutrición',ia:'IA Coach',desafios:'Desafíos',records:'Récords',logros:'Mis Logros',recuperacion:'Recuperación',progreso:'Mi Progreso',perfil:'Mi Perfil'};
+function sw(tab,el){
+  document.querySelectorAll('.apg').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('tbTitle').textContent=tbTitles[tab]||tab;
+  setTimeout(animateBars,150);
+  if(tab==='progreso'&&!chartsInit){setTimeout(initCharts,100);chartsInit=true;}
+  if(tab==='calendario')renderCal();
+  notifOpen=false; document.getElementById('notifPanel').classList.remove('open');
+}
+
+// ===== TIMER =====
+function togTimer(){
+  const btn=document.getElementById('timerBtn');
+  if(tRun){clearInterval(tInt);tRun=false;btn.textContent='INICIAR';}
+  else{tRun=true;btn.textContent='PAUSAR';
+    tInt=setInterval(()=>{if(t2<=0){clearInterval(tInt);tRun=false;btn.textContent='INICIAR';return;}
+      t2--; const m=String(Math.floor(t2/60)).padStart(2,'0'),s=String(t2%60).padStart(2,'0');
+      document.getElementById('timerD').textContent=m+':'+s;
+    },1000);
+  }
+}
+function resTimer(){clearInterval(tInt);tRun=false;t2=180;document.getElementById('timerD').textContent='03:00';document.getElementById('timerBtn').textContent='INICIAR';}
+
+// ===== SESSION =====
+function openSession(){
+  document.getElementById('sessOver').classList.add('open');
+  document.querySelectorAll('.seitem').forEach(i=>{i.classList.remove('done');i.querySelector('.seck').textContent='';});
+  sessSeconds=0; sessExDone=0;
+  document.getElementById('sessXpFill').style.width='0%';
+  document.getElementById('sessExCount').textContent='0/5';
+  document.getElementById('sessTimer').textContent='00:00';
+  sessRunning=true;
+  sessInterval=setInterval(()=>{
+    sessSeconds++;
+    const m=String(Math.floor(sessSeconds/60)).padStart(2,'0'),s=String(sessSeconds%60).padStart(2,'0');
+    document.getElementById('sessTimer').textContent=m+':'+s;
+  },1000);
+}
+function closeSession(){clearInterval(sessInterval);sessRunning=false;document.getElementById('sessOver').classList.remove('open');}
+function toggleEx(el){
+  el.classList.toggle('done');
+  el.querySelector('.seck').textContent=el.classList.contains('done')?'✓':'';
+  sessExDone=document.querySelectorAll('.seitem.done').length;
+  const total=document.querySelectorAll('.seitem').length;
+  document.getElementById('sessXpFill').style.width=(sessExDone/total*100)+'%';
+  document.getElementById('sessExCount').textContent=sessExDone+'/'+total;
+}
+function endSession(){
+  const m=String(Math.floor(sessSeconds/60)).padStart(2,'0'),s=String(sessSeconds%60).padStart(2,'0');
+  const xp=Math.round(40+sessExDone*9+(sessSeconds/60)*0.5);
+  document.getElementById('xpmXP').textContent='+'+xp;
+  document.getElementById('xpmTime').textContent=m+':'+s;
+  document.getElementById('xpmEx').textContent=sessExDone+'/5';
+  clearInterval(sessInterval); sessRunning=false;
+  document.getElementById('sessOver').classList.remove('open');
+  document.getElementById('xpOver').classList.add('open');
+  addNotif('💪','Sesión de '+user.sport+' completada. +'+xp+' XP ganados.','Ahora mismo');
+}
+function closeXPModal(){document.getElementById('xpOver').classList.remove('open');}
+
+// ===== NOTIFICACIONES =====
+function renderNotifs(){
+  const list=document.getElementById('notifList');
+  list.innerHTML='';
+  notifs.forEach(n=>{
+    const d=document.createElement('div');
+    d.className='nitem'+(n.unread?' unr':'');
+    d.innerHTML=`<div class="niic">${n.icon}</div><div style="flex:1"><div class="nitx">${n.text}</div><div class="nitm">${n.time}</div></div>${n.unread?'<div class="niud"></div>':''}`;
+    list.appendChild(d);
+  });
+  const unread=notifs.filter(n=>n.unread).length;
+  document.getElementById('notifDot').style.display=unread>0?'block':'none';
+}
+function toggleNotif(){
+  notifOpen=!notifOpen;
+  document.getElementById('notifPanel').classList.toggle('open',notifOpen);
+  renderNotifs();
+}
+function clearNotifs(){notifs.forEach(n=>n.unread=false);renderNotifs();}
+function addNotif(icon,text,time){notifs.unshift({icon,text,time,unread:true});renderNotifs();}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#notifBtn')&&!e.target.closest('#notifPanel')){
+    notifOpen=false;document.getElementById('notifPanel').classList.remove('open');
+  }
+});
+
+// ===== CALENDARIO =====
+const trained={0:[3,5,8,10,12,15,17,19,22,24,26],1:[1,4,6,8,11,13,15,18,20,22,25,27,29]};
+const rests={0:[4,6,11,13,18,20,25,27],1:[2,5,9,12,16,19,23,26,30]};
+function renderCal(){
+  const now=new Date();
+  const d=new Date(now.getFullYear(),now.getMonth()+calOffset,1);
+  const months=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('calMonth').textContent=months[d.getMonth()]+' '+d.getFullYear();
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML='';
+  ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(dn=>{
+    const el=document.createElement('div');el.className='caldn';el.textContent=dn;grid.appendChild(el);
+  });
+  const firstDay=(d.getDay()+6)%7;
+  const daysInMonth=new Date(d.getFullYear(),d.getMonth()+1,0).getDate();
+  const today=new Date();
+  const isCur=d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear();
+  const td=trained[((calOffset%2)+2)%2]||trained[0];
+  const rd=rests[((calOffset%2)+2)%2]||rests[0];
+  for(let i=0;i<firstDay;i++){const el=document.createElement('div');el.className='cald empty';grid.appendChild(el);}
+  for(let day=1;day<=daysInMonth;day++){
+    const el=document.createElement('div');el.className='cald';el.textContent=day;
+    if(isCur&&day===today.getDate())el.classList.add('today');
+    else if(td.includes(day))el.classList.add('trained');
+    else if(rd.includes(day))el.classList.add('rest');
+    grid.appendChild(el);
+  }
+}
+function calNav(dir){calOffset+=dir;renderCal();}
+
+// ===== VASOS =====
+let wCount=6;
+function renderGlasses(){
+  const row=document.getElementById('glsApp');if(!row)return;
+  row.innerHTML='';
+  for(let i=0;i<8;i++){
+    const g=document.createElement('div');g.className='wg'+(i<wCount?' full':'');
+    const f=document.createElement('div');f.className='wgf';f.style.height=i<wCount?'70%':'0%';
+    g.appendChild(f);
+    g.onclick=()=>{wCount=i<wCount?i:i+1;renderGlasses();document.getElementById('wCnt').textContent=wCount+'/8';};
+    row.appendChild(g);
+  }
+}
+
+// ===== CHAT IA =====
+function sendChat(){
+  const inp=document.getElementById('chatI');if(!inp.value.trim())return;
+  const body=document.getElementById('chatB');
+  const um=document.createElement('div');um.className='msg mu';um.textContent=inp.value;body.appendChild(um);
+  inp.value=''; body.scrollTop=body.scrollHeight;
+  setTimeout(()=>{
+    const am=document.createElement('div');am.className='msg ma';am.textContent=aiReplies[rIdx%aiReplies.length];rIdx++;
+    body.appendChild(am);body.scrollTop=body.scrollHeight;
+  },800);
+}
+
+// ===== SPORT PICK =====
+function pSport(el){document.querySelectorAll('.spc').forEach(c=>c.classList.remove('active'));el.classList.add('active');}
+
+// ===== PERFIL =====
+function selPerfAv(el){
+  document.querySelectorAll('#perfilAvGrid .avbo').forEach(a=>a.classList.remove('sel'));
+  el.classList.add('sel'); perfilSelAvatar=el.dataset.av;
+  document.getElementById('perfilAvBig').textContent=perfilSelAvatar;
+}
+function syncPerfilAvGrid(){
+  document.querySelectorAll('#perfilAvGrid .avbo').forEach(a=>a.classList.toggle('sel',a.dataset.av===user.avatar));
+  perfilSelAvatar=user.avatar;
+}
+function savePerfil(){
+  const nm=document.getElementById('pfName').value.trim();
+  if(nm.length>=2){user.name=nm.toUpperCase();}
+  user.avatar=perfilSelAvatar;
+  updateAppUser();
+  const conf=document.getElementById('saveConf');
+  conf.classList.add('show'); setTimeout(()=>conf.classList.remove('show'),2500);
+  addNotif('👤','Perfil actualizado correctamente.','Ahora mismo');
+}
+
+// ===== CHARTS =====
+function initCharts(){
+  const cfg={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#151c27',borderColor:'#1e2d42',borderWidth:1,titleColor:'#fff',bodyColor:'#8892a4'}},scales:{x:{grid:{color:'rgba(30,45,66,.5)'},ticks:{color:'#8892a4',font:{size:10}}},y:{grid:{color:'rgba(30,45,66,.5)'},ticks:{color:'#8892a4',font:{size:10}}}}};
+  new Chart(document.getElementById('chartXP'),{type:'line',data:{labels:['S1','S2','S3','S4','S5','S6'],datasets:[{data:[120,185,210,340,480,847],borderColor:'#8b5cf6',backgroundColor:'rgba(139,92,246,.15)',tension:.4,fill:true,pointBackgroundColor:'#8b5cf6',pointRadius:4}]},options:cfg});
+  new Chart(document.getElementById('chartSes'),{type:'bar',data:{labels:['Ene','Feb','Mar','Abr','May','Jun'],datasets:[{data:[8,12,10,15,18,14],backgroundColor:'rgba(230,57,70,.6)',borderColor:'#e63946',borderWidth:1,borderRadius:4}]},options:cfg});
+  new Chart(document.getElementById('chartNut'),{type:'doughnut',data:{labels:['Proteína','Carbos','Grasas'],datasets:[{data:[156,276,54],backgroundColor:['rgba(230,57,70,.7)','rgba(245,158,11,.7)','rgba(59,130,246,.7)'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#8892a4',font:{size:10},padding:10}}}}});
+  new Chart(document.getElementById('chartSleep'),{type:'line',data:{labels:['L','M','X','J','V','S','D'],datasets:[{data:[7,6.5,7.5,8,7,9,7.5],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.15)',tension:.4,fill:true,pointBackgroundColor:'#3b82f6',pointRadius:4}]},options:cfg});
+}
+
+// ===== SCROLL REVEAL =====
+function initReveal(){
+  const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.08});
+  document.querySelectorAll('.fade-in').forEach(el=>{el.classList.remove('visible');obs.observe(el);});
+}
+
+// ===== HEATMAP =====
+function renderHeatmap(){
+  const el=document.getElementById('actHeat');if(!el)return;
+  const data=[1,2,3,1,0,2,1, 3,1,2,2,3,0,1, 2,3,1,3,2,1,0, 3,2,3,1,2,3,2];
+  el.innerHTML='';
+  data.forEach((v,i)=>{
+    const d=document.createElement('div');
+    const cols=['var(--dark3)','rgba(230,57,70,.3)','rgba(230,57,70,.6)','var(--red)'];
+    d.style.cssText='height:24px;border-radius:4px;background:'+cols[v]+';transition:.2s;cursor:pointer';
+    d.title='Día '+(i+1)+': '+['Sin actividad','Actividad leve','Actividad moderada','Alta intensidad'][v];
+    d.onmouseenter=()=>d.style.transform='scale(1.15)';
+    d.onmouseleave=()=>d.style.transform='scale(1)';
+    el.appendChild(d);
+  });
+}
+
+// ===== PARTICLES =====
+function initParticles(){
+  const c=document.getElementById('particles');
+  if(!c)return;
+  const colors=['rgba(230,57,70,.5)','rgba(245,158,11,.4)','rgba(139,92,246,.4)','rgba(6,182,212,.3)','rgba(46,204,113,.3)'];
+  for(let i=0;i<18;i++){
+    const d=document.createElement('div');
+    const size=Math.random()*4+2;
+    const col=colors[Math.floor(Math.random()*colors.length)];
+    const x=Math.random()*100, y=Math.random()*100;
+    const dur=Math.random()*12+8;
+    const delay=Math.random()*-10;
+    d.className='particle';
+    d.style.cssText=`width:${size}px;height:${size}px;background:${col};left:${x}%;top:${y}%;animation-duration:${dur}s;animation-delay:${delay}s;filter:blur(${size>4?1:0}px)`;
+    c.appendChild(d);
+  }
+}
+
+// ===== ANIMATED COUNTER =====
+function animateCounter(el,target,suffix='',duration=1000){
+  let start=0,step=target/60;
+  const timer=setInterval(()=>{
+    start=Math.min(start+step,target);
+    el.textContent=Math.floor(start)+(suffix||'');
+    if(start>=target){el.textContent=target+(suffix||'');clearInterval(timer);}
+  },duration/60);
+}
+
+// ===== SMOOTH BAR FILL =====
+function animateBars(){
+  document.querySelectorAll('.mxf,.abxf').forEach(bar=>{
+    const w=bar.style.width;
+    bar.style.width='0%';
+    setTimeout(()=>{bar.style.transition='width 1s cubic-bezier(.4,0,.2,1)';bar.style.width=w;},100);
+  });
+}
+
+// ===== TOAST NOTIFICATION =====
+function showToast(msg,icon='✓',color='var(--green)'){
+  const t=document.createElement('div');
+  t.style.cssText=`position:fixed;bottom:28px;right:28px;background:var(--card);border:1px solid ${color};border-left:3px solid ${color};border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;z-index:900;box-shadow:0 8px 30px rgba(0,0,0,.4);animation:fadeUp .3s ease;max-width:300px`;
+  t.innerHTML=`<span style="font-size:18px">${icon}</span><span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(()=>{t.style.opacity='0';t.style.transform='translateY(10px)';t.style.transition='.3s';setTimeout(()=>t.remove(),300)},3000);
+}
+
+// ===== INIT =====
+function initAppWidgets(){
+  renderGlasses();
+  renderNotifs();
+  setTimeout(renderHeatmap,200);
+  setTimeout(animateBars,300);
+}
+
+// Override savePerfil to show toast
+const _savePerfil=savePerfil;
+window.savePerfil=function(){
+  const nm=document.getElementById('pfName').value.trim();
+  if(nm.length>=2){user.name=nm.toUpperCase();}
+  user.avatar=perfilSelAvatar;
+  updateAppUser();
+  const conf=document.getElementById('saveConf');
+  conf.classList.add('show'); setTimeout(()=>conf.classList.remove('show'),2500);
+  addNotif('👤','Perfil actualizado correctamente.','Ahora mismo');
+  showToast('Perfil guardado correctamente','👤','var(--yellow)');
+};
+
+// Override endSession to show toast
+const _endSession=endSession;
+window.endSession=function(){
+  const m=String(Math.floor(sessSeconds/60)).padStart(2,'0'),s=String(sessSeconds%60).padStart(2,'0');
+  const xp=Math.round(40+sessExDone*9+(sessSeconds/60)*0.5);
+  document.getElementById('xpmXP').textContent='+'+xp;
+  document.getElementById('xpmTime').textContent=m+':'+s;
+  document.getElementById('xpmEx').textContent=sessExDone+'/5';
+  clearInterval(sessInterval); sessRunning=false;
+  document.getElementById('sessOver').classList.remove('open');
+  document.getElementById('xpOver').classList.add('open');
+  addNotif('💪','Sesión completada. +'+xp+' XP ganados.','Ahora mismo');
+};
+showPage('landing');
+</script>
+</body>
+</html>
