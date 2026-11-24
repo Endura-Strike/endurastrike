@@ -21,10 +21,8 @@
   <meta name="twitter:title" content="Endura Strike - Entrena como un campeón">
   <meta name="twitter:description" content="Boxeo con IA: la camara analiza cada golpe y mide tu progreso real.">
   <meta name="apple-mobile-web-app-title" content="Endura Strike">
-  <meta name="format-detection" content="telephone=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Endura Strike">
 
 <title>Endura Strike</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800;900&family=Manrope:wght@500;600;700;800&family=Unbounded:wght@700;800&display=swap">
@@ -4907,11 +4905,8 @@ html.es-app .app-tab span { font: 500 10px -apple-system, system-ui, sans-serif 
 
   
   
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Endura Strike">
-  <script src="https://unpkg.com/@mediapipe/pose@0.5.1675469404/pose.js" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@mediapipe/pose@0.5.1675469404/pose.js" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" crossorigin="anonymous" defer></script>
 
 </head>
 <body>
@@ -6054,6 +6049,8 @@ html.es-app .app-tab span { font: 500 10px -apple-system, system-ui, sans-serif 
 <div class="toast" id="toast" style="position:fixed;bottom:28px;right:28px;background:var(--card);border:1px solid var(--green);border-left:3px solid var(--green);border-radius:12px;padding:13px 18px;display:flex;align-items:center;gap:10px;font-size:12px;font-weight:600;z-index:999;box-shadow:0 8px 30px rgba(0,0,0,.5);transform:translateY(80px);opacity:0;transition:.35s cubic-bezier(.4,0,.2,1);max-width:320px;pointer-events:none"><span id="toast-icon">✓</span><span id="toast-msg"></span></div>
 
 <script>
+/* Fecha AAAA-MM-DD en la hora local del teléfono (toISOString usa UTC y en Lima cambia de día a las 7 pm) */
+function fechaLocal(d){ d=d||new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
 
 let user = {name:'CAMPEÓN', avatar:'', avatarDesign:'d1', avatarCustom:null, apodo:'', frase:'', email:'', fotoPerfil:null, objetivo:'Rendimiento', nivel:'Intermedio', dias:3, fuertes:[], debiles:[]};
 
@@ -6703,7 +6700,7 @@ function renderPerformance() {
 function updatePeso(val) {
   state.peso = parseFloat(val);
   setText('p-peso-val', val);
-  const today = new Date().toISOString().split('T')[0];
+  const today = fechaLocal();
   const last  = state.weightHistory[state.weightHistory.length-1];
   if (!last || last.date !== today) state.weightHistory.push({ date:today, peso:state.peso });
   else last.peso = state.peso;
@@ -7752,7 +7749,7 @@ function guardarFicha() {
   const apodo = (document.getElementById('ficha-apodo')?.value || '').trim();
   const frase = (document.getElementById('ficha-frase')?.value || '').trim();
   user = user || {};
-  if (peso >= 25 && peso <= 180) { state.peso = peso; if (!state.weightHistory) state.weightHistory = []; const _t = new Date().toISOString().split('T')[0]; const _l = state.weightHistory[state.weightHistory.length-1]; if (!_l || _l.date !== _t) state.weightHistory.push({ date: _t, peso: peso }); else _l.peso = peso; }
+  if (peso >= 25 && peso <= 180) { state.peso = peso; if (!state.weightHistory) state.weightHistory = []; const _t = fechaLocal(); const _l = state.weightHistory[state.weightHistory.length-1]; if (!_l || _l.date !== _t) state.weightHistory.push({ date: _t, peso: peso }); else _l.peso = peso; }
   if (altura >= 100 && altura <= 230) state.talla = altura;
   if (edad >= 5 && edad <= 99) user.edad = edad;
   user.apodo = apodo;
@@ -7876,7 +7873,7 @@ function exportarDatos()  {
   const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob);
-  a.download=`endura-strike-${new Date().toISOString().split('T')[0]}.json`;
+  a.download=`endura-strike-${fechaLocal()}.json`;
   a.click(); URL.revokeObjectURL(a.href);
   showToast('📤 Datos exportados');
 }
@@ -8718,7 +8715,7 @@ function guardarSesion() {
   const sesión = {
     id:         Date.now(),
     fecha:      new Date().toLocaleDateString('es-PE', {day:'numeric',month:'short',year:'numeric'}),
-    fechaISO:   new Date().toISOString().split('T')[0],
+    fechaISO:   fechaLocal(),
     tipo:       regState.tipo,
     duracion:   dur,
     intensidad: regState.intensidad,
@@ -11327,7 +11324,7 @@ const RETOS_DIA = [
   { tipo:'potencia', meta:1,   ico:'💥', txt:'Logra 70%+ de potencia en una sesión', xp:110 },
   { tipo:'guardia',  meta:1,   ico:'🛡️', txt:'Mantén 75%+ de guardia en una sesión', xp:100 },
 ];
-function hoyStr() { return new Date().toISOString().split('T')[0]; }
+function hoyStr() { return fechaLocal(); }
 function getReto() {
   const hoy = hoyStr();
   if (!state.retoDiario || state.retoDiario.fecha !== hoy) {
@@ -14674,7 +14671,7 @@ function registrarRecord(id, valor){
   var r = recState();
   var prev = r[id] ? (r[id].v||0) : 0;
   if(valor <= prev) return false;
-  r[id] = { v:valor, f:new Date().toISOString().slice(0,10), prev:prev };
+  r[id] = { v:valor, f:fechaLocal(), prev:prev };
   if(typeof guardarDatos==='function') guardarDatos();
   celebrarRecord(id, valor, prev);
   return true;
@@ -14710,13 +14707,13 @@ function celebrarRecord(id, valor, prev){
     window.ganarXP = function(c){
       _g.apply(this, arguments);
       try{
-        var hoy = new Date().toISOString().slice(0,10);
+        var hoy = fechaLocal();
         state.xpDia = state.xpDia || {};
         state.xpDia[hoy] = (state.xpDia[hoy]||0) + (Number(c)||0);
         registrarRecord('xpdia', state.xpDia[hoy]);
         var sem=0, t=Date.now();
         for(var i=0;i<7;i++){
-          var d=new Date(t-i*86400000).toISOString().slice(0,10);
+          var d=fechaLocal(new Date(t-i*86400000));
           sem += (state.xpDia[d]||0);
         }
         registrarRecord('xpsem', sem);
@@ -14733,7 +14730,7 @@ function celebrarRecord(id, valor, prev){
     try{
       registrarRecord('racha', state.racha||state.streak||0);
       registrarRecord('arc', ((state.winterArc||{}).diasCompletados)||0);
-      var hoy = new Date().toISOString().slice(0,10);
+      var hoy = fechaLocal();
       var vp = state.videosPracticados||{}, n=0;
       Object.keys(vp).forEach(function(k){
         var v=vp[k];
@@ -14975,7 +14972,7 @@ function bloqueHoy(){
   var arc   = _n((state.winterArc||{}).diasCompletados);
   var _mm = cuentaMisiones();
   var hechas = _mm.hechas, total = _mm.total;
-  var xpHoy = _n((state.xpDia||{})[new Date().toISOString().slice(0,10)]);
+  var xpHoy = _n((state.xpDia||{})[fechaLocal()]);
 
   // Una sola cosa: la que falta. Se elige por orden de importancia.
   var accion, detalle, destino, verbo;
@@ -15553,7 +15550,7 @@ function renderHistorial(){
 
   var cab = document.getElementById('hist-resumen');
   if(cab){
-    var hoy = new Date().toISOString().slice(0,10);
+    var hoy = fechaLocal();
     var semana = 0, minSemana = 0, t = Date.now();
     log.forEach(function(r){
       var d = new Date(r.fecha).getTime();
@@ -15863,7 +15860,7 @@ function minutosPorDia(){
   var m = {};
   (state.sessionLog||[]).forEach(function(r){
     if(!r || !r.fecha) return;
-    var k = String(r.fecha).slice(0,10);
+    var k = fechaLocal(new Date(r.fecha));
     m[k] = (m[k]||0) + (r.min||0);
   });
   return m;
@@ -15925,7 +15922,7 @@ function sesionesEstaSemana(){
   (state.sessionLog||[]).forEach(function(r){
     if(!r || !r.fecha || !r.manual) return;
     var d = new Date(r.fecha).getTime();
-    if(t-d < 7*86400000) dias[String(r.fecha).slice(0,10)] = true;
+    if(t-d < 7*86400000) dias[fechaLocal(new Date(r.fecha))] = true;
   });
   return Object.keys(dias).length;
 }
@@ -15958,7 +15955,7 @@ function exportarProgreso(){
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'endura-strike-respaldo-'+new Date().toISOString().slice(0,10)+'.json';
+    a.download = 'endura-strike-respaldo-'+fechaLocal()+'.json';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
     if(typeof showToast==='function') showToast('Respaldo descargado','var(--green)');
@@ -16028,7 +16025,7 @@ function renderRespaldo(){
 // No repite lo de ayer, alterna carga y manda recuperación
 // cuando vienes de días duros. Todo sale de lo que registraste.
 
-function _diaISO(d){ return new Date(d).toISOString().slice(0,10); }
+function _diaISO(d){ return fechaLocal(new Date(d)); }
 
 function historialReciente(n){
   var t = Date.now();
@@ -16747,13 +16744,13 @@ function exportarCSV(){
     var cab = 'fecha,tipo,minutos,sensacion,xp,nota\n';
     var filas = log.map(function(r){
       var nota = String(r.nota||'').replace(/"/g,'""');
-      return [String(r.fecha).slice(0,10), '"'+String(r.tipo||'').replace(/"/g,'""')+'"',
+      return [fechaLocal(new Date(r.fecha)), '"'+String(r.tipo||'').replace(/"/g,'""')+'"',
               r.min||0, r.sensacion||'', r.xp||0, '"'+nota+'"'].join(',');
     }).join('\n');
     var blob = new Blob(['﻿'+cab+filas], {type:'text/csv;charset=utf-8'});
     var u = URL.createObjectURL(blob);
     var a = document.createElement('a');
-    a.href = u; a.download = 'endura-historial-'+new Date().toISOString().slice(0,10)+'.csv';
+    a.href = u; a.download = 'endura-historial-'+fechaLocal()+'.csv';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){ URL.revokeObjectURL(u); }, 1500);
     if(typeof showToast==='function') showToast(log.length+' sesiones exportadas','var(--gold)');
@@ -16877,7 +16874,7 @@ function fijarHora(v){
 }
 function tocaEntrenar(){
   var h = horaEntreno(); if(!h) return false;
-  var hoy = new Date().toISOString().slice(0,10);
+  var hoy = fechaLocal();
   var xpHoy = ((state.xpDia||{})[hoy])||0;
   if(xpHoy > 0) return false;                       // ya entrenaste
   var p = h.split(':'), ahora = new Date();
@@ -17273,7 +17270,7 @@ function resumenMes(desplaza){
   (state.sessionLog||[]).forEach(function(r){
     if(!r || !r.manual || !r.fecha) return;
     var t = new Date(r.fecha);
-    if(t >= ini && t < fin){ dias[String(r.fecha).slice(0,10)] = true; min += (r.min||0); n++; }
+    if(t >= ini && t < fin){ dias[fechaLocal(new Date(r.fecha))] = true; min += (r.min||0); n++; }
   });
   return { dias:Object.keys(dias).length, min:min, sesiones:n,
            nombre:ini.toLocaleDateString('es-PE',{month:'long'}) };
@@ -17515,9 +17512,9 @@ async function programarAviso(hhmm){
 function metaMinutos(){ return state.metaMinutosDia || 20; }
 
 function minutosHoy(){
-  var hoy = new Date().toISOString().slice(0,10), m = 0;
+  var hoy = fechaLocal(), m = 0;
   (state.sessionLog||[]).forEach(function(r){
-    if(r && r.fecha && String(r.fecha).slice(0,10) === hoy) m += (r.min||0);
+    if(r && r.fecha && fechaLocal(new Date(r.fecha)) === hoy) m += (r.min||0);
   });
   return m;
 }
@@ -17526,14 +17523,14 @@ function minutosHoy(){
 // desplaza = 0 es la semana en curso, 1 la anterior, y así.
 function ventana7(desplaza){
   var base = Date.now() - (desplaza||0)*7*86400000, d = {};
-  for(var i=0;i<7;i++) d[new Date(base-i*86400000).toISOString().slice(0,10)] = true;
+  for(var i=0;i<7;i++) d[fechaLocal(new Date(base-i*86400000))] = true;
   return d;
 }
 function diasEnSemana(desplaza){
   var v = ventana7(desplaza), min = {};
   (state.sessionLog||[]).forEach(function(r){
     if(!r || !r.fecha) return;
-    var k = String(r.fecha).slice(0,10);
+    var k = fechaLocal(new Date(r.fecha));
     if(v[k]) min[k] = (min[k]||0) + (r.min||0);
   });
   return Object.keys(min).filter(function(k){ return min[k] > 0; }).length;
@@ -17603,12 +17600,12 @@ function renderHoy(){
   else { est = 'Hoy todavía está en cero. <b>'+d[0].m+' minutos</b> y lo cierras.'; ei='○'; }
 
   // La semana, día por día, con el anillo de minutos de cada uno.
-  var hoyISO = new Date().toISOString().slice(0,10);
+  var hoyISO = fechaLocal();
   var porDia = (typeof minutosPorDia==='function') ? minutosPorDia() : {};
   var L = ['L','M','M','J','V','S','D'], sem = '';
   for(var i=6;i>=0;i--){
     var dt = new Date(Date.now()-i*86400000);
-    var iso = dt.toISOString().slice(0,10);
+    var iso = fechaLocal(dt);
     var mins = porDia[iso]||0;
     var esHoy = iso===hoyISO;
     sem += '<div class="hy-d'+(esHoy?' hoy':'')+'" role="img" aria-label="'
@@ -20047,9 +20044,15 @@ document.addEventListener('click', function (e) {
 }, true);
 
 /* ═══ v53 · ningún botón blanco con letra blanca: verde con letra negra ═══ */
-function focoSinBlanco() {
+function focoSinBlanco(raices) {
   function lum(s) { var m = s && s.match(/[\d.]+/g); if (!m) return -1; if (m[3] !== undefined && +m[3] < .5) return -1; return (+m[0] + +m[1] + +m[2]) / 3; }
-  document.querySelectorAll('button, a, .btn, [class*="btn"], [class*="chip"], [onclick]').forEach(function (e) {
+  var SEL = 'button, a, .btn, [class*="btn"], [class*="chip"], [onclick]', lista = [];
+  (raices && raices.length ? raices : [document]).forEach(function (r) {
+    if (!r.isConnected && r !== document) return;
+    if (r.matches && r.matches(SEL)) lista.push(r);
+    if (r.querySelectorAll) lista.push.apply(lista, r.querySelectorAll(SEL));
+  });
+  lista.forEach(function (e) {
     if (e.classList.contains('fo-verde') || e.classList.contains('fo-negro') || !e.textContent.trim()) return;
     if (e.closest('.ao-c, #app-onb, .es-bien')) return;
     var c = getComputedStyle(e), bg = lum(c.backgroundColor);
@@ -20058,11 +20061,19 @@ function focoSinBlanco() {
   });
 }
 (function () {
-  var t = null;
-  function luego() { clearTimeout(t); t = setTimeout(focoSinBlanco, 120); }
+  var t = null, nuevos = [], todo = false;
+  function correr() { var r = todo ? null : nuevos; nuevos = []; todo = false; focoSinBlanco(r); }
+  function luego() { todo = true; clearTimeout(t); t = setTimeout(correr, 120); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', luego); else luego();
   window.addEventListener('load', luego);
-  try { new MutationObserver(luego).observe(document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+  try {
+    /* Solo los elementos nuevos: cambiar el texto del cronómetro cada segundo ya no reescanea toda la app */
+    new MutationObserver(function (ms) {
+      var hay = false;
+      ms.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) { nuevos.push(n); hay = true; } }); });
+      if (hay) { clearTimeout(t); t = setTimeout(correr, 120); }
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
 })();
 
 /* ═══ v53 · animaciones con más calidad ═══ */
