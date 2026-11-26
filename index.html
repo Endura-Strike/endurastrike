@@ -21184,15 +21184,15 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
   var ESTIRADO = { 13: [0.17, -0.47, -0.235], 15: [0.16, -0.46, -0.5], 14: [-0.17, -0.47, -0.235], 16: [-0.16, -0.46, -0.5] };
   var PUNTOS = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
   /* [desde, hasta, grosor en la parte ancha, forma] */
-  var HUESOS = [[11, 13, 0.058, 'brazo'], [13, 15, 0.05, 'ante'], [12, 14, 0.058, 'brazo'], [14, 16, 0.05, 'ante'],
-    [23, 25, 0.085, 'muslo'], [25, 27, 0.062, 'pierna'], [24, 26, 0.085, 'muslo'], [26, 28, 0.062, 'pierna']];
+  var HUESOS = [[11, 13, 0.076, 'brazo'], [13, 15, 0.062, 'ante'], [12, 14, 0.076, 'brazo'], [14, 16, 0.062, 'ante'],
+    [23, 25, 0.1, 'muslo'], [25, 27, 0.07, 'pierna'], [24, 26, 0.1, 'muslo'], [26, 28, 0.07, 'pierna']];
   /* Perfil de cada músculo a lo largo del hueso: [posición 0..1, radio relativo] */
   var FORMAS = {
-    brazo: [[0, 0.82], [0.12, 1], [0.4, 0.96], [0.75, 0.74], [1, 0.62]],
-    ante: [[0, 0.78], [0.2, 1], [0.55, 0.82], [1, 0.56]],
-    muslo: [[0, 0.92], [0.22, 1], [0.6, 0.84], [1, 0.6]],
-    pierna: [[0, 0.68], [0.28, 1], [0.65, 0.66], [1, 0.48]],
-    torso: [[0, 0.6], [0.1, 0.66], [0.3, 0.6], [0.58, 0.8], [0.8, 1], [0.93, 0.9], [1, 0.42]]
+    brazo: [[0, 0.86], [0.12, 0.98], [0.3, 0.9], [0.52, 1], [0.72, 0.86], [0.88, 0.66], [1, 0.58]],
+    ante: [[0, 0.72], [0.14, 0.96], [0.3, 1], [0.6, 0.76], [0.85, 0.58], [1, 0.54]],
+    muslo: [[0, 0.88], [0.18, 1], [0.45, 0.98], [0.72, 0.84], [0.9, 0.66], [1, 0.58]],
+    pierna: [[0, 0.62], [0.12, 0.86], [0.3, 1], [0.48, 0.86], [0.72, 0.58], [1, 0.46]],
+    torso: [[0, 0.56], [0.1, 0.6], [0.3, 0.52], [0.5, 0.68], [0.7, 0.92], [0.85, 1], [0.95, 0.9], [1, 0.4]]
   };
 
   function sombraDemo(t) {                                    // sombra sola mientras no hay cámara
@@ -21239,9 +21239,10 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     var mCuerpo = mat(0x63e6be, 1), mJunta = mat(0x9ff5dc, 0.9), mTorso = mat(0x63e6be, 0.9);
     var huesos = HUESOS.map(function (b) { var m = new THREE.Mesh(gForma[b[3]], mCuerpo); m.userData = b; cuerpo.add(m); return m; });
     var cuello = new THREE.Mesh(gCil, mCuerpo), torso = new THREE.Mesh(gForma.torso, mTorso), pelvis = new THREE.Mesh(gEsf, mTorso), cabeza = new THREE.Mesh(gEsf, mCuerpo);
-    [cuello, torso, pelvis, cabeza].forEach(function (m) { cuerpo.add(m); });
+    var trapecio = new THREE.Mesh(gEsf, mTorso), pecho = { 11: new THREE.Mesh(gEsf, mCuerpo), 12: new THREE.Mesh(gEsf, mCuerpo) };
+    [cuello, torso, pelvis, cabeza, trapecio, pecho[11], pecho[12]].forEach(function (m) { cuerpo.add(m); });
     /* Hombros (deltoides) y articulaciones pequeñas, para que no parezcan bolitas */
-    var juntas = {}, TAM = { 11: 0.064, 12: 0.064, 13: 0.03, 14: 0.03, 25: 0.036, 26: 0.036 };
+    var juntas = {}, TAM = { 11: 0.09, 12: 0.09, 13: 0.03, 14: 0.03, 25: 0.036, 26: 0.036 };
     Object.keys(TAM).forEach(function (i) { var m = new THREE.Mesh(gEsf, +i < 13 ? mCuerpo : mJunta); m.scale.set(TAM[i], TAM[i] * (+i < 13 ? 0.85 : 1), TAM[i]); cuerpo.add(m); juntas[i] = m; });
     var pies = { 27: new THREE.Mesh(gEsf, mCuerpo), 28: new THREE.Mesh(gEsf, mCuerpo) };
     pies[27].scale.set(0.045, 0.032, 0.105); pies[28].scale.set(0.045, 0.032, 0.105); cuerpo.add(pies[27]); cuerpo.add(pies[28]);
@@ -21340,14 +21341,22 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
       ejeZ.crossVectors(ejeX, ejeY).normalize(); ejeX.crossVectors(ejeY, ejeZ).normalize();
       base.makeBasis(ejeX, ejeY, ejeZ); giroTronco.setFromRotationMatrix(base);
       torso.quaternion.copy(giroTronco); torso.position.copy(cad).addScaledVector(ejeY, alto * 0.52);
-      torso.scale.set(anchoH * 0.5, alto * 1.08, 0.11);
+      torso.scale.set(anchoH * 0.72, alto * 1.08, 0.13);
+      /* Trapecios, pectorales: dan volumen de boxeador. Ojo: ejeZ apunta hacia la espalda */
+      trapecio.quaternion.copy(giroTronco); trapecio.position.copy(hom).addScaledVector(ejeY, -0.01).addScaledVector(ejeZ, 0.02);
+      trapecio.scale.set(anchoH * 0.48, 0.065, 0.07);
+      [11, 12].forEach(function (i) {
+        var pc = pecho[i]; pc.quaternion.copy(giroTronco);
+        pc.position.copy(hom).addScaledVector(ejeY, -0.085).addScaledVector(ejeX, (i === 11 ? 1 : -1) * anchoH * 0.22).addScaledVector(ejeZ, -0.095);
+        pc.scale.set(anchoH * 0.24, 0.065, 0.045);
+      });
       pelvis.quaternion.copy(giroTronco); pelvis.position.copy(cad).addScaledVector(ejeY, 0.015);
       pelvis.scale.set(Math.max(0.1, v3(23).distanceTo(v3(24)) * 0.78), 0.075, 0.1);
       cab.copy(v3(0)); cab.y += 0.04;
-      hueso(cuello, hom, cab, 0.042);
+      hueso(cuello, hom, cab, 0.052);
       cabeza.position.copy(cab); cabeza.position.y += 0.05; cabeza.scale.set(0.095, 0.118, 0.105);
       Object.keys(juntas).forEach(function (i) { juntas[i].position.copy(v3(+i)); });
-      [27, 28].forEach(function (i) { var pie = pies[i]; pie.position.copy(v3(i)); pie.position.y -= 0.035; pie.position.addScaledVector(ejeZ, 0.055); pie.quaternion.copy(giroTronco); });
+      [27, 28].forEach(function (i) { var pie = pies[i]; pie.position.copy(v3(i)); pie.position.y -= 0.035; pie.position.addScaledVector(ejeZ, -0.055); pie.quaternion.copy(giroTronco); });
       [15, 16].forEach(function (i) {
         var gl = guantes[i], codo = v3(i === 15 ? 13 : 14);
         gl.position.copy(v3(i));
