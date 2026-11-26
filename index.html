@@ -6050,7 +6050,7 @@ html.es-app .app-tab span { font: 500 10px -apple-system, system-ui, sans-serif 
 
 <script>
 /* Fecha AAAA-MM-DD en la hora local del teléfono (toISOString usa UTC y en Lima cambia de día a las 7 pm) */
-function fechaLocal(d){ d=d||new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+function fechaLocal(d){ d = d == null ? new Date() : new Date(d); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
 
 let user = {name:'CAMPEÓN', avatar:'', avatarDesign:'d1', avatarCustom:null, apodo:'', frase:'', email:'', fotoPerfil:null, objetivo:'Rendimiento', nivel:'Intermedio', dias:3, fuertes:[], debiles:[]};
 
@@ -14713,7 +14713,7 @@ function celebrarRecord(id, valor, prev){
         registrarRecord('xpdia', state.xpDia[hoy]);
         var sem=0, t=Date.now();
         for(var i=0;i<7;i++){
-          var d=fechaLocal(new Date(t-i*86400000));
+          var d=fechaLocal(t-i*86400000);
           sem += (state.xpDia[d]||0);
         }
         registrarRecord('xpsem', sem);
@@ -15856,15 +15856,6 @@ function pintarReproductor(){
 // ═══════════════ CALENDARIO DEL MES ═══════════════
 var calMes = 0;   // 0 = este mes, -1 = el anterior
 
-function minutosPorDia(){
-  var m = {};
-  (state.sessionLog||[]).forEach(function(r){
-    if(!r || !r.fecha) return;
-    var k = fechaLocal(new Date(r.fecha));
-    m[k] = (m[k]||0) + (r.min||0);
-  });
-  return m;
-}
 function moverMes(d){ calMes = Math.max(-11, Math.min(0, calMes+d)); renderCalendario(); }
 
 function renderCalendario(){
@@ -15922,7 +15913,7 @@ function sesionesEstaSemana(){
   (state.sessionLog||[]).forEach(function(r){
     if(!r || !r.fecha || !r.manual) return;
     var d = new Date(r.fecha).getTime();
-    if(t-d < 7*86400000) dias[fechaLocal(new Date(r.fecha))] = true;
+    if(t-d < 7*86400000) dias[fechaLocal(d)] = true;
   });
   return Object.keys(dias).length;
 }
@@ -16025,7 +16016,7 @@ function renderRespaldo(){
 // No repite lo de ayer, alterna carga y manda recuperación
 // cuando vienes de días duros. Todo sale de lo que registraste.
 
-function _diaISO(d){ return fechaLocal(new Date(d)); }
+function _diaISO(d){ return fechaLocal(d); }
 
 function historialReciente(n){
   var t = Date.now();
@@ -16095,7 +16086,7 @@ function renderSugerencia(){
 // Un día libre al mes. La vida pasa y perder 30 días por una noche
 // de trabajo no enseña disciplina: solo hace que abandones.
 
-function escudoMes(){ return new Date().toISOString().slice(0,7); }
+function escudoMes(){ return fechaLocal().slice(0,7); }
 function escudoDisponible(){
   var e = state.escudo || {};
   return e.mes !== escudoMes();
@@ -16744,7 +16735,7 @@ function exportarCSV(){
     var cab = 'fecha,tipo,minutos,sensacion,xp,nota\n';
     var filas = log.map(function(r){
       var nota = String(r.nota||'').replace(/"/g,'""');
-      return [fechaLocal(new Date(r.fecha)), '"'+String(r.tipo||'').replace(/"/g,'""')+'"',
+      return [fechaLocal(r.fecha), '"'+String(r.tipo||'').replace(/"/g,'""')+'"',
               r.min||0, r.sensacion||'', r.xp||0, '"'+nota+'"'].join(',');
     }).join('\n');
     var blob = new Blob(['﻿'+cab+filas], {type:'text/csv;charset=utf-8'});
@@ -17270,7 +17261,7 @@ function resumenMes(desplaza){
   (state.sessionLog||[]).forEach(function(r){
     if(!r || !r.manual || !r.fecha) return;
     var t = new Date(r.fecha);
-    if(t >= ini && t < fin){ dias[fechaLocal(new Date(r.fecha))] = true; min += (r.min||0); n++; }
+    if(t >= ini && t < fin){ dias[fechaLocal(t)] = true; min += (r.min||0); n++; }
   });
   return { dias:Object.keys(dias).length, min:min, sesiones:n,
            nombre:ini.toLocaleDateString('es-PE',{month:'long'}) };
@@ -17510,31 +17501,6 @@ async function programarAviso(hhmm){
 // Todo sale del registro real de sesiones. Nada inventado.
 
 function metaMinutos(){ return state.metaMinutosDia || 20; }
-
-function minutosHoy(){
-  var hoy = fechaLocal(), m = 0;
-  (state.sessionLog||[]).forEach(function(r){
-    if(r && r.fecha && fechaLocal(new Date(r.fecha)) === hoy) m += (r.min||0);
-  });
-  return m;
-}
-
-// Días distintos con entrenamiento dentro de una ventana de 7 días.
-// desplaza = 0 es la semana en curso, 1 la anterior, y así.
-function ventana7(desplaza){
-  var base = Date.now() - (desplaza||0)*7*86400000, d = {};
-  for(var i=0;i<7;i++) d[fechaLocal(new Date(base-i*86400000))] = true;
-  return d;
-}
-function diasEnSemana(desplaza){
-  var v = ventana7(desplaza), min = {};
-  (state.sessionLog||[]).forEach(function(r){
-    if(!r || !r.fecha) return;
-    var k = fechaLocal(new Date(r.fecha));
-    if(v[k]) min[k] = (min[k]||0) + (r.min||0);
-  });
-  return Object.keys(min).filter(function(k){ return min[k] > 0; }).length;
-}
 
 // Semanas seguidas cumpliendo la meta. La semana en curso no cuenta
 // hasta que se cumple, pero tampoco rompe la racha mientras va a medias.
@@ -18215,7 +18181,7 @@ function neoLobo(animo, lado) {
    cuenta para ese día, no para el siguiente. */
 
 /* ── Fechas locales ── */
-function nClave(d) { d = d || new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function nClave(d) { return fechaLocal(d); }
 function nDe(k) { var a = String(k).split('-'); return new Date(+a[0], +a[1] - 1, +a[2]); }
 function nSuma(k, n) { var d = nDe(k); d.setDate(d.getDate() + n); return nClave(d); }
 function nLunes(k) { var d = nDe(k); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return nClave(d); }
@@ -20046,11 +20012,11 @@ document.addEventListener('click', function (e) {
 /* ═══ v53 · ningún botón blanco con letra blanca: verde con letra negra ═══ */
 function focoSinBlanco(raices) {
   function lum(s) { var m = s && s.match(/[\d.]+/g); if (!m) return -1; if (m[3] !== undefined && +m[3] < .5) return -1; return (+m[0] + +m[1] + +m[2]) / 3; }
-  var SEL = 'button, a, .btn, [class*="btn"], [class*="chip"], [onclick]', lista = [];
-  (raices && raices.length ? raices : [document]).forEach(function (r) {
-    if (!r.isConnected && r !== document) return;
-    if (r.matches && r.matches(SEL)) lista.push(r);
-    if (r.querySelectorAll) lista.push.apply(lista, r.querySelectorAll(SEL));
+  var SEL = 'button, a, .btn, [class*="btn"], [class*="chip"], [onclick]', lista = new Set();
+  (raices || [document]).forEach(function (r) {
+    if (!r.isConnected) return;
+    if (r.matches && r.matches(SEL)) lista.add(r);
+    r.querySelectorAll(SEL).forEach(function (e) { lista.add(e); });
   });
   lista.forEach(function (e) {
     if (e.classList.contains('fo-verde') || e.classList.contains('fo-negro') || !e.textContent.trim()) return;
@@ -20061,18 +20027,20 @@ function focoSinBlanco(raices) {
   });
 }
 (function () {
-  var t = null, nuevos = [], todo = false;
-  function correr() { var r = todo ? null : nuevos; nuevos = []; todo = false; focoSinBlanco(r); }
-  function luego() { todo = true; clearTimeout(t); t = setTimeout(correr, 120); }
+  var t = null, nuevos = new Set();
+  function correr() { t = null; var r = nuevos.has(document) ? [document] : Array.from(nuevos); nuevos.clear(); focoSinBlanco(r); }
+  function agendar(n) { nuevos.add(n); if (!t) t = setTimeout(correr, 120); }
+  function luego() { agendar(document); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', luego); else luego();
   window.addEventListener('load', luego);
   try {
-    /* Solo los elementos nuevos: cambiar el texto del cronómetro cada segundo ya no reescanea toda la app */
+    /* Solo lo que cambia: elementos nuevos o cambios de clase. El texto del cronómetro ya no reescanea toda la app */
     new MutationObserver(function (ms) {
-      var hay = false;
-      ms.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) { nuevos.push(n); hay = true; } }); });
-      if (hay) { clearTimeout(t); t = setTimeout(correr, 120); }
-    }).observe(document.documentElement, { childList: true, subtree: true });
+      ms.forEach(function (m) {
+        if (m.type === 'attributes') agendar(m.target);
+        else m.addedNodes.forEach(function (n) { if (n.nodeType === 1) agendar(n); });
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   } catch (e) {}
 })();
 
