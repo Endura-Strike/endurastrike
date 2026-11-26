@@ -5275,9 +5275,11 @@ html.es-app .app-tab span { font: 500 10px -apple-system, system-ui, sans-serif 
       <div class="card tec3d" style="margin-bottom:15px">
         <div class="card-title">Mira cada golpe</div>
         <div class="cam2-holo tec3d-holo" id="tec3d-holo"><div class="cam2-holo-lbl"><i></i>Holograma <b id="tec3d-nombre">Jab</b></div><div class="cam2-holo-sin">El 3D no está disponible en este teléfono</div></div>
-        <div class="tec3d-tabs" role="group" aria-label="Elige un golpe">
-          <button type="button" data-t="jab" class="on" aria-pressed="true" onclick="tecElegir('jab')">Jab</button><button type="button" data-t="cross" aria-pressed="false" onclick="tecElegir('cross')">Cross</button><button type="button" data-t="hook" aria-pressed="false" onclick="tecElegir('hook')">Gancho</button><button type="button" data-t="uppercut" aria-pressed="false" onclick="tecElegir('uppercut')">Uppercut</button>
+        <div class="tec3d-tabs" id="tec3d-fam" role="group" aria-label="Familia de golpes">
+          <button type="button" data-f="rectos" class="on" aria-pressed="true" onclick="tecFamilia('rectos')">Rectos</button><button type="button" data-f="cruzados" aria-pressed="false" onclick="tecFamilia('cruzados')">Cruzados</button><button type="button" data-f="ganchos" aria-pressed="false" onclick="tecFamilia('ganchos')">Ganchos</button>
         </div>
+        <p class="tec3d-fam-txt" id="tec3d-fam-txt">Viajan en línea recta, del hombro al objetivo. Son los más rápidos.</p>
+        <div class="tec3d-tipos" id="tec3d-tipos" role="group" aria-label="Tipo de golpe"></div>
         <div class="tec3d-pie"><p id="tec3d-txt">Mano de adelante, recta y rápida. Vuelve a la cara por el mismo camino.</p><button type="button" class="tec3d-lento" id="tec3d-lento" aria-pressed="false" onclick="tecLento()">Lento</button></div>
       </div>
       <div class="card" style="margin-bottom:15px">
@@ -21340,51 +21342,92 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     torso: [[0, 0.56], [0.1, 0.6], [0.3, 0.52], [0.5, 0.68], [0.7, 0.92], [0.85, 1], [0.95, 0.9], [1, 0.4]]
   };
 
-  /* Cada golpe con el cuerpo entero (guardia ortodoxa; la zurda se refleja). Coordenadas de MediaPipe: metros, origen en la cadera, y hacia abajo, -z hacia la cámara.
-     k = [segundo del ciclo, puntos que cambian respecto a la guardia]; imp = momento del impacto */
+  /* ═══ Cuerpo de boxeador por articulaciones ═══
+     Coordenadas de MediaPipe: metros, y hacia abajo, -z hacia la cámara (el rival). Guardia ortodoxa: izquierda adelante.
+     Una pose se arma con pocos parámetros y los brazos y piernas se resuelven con cinemática inversa de dos huesos,
+     así siempre conservan su largo. Parámetros: r = giro del torso (+ = hombro de adelante al frente), d = cuánto baja
+     con las rodillas, f = inclinación al frente, l = inclinación lateral (+ = hacia su izquierda), piv = pivote del pie de atrás. */
+  function vSum(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+  function vRes(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+  function vEsc(a, k) { return [a[0] * k, a[1] * k, a[2] * k]; }
+  function vPunto(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
+  function vNorma(a) { var l = Math.sqrt(vPunto(a, a)) || 1; return vEsc(a, 1 / l); }
+  function vMezcla(a, b, u) { return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u]; }
+  function rotY(v, r) { var c = Math.cos(r), sn = Math.sin(r); return [v[0] * c + v[2] * sn, v[1], -v[0] * sn + v[2] * c]; }
+  function ik(S, T, L1, L2, polo) {                         // devuelve [codo/rodilla, muñeca/tobillo]
+    var d = vRes(T, S), dist = Math.sqrt(vPunto(d, d)) || 0.001, dir = vEsc(d, 1 / dist);
+    dist = Math.max(0.08, Math.min(dist, L1 + L2 - 0.004));
+    var a = (L1 * L1 - L2 * L2 + dist * dist) / (2 * dist), h = Math.sqrt(Math.max(0, L1 * L1 - a * a));
+    var p = vRes(polo, vEsc(dir, vPunto(polo, dir))); p = vPunto(p, p) < 1e-6 ? [0, 1, 0] : vNorma(p);
+    return [vSum(vSum(S, vEsc(dir, a)), vEsc(p, h)), vSum(S, vEsc(dir, dist))];
+  }
+  var BRAZO = [0.25, 0.27], PIERNA = [0.43, 0.44], GUARDIA = { r: 0.45, d: 0, f: 0, l: 0, piv: 0 };
+  function nariz(P) { var cae = 0.07 + P.d; return [P.l * 1.3, -0.6 + cae, -0.1 - P.f * 1.4]; }
+  function manoGuardia(P, lado) {                           // adelante: a la altura de la mejilla; atrás: en la mandíbula
+    var n = nariz(P);
+    return lado === 'L' ? { t: vSum(n, [0.08, 0.05, -0.22]), p: [0.5, 1, 0.1] } : { t: vSum(n, [-0.06, 0.08, -0.08]), p: [-0.5, 1, 0.2] };
+  }
+  function poseDe(P, mL, mR) {
+    var cae = 0.07 + P.d, C = [P.l, -0.47 + cae, -P.f], rh = P.r * 0.7, o = {};
+    o[11] = vSum(C, rotY([0.18, 0, 0], P.r)); o[12] = vSum(C, rotY([-0.18, 0, 0], P.r));
+    o[0] = nariz(P);
+    o[23] = vSum([0, cae, 0], rotY([0.105, 0, 0], rh)); o[24] = vSum([0, cae, 0], rotY([-0.105, 0, 0], rh));
+    o[27] = [0.13, 0.86, -0.2]; o[28] = vMezcla([-0.15, 0.86, 0.19], [-0.12, 0.82, 0.16], P.piv);
+    var pi = ik(o[23], o[27], PIERNA[0], PIERNA[1], [0.25, 0, -1]), pd = ik(o[24], o[28], PIERNA[0], PIERNA[1], [-0.25, 0, -1]);
+    o[25] = pi[0]; o[27] = pi[1]; o[26] = pd[0]; o[28] = pd[1];
+    var bi = ik(o[11], mL.t, BRAZO[0], BRAZO[1], mL.p), bd = ik(o[12], mR.t, BRAZO[0], BRAZO[1], mR.p);
+    o[13] = bi[0]; o[15] = bi[1]; o[14] = bd[0]; o[16] = bd[1];
+    return o;
+  }
+  /* Golpes: [segundo del ciclo, parámetros]. L/R = [x, y, z del puño respecto a la nariz, x, y, z hacia donde apunta el codo]; sin L/R la mano queda en guardia */
   var CICLO = 2.4;
   var GOLPES = {
-    jab: { lado: 'left', imp: 1.06, k: [[0.85, {}],
-      [1.06, { 11: [0.18, -0.48, -0.05], 12: [-0.17, -0.47, 0.04], 13: [0.171, -0.475, -0.285], 15: [0.16, -0.47, -0.555], 16: [-0.1, -0.54, -0.16], 0: [0.02, -0.62, -0.1] }],
-      [1.2, { 11: [0.18, -0.48, -0.05], 12: [-0.17, -0.47, 0.04], 13: [0.171, -0.475, -0.285], 15: [0.16, -0.47, -0.555], 16: [-0.1, -0.54, -0.16], 0: [0.02, -0.62, -0.1] }],
-      [1.5, {}]] },
-    cross: { lado: 'right', imp: 1.1, k: [[0.85, {}],
-      [1.1, { 11: [0.17, -0.48, 0.09], 12: [-0.14, -0.48, -0.11], 14: [-0.078, -0.476, -0.337], 16: [-0.006, -0.47, -0.597], 15: [0.1, -0.53, -0.2], 23: [0.11, 0, 0.03], 24: [-0.1, 0, -0.04], 26: [-0.1, 0.42, -0.02], 28: [-0.12, 0.83, 0.06], 0: [0.04, -0.61, -0.12] }],
-      [1.24, { 11: [0.17, -0.48, 0.09], 12: [-0.14, -0.48, -0.11], 14: [-0.078, -0.476, -0.337], 16: [-0.006, -0.47, -0.597], 15: [0.1, -0.53, -0.2], 23: [0.11, 0, 0.03], 24: [-0.1, 0, -0.04], 26: [-0.1, 0.42, -0.02], 28: [-0.12, 0.83, 0.06], 0: [0.04, -0.61, -0.12] }],
-      [1.58, {}]] },
-    hook: { lado: 'left', imp: 1.14, k: [[0.8, {}],
-      [0.98, { 13: [0.38, -0.45, -0.06], 15: [0.38, -0.45, -0.33], 11: [0.19, -0.48, 0.02], 0: [0.03, -0.62, -0.06] }],
-      [1.14, { 11: [0.15, -0.48, -0.08], 12: [-0.17, -0.48, 0.07], 13: [0.22, -0.46, -0.28], 15: [-0.04, -0.46, -0.34], 23: [0.1, 0, -0.03], 24: [-0.11, 0, 0.03], 25: [0.11, 0.42, -0.08], 0: [-0.02, -0.61, -0.08] }],
-      [1.26, { 11: [0.15, -0.48, -0.08], 12: [-0.17, -0.48, 0.07], 13: [0.22, -0.46, -0.28], 15: [-0.04, -0.46, -0.34], 23: [0.1, 0, -0.03], 24: [-0.11, 0, 0.03], 25: [0.11, 0.42, -0.08], 0: [-0.02, -0.61, -0.08] }],
-      [1.62, {}]] },
-    uppercut: { lado: 'right', imp: 1.18, k: [[0.75, {}],
-      [1.0, { 12: [-0.19, -0.44, 0], 14: [-0.22, -0.27, -0.1], 16: [-0.17, -0.3, -0.3], 25: [0.14, 0.38, -0.12], 26: [-0.12, 0.38, -0.04], 27: [0.15, 0.8, -0.1], 28: [-0.14, 0.8, 0.08], 0: [-0.03, -0.58, -0.1] }],
-      [1.18, { 11: [0.18, -0.47, 0.06], 12: [-0.16, -0.5, -0.08], 14: [-0.18, -0.38, -0.24], 16: [-0.06, -0.64, -0.3], 28: [-0.13, 0.83, 0.07], 0: [0.02, -0.64, -0.1] }],
-      [1.3, { 11: [0.18, -0.47, 0.06], 12: [-0.16, -0.5, -0.08], 14: [-0.18, -0.38, -0.24], 16: [-0.06, -0.64, -0.3], 28: [-0.13, 0.83, 0.07], 0: [0.02, -0.64, -0.1] }],
-      [1.65, {}]] }
+    jab: { lado: 'L', imp: 1.06, k: [[0.85, {}], [1.06, { r: 0.55, f: 0.03, L: [0.03, 0.04, -0.62, 0.5, 1, 0.2] }], [1.18, 'igual'], [1.45, {}]] },
+    recto: { lado: 'R', imp: 1.1, k: [[0.85, {}], [1.1, { r: -0.25, f: 0.05, piv: 1, R: [-0.02, 0.04, -0.62, -0.5, 1, 0.2] }], [1.22, 'igual'], [1.58, {}]] },
+    jab_cuerpo: { lado: 'L', imp: 1.06, k: [[0.8, {}], [1.06, { d: 0.08, f: 0.06, r: 0.55, L: [0.05, 0.32, -0.5, 0.6, 1, 0.3] }], [1.18, 'igual'], [1.5, {}]] },
+    recto_cuerpo: { lado: 'R', imp: 1.1, k: [[0.8, {}], [1.1, { d: 0.08, f: 0.06, r: -0.2, piv: 1, R: [-0.02, 0.32, -0.5, -0.6, 1, 0.3] }], [1.22, 'igual'], [1.6, {}]] },
+    cruzado: { lado: 'L', imp: 1.12, k: [[0.8, {}], [0.95, { r: 0.6, L: [0.26, 0.09, -0.2, 1, -0.2, 0.2] }], [1.12, { r: -0.05, l: -0.02, L: [-0.08, 0.09, -0.3, 1, -0.15, 0.3] }], [1.24, 'igual'], [1.6, {}]] },
+    cruzado_atras: { lado: 'R', imp: 1.14, k: [[0.8, {}], [0.95, { r: 0.55, R: [-0.28, 0.09, -0.18, -1, -0.2, 0.2] }], [1.14, { r: -0.35, piv: 1, R: [0.08, 0.09, -0.32, -1, -0.15, 0.3] }], [1.26, 'igual'], [1.62, {}]] },
+    cruzado_cuerpo: { lado: 'L', imp: 1.14, k: [[0.8, {}], [0.95, { d: 0.06, r: 0.6, l: 0.04, L: [0.27, 0.33, -0.2, 1, 0.3, 0.2] }], [1.14, { d: 0.08, r: 0.05, l: 0.03, L: [-0.05, 0.34, -0.3, 1, 0.4, 0.3] }], [1.26, 'igual'], [1.62, {}]] },
+    volado: { lado: 'R', imp: 1.16, k: [[0.8, {}], [0.97, { r: 0.55, R: [-0.3, -0.1, -0.05, -0.6, -1, 0.3] }], [1.16, { r: -0.35, f: 0.08, d: 0.06, l: 0.03, piv: 1, R: [0.02, 0.1, -0.55, -0.7, -1, 0] }], [1.28, 'igual'], [1.65, {}]] },
+    gancho: { lado: 'L', imp: 1.14, k: [[0.8, {}], [0.97, { d: 0.07, l: 0.05, r: 0.5, L: [0.12, 0.3, -0.28, 0.3, 1, 0.6] }], [1.14, { r: 0.25, L: [0.02, 0.0, -0.32, 0.3, 1, 0.8] }], [1.26, 'igual'], [1.62, {}]] },
+    gancho_atras: { lado: 'R', imp: 1.16, k: [[0.8, {}], [0.97, { d: 0.07, l: -0.05, r: 0.55, R: [-0.14, 0.3, -0.25, -0.3, 1, 0.6] }], [1.16, { r: -0.1, piv: 1, R: [-0.01, -0.01, -0.33, -0.3, 1, 0.8] }], [1.28, 'igual'], [1.64, {}]] },
+    gancho_cuerpo: { lado: 'R', imp: 1.14, k: [[0.8, {}], [0.97, { d: 0.09, l: -0.03, r: 0.5, R: [-0.12, 0.42, -0.22, -0.3, 1, 0.6] }], [1.14, { d: 0.07, f: 0.04, r: -0.05, piv: 1, R: [-0.02, 0.28, -0.38, -0.3, 1, 0.8] }], [1.26, 'igual'], [1.62, {}]] }
   };
+  /* Cada fotograma clave se resuelve una vez: parámetros completos y puños en coordenadas absolutas */
+  function resolver(spec) {
+    var P = {}; for (var c in GUARDIA) P[c] = spec[c] != null ? spec[c] : GUARDIA[c];
+    var n = nariz(P);
+    function mano(lado) { var m = spec[lado]; return m ? { t: vSum(n, [m[0], m[1], m[2]]), p: [m[3], m[4], m[5]] } : manoGuardia(P, lado); }
+    P.mL = mano('L'); P.mR = mano('R'); return P;
+  }
+  Object.keys(GOLPES).forEach(function (id) {
+    var k = GOLPES[id].k;
+    for (var j = 0; j < k.length; j++) k[j][1] = k[j][1] === 'igual' ? k[j - 1][1] : resolver(k[j][1]);
+  });
+  var POSE_GUARDIA = resolver({});
+  BASE = poseDe(POSE_GUARDIA, POSE_GUARDIA.mL, POSE_GUARDIA.mR);
   var ESPEJO = { 11: 12, 12: 11, 13: 14, 14: 13, 15: 16, 16: 15, 23: 24, 24: 23, 25: 26, 26: 25, 27: 28, 28: 27 };
   function suave(u) { return u * u * (3 - 2 * u); }
   function golpeTecnica(tipo, tt) {
     var G = GOLPES[tipo] || GOLPES.jab, k = G.k, q = quieto(), tc = q ? G.imp : tt % CICLO, n = Math.floor(tt / CICLO);
     var a = k[0], b = k[0];
-    if (tc <= k[0][0]) { a = b = k[0]; } else if (tc >= k[k.length - 1][0]) { a = b = k[k.length - 1]; }
-    else for (var j = 1; j < k.length; j++) if (tc <= k[j][0]) { a = k[j - 1]; b = k[j]; break; }
-    var u = b[0] > a[0] ? suave((tc - a[0]) / (b[0] - a[0])) : 1;
-    var zurdo = window.camGuardia === 'zurdo', bote = q ? 0 : Math.sin(tt * 4.2) * 0.012, out = {};
-    PUNTOS.forEach(function (i) {
-      var pa = a[1][i] || BASE[i], pb = b[1][i] || BASE[i];
-      var p = [pa[0] + (pb[0] - pa[0]) * u, pa[1] + (pb[1] - pa[1]) * u + (i < 25 ? bote : 0), pa[2] + (pb[2] - pa[2]) * u];
-      if (zurdo) out[ESPEJO[i] || i] = [-p[0], p[1], p[2]]; else out[i] = p;
-    });
-    var lado = zurdo ? (G.lado === 'left' ? 'right' : 'left') : G.lado;
+    if (tc >= k[k.length - 1][0]) a = b = k[k.length - 1];
+    else if (tc > k[0][0]) for (var j = 1; j < k.length; j++) if (tc <= k[j][0]) { a = k[j - 1]; b = k[j]; break; }
+    var u = b[0] > a[0] ? suave((tc - a[0]) / (b[0] - a[0])) : 1, A = a[1], B = b[1], P = {};
+    for (var c in GUARDIA) P[c] = A[c] + (B[c] - A[c]) * u;
+    if (!q) P.d += Math.sin(tt * 4.2) * 0.008;                // rebote suave en las piernas
+    function m(x, y) { return { t: vMezcla(x.t, y.t, u), p: vMezcla(x.p, y.p, u) }; }
+    var pose = poseDe(P, m(A.mL, B.mL), m(A.mR, B.mR)), zurdo = window.camGuardia === 'zurdo', out = {};
+    PUNTOS.forEach(function (i) { var p = pose[i]; if (zurdo) out[ESPEJO[i] || i] = [-p[0], p[1], p[2]]; else out[i] = p; });
+    var lado = (G.lado === 'L') !== zurdo ? 'left' : 'right';
     if (!q && tc >= G.imp && HOLO._imp !== tipo + n) { HOLO._imp = tipo + n; if (HOLO.golpe) HOLO.golpe(lado, 70); }
     return out;
   }
-  var DEMO = ['jab', 'cross', 'hook', 'uppercut'];
-  function sombraDemo(t) {                                    // sombra sola mientras no hay cámara: los cuatro golpes por turno
+  var DEMO = ['jab', 'recto', 'cruzado', 'gancho'];
+  function sombraDemo(t) {                                    // sombra sola mientras no hay cámara: una de cada familia por turno
     if (quieto()) { var fijo = {}; PUNTOS.forEach(function (i) { fijo[i] = BASE[i]; }); return fijo; }
-    return golpeTecnica(DEMO[Math.floor(t / CICLO) % 4], t);
+    return golpeTecnica(DEMO[Math.floor(t / CICLO) % DEMO.length], t);
   }
 
   function crear(destino) {
@@ -21669,12 +21712,6 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
 
   /* ═══ TÉCNICAS EN 3D: Boxeo › Técnicas. Se enciende solo mientras la tarjeta está a la vista ═══ */
   var tecBox = document.getElementById('tec3d-holo'), tecVisible = false;
-  var TEC = {
-    jab: ['Jab', 'Mano de adelante, recta y rápida. Vuelve a la cara por el mismo camino.'],
-    cross: ['Cross', 'Mano de atrás. Gira la cadera y el pie de atrás: el hombro empuja el golpe.'],
-    hook: ['Gancho', 'Codo a la altura del hombro y antebrazo horizontal. El giro sale del pie de adelante.'],
-    uppercut: ['Uppercut', 'Baja un poco con las rodillas y sube con las piernas. El puño mira hacia ti.']
-  };
   function tecMostrar() {
     if (!tecBox || camAbierta || !tecVisible) return;
     if (typeof THREE === 'undefined') { if (document.readyState !== 'complete') window.addEventListener('load', tecMostrar, { once: true }); else tecBox.classList.add('sin-3d'); return; }
@@ -21690,13 +21727,41 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
       if (tecVisible) tecMostrar(); else if (HOLO.modo === 'tecnica' && !camAbierta) HOLO.on = false;
     }).observe(tecBox);
   }
+  /* Familias y tipos: [nombre corto, nombre completo, cómo se tira] */
+  var FAMILIAS = {
+    rectos: { txt: 'Viajan en línea recta, del hombro al objetivo. Son los más rápidos.', tipos: ['jab', 'recto', 'jab_cuerpo', 'recto_cuerpo'] },
+    cruzados: { txt: 'Recorren un arco de lado con el codo a la altura del hombro (en inglés, hook).', tipos: ['cruzado', 'cruzado_atras', 'cruzado_cuerpo', 'volado'] },
+    ganchos: { txt: 'Suben de abajo hacia arriba, cortos y por dentro (en inglés, uppercut).', tipos: ['gancho', 'gancho_atras', 'gancho_cuerpo'] }
+  };
+  var TEC = {
+    jab: ['Jab', 'Jab', 'Mano de adelante, recta y rápida. Vuelve a la cara por el mismo camino.'],
+    recto: ['Recto', 'Recto de atrás', 'Mano de atrás (en inglés, cross). Gira la cadera y pivotea el pie de atrás: el hombro empuja el golpe.'],
+    jab_cuerpo: ['Jab al cuerpo', 'Jab al cuerpo', 'Baja con las rodillas, no con la espalda, y mantén la otra mano en la cara.'],
+    recto_cuerpo: ['Recto al cuerpo', 'Recto al cuerpo', 'Flexiona las rodillas y gira la cadera. La cabeza queda fuera de la línea del rival.'],
+    cruzado: ['De adelante', 'Cruzado de adelante', 'Codo a la altura del hombro y antebrazo horizontal. El giro sale del pie de adelante.'],
+    cruzado_atras: ['De atrás', 'Cruzado de atrás', 'Más largo y más fuerte. Pivotea el pie de atrás y cierra el giro con la cadera.'],
+    cruzado_cuerpo: ['Al cuerpo', 'Cruzado al cuerpo', 'Al hígado o a las costillas. Baja con las piernas y deja el codo pegado a tu costado.'],
+    volado: ['Volado', 'Volado', 'De atrás, pasa por encima de la guardia del rival en un arco de arriba hacia abajo (en inglés, overhand).'],
+    gancho: ['De adelante', 'Gancho de adelante', 'Baja un poco hacia tu lado de adelante y sube con las piernas. Corto: el codo no se abre.'],
+    gancho_atras: ['De atrás', 'Gancho de atrás', 'Carga en la pierna de atrás y sube girando la cadera. El puño mira hacia ti.'],
+    gancho_cuerpo: ['Al cuerpo', 'Gancho al cuerpo', 'Al plexo o al hígado, desde abajo. Flexiona bien las rodillas para entrar.']
+  };
+  window.tecFamilia = function (f) {
+    var F = FAMILIAS[f]; if (!F) return;
+    document.querySelectorAll('#tec3d-fam button').forEach(function (b) { var on = b.getAttribute('data-f') === f; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    var tx = document.getElementById('tec3d-fam-txt'); if (tx) tx.textContent = F.txt;
+    var c = document.getElementById('tec3d-tipos');
+    if (c) c.innerHTML = F.tipos.map(function (t) { return '<button type="button" data-t="' + t + '" aria-pressed="false" onclick="tecElegir(\'' + t + '\')">' + TEC[t][0] + '</button>'; }).join('');
+    window.tecElegir(F.tipos[0]);
+  };
   window.tecElegir = function (t) {
     if (!TEC[t]) return;
     HOLO.tec = t; HOLO._tt = 0.55;                               // el golpe sale enseguida
     var n = document.getElementById('tec3d-nombre'), x = document.getElementById('tec3d-txt');
-    if (n) n.textContent = TEC[t][0]; if (x) x.textContent = TEC[t][1];
-    document.querySelectorAll('.tec3d-tabs button').forEach(function (b) { var on = b.getAttribute('data-t') === t; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    if (n) n.textContent = TEC[t][1]; if (x) x.textContent = TEC[t][2];
+    document.querySelectorAll('#tec3d-tipos button').forEach(function (b) { var on = b.getAttribute('data-t') === t; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
   };
+  if (document.getElementById('tec3d-tipos')) window.tecFamilia('rectos');
   window.tecLento = function () {
     HOLO.lento = !HOLO.lento;
     var b = document.getElementById('tec3d-lento'); if (b) { b.classList.toggle('on', HOLO.lento); b.setAttribute('aria-pressed', HOLO.lento ? 'true' : 'false'); }
@@ -21706,10 +21771,15 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
 
 <style id="tec3dcss">
 .tec3d-holo{height:250px;margin:4px 0 12px;background:radial-gradient(ellipse at 50% 85%,rgba(99,230,190,.10),transparent 60%),#0b0d0f}
-.tec3d-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:3px;border-radius:12px;background:#2c2c2e}
+.tec3d-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:3px;border-radius:12px;background:#2c2c2e}
 .tec3d-tabs button{min-height:40px;border:0;border-radius:9px;background:transparent;color:rgba(235,235,245,.6);font:600 14px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;cursor:pointer}
 .tec3d-tabs button.on{background:#48484a;color:#fff}
 .tec3d-tabs button:focus-visible,.tec3d-lento:focus-visible{outline:2px solid #63e6be;outline-offset:2px}
+.tec3d-fam-txt{margin:8px 2px 10px;font-size:12.5px;line-height:1.4;color:rgba(235,235,245,.6)}
+.tec3d-tipos{display:flex;flex-wrap:wrap;gap:8px}
+.tec3d-tipos button{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #3a3a3c;background:transparent;color:rgba(235,235,245,.85);font:600 13px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;cursor:pointer}
+.tec3d-tipos button.on{background:#fff;border-color:#fff;color:#000}
+.tec3d-tipos button:focus-visible{outline:2px solid #63e6be;outline-offset:2px}
 .tec3d-pie{display:flex;align-items:flex-start;gap:12px;margin-top:10px}
 .tec3d-pie p{flex:1;margin:0;font-size:13px;line-height:1.45;color:rgba(235,235,245,.7)}
 .tec3d-lento{flex:none;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #48484a;background:transparent;color:#fff;font:600 13px -apple-system,system-ui,sans-serif;cursor:pointer}
