@@ -21184,13 +21184,13 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
   var ESTIRADO = { 13: [0.17, -0.47, -0.235], 15: [0.16, -0.46, -0.5], 14: [-0.17, -0.47, -0.235], 16: [-0.16, -0.46, -0.5] };
   var PUNTOS = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
   /* [desde, hasta, grosor en la parte ancha, forma] */
-  var HUESOS = [[11, 13, 0.076, 'brazo'], [13, 15, 0.062, 'ante'], [12, 14, 0.076, 'brazo'], [14, 16, 0.062, 'ante'],
-    [23, 25, 0.1, 'muslo'], [25, 27, 0.07, 'pierna'], [24, 26, 0.1, 'muslo'], [26, 28, 0.07, 'pierna']];
+  var HUESOS = [[11, 13, 0.07, 'brazo'], [13, 15, 0.06, 'ante'], [12, 14, 0.07, 'brazo'], [14, 16, 0.06, 'ante'],
+    [23, 25, 0.092, 'muslo'], [25, 27, 0.064, 'pierna'], [24, 26, 0.092, 'muslo'], [26, 28, 0.064, 'pierna']];
   /* Perfil de cada músculo a lo largo del hueso: [posición 0..1, radio relativo] */
   var FORMAS = {
     brazo: [[0, 0.86], [0.12, 0.98], [0.3, 0.9], [0.52, 1], [0.72, 0.86], [0.88, 0.66], [1, 0.58]],
     ante: [[0, 0.72], [0.14, 0.96], [0.3, 1], [0.6, 0.76], [0.85, 0.58], [1, 0.54]],
-    muslo: [[0, 0.88], [0.18, 1], [0.45, 0.98], [0.72, 0.84], [0.9, 0.66], [1, 0.58]],
+    muslo: [[0, 0.9], [0.15, 1], [0.42, 0.96], [0.7, 0.86], [0.82, 0.8], [0.92, 0.64], [1, 0.56]],
     pierna: [[0, 0.62], [0.12, 0.86], [0.3, 1], [0.48, 0.86], [0.72, 0.58], [1, 0.46]],
     torso: [[0, 0.56], [0.1, 0.6], [0.3, 0.52], [0.5, 0.68], [0.7, 0.92], [0.85, 1], [0.95, 0.9], [1, 0.4]]
   };
@@ -21226,24 +21226,57 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     var escena = new THREE.Scene(), cam = new THREE.PerspectiveCamera(36, 1, 0.1, 50);
     cam.position.set(0, 0.1, 3.05); cam.lookAt(0, -0.05, 0);
     var tiempo = { value: 0 };
-    var VS = 'varying vec3 vN;varying vec3 vV;varying float vY;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vY=wp.y;vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-wp.xyz);gl_Position=projectionMatrix*viewMatrix*wp;}';
-    var FS = 'uniform vec3 c;uniform float t;uniform float k;varying vec3 vN;varying vec3 vV;varying float vY;void main(){float f=pow(1.0-abs(dot(normalize(vN),normalize(vV))),2.0);float s=0.72+0.28*sin(vY*150.0-t*5.0);float fl=0.94+0.06*sin(t*31.0);float a=clamp((0.14+f*0.95)*s*fl*k,0.0,1.0);gl_FragColor=vec4(c*(0.6+f*1.3),a);}';
-    function mat(hex, k) {
-      return new THREE.ShaderMaterial({ uniforms: { c: { value: new THREE.Color(hex) }, t: tiempo, k: { value: k || 1 } }, vertexShader: VS, fragmentShader: FS,
+    var VS = 'varying vec3 vN;varying vec3 vV;varying vec3 vU;varying float vY;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vY=wp.y;vec4 mv=viewMatrix*wp;vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);vU=normalize(mat3(viewMatrix)*vec3(0.0,1.0,0.0));gl_Position=projectionMatrix*mv;}';
+    var FS = 'uniform vec3 c;uniform float t;uniform float k;uniform float l;varying vec3 vN;varying vec3 vV;varying vec3 vU;varying float vY;void main(){vec3 n=normalize(vN);float f=pow(1.0-abs(dot(n,normalize(vV))),2.0);float d=max(dot(n,normalize(normalize(vV)+vU*1.3)),0.0);float s=0.72+0.28*sin(vY*150.0-t*5.0);float fl=0.94+0.06*sin(t*31.0);float a=clamp((0.18+f*1.0+l*(d*d*d*1.25-0.16))*s*fl*k,0.0,1.0);gl_FragColor=vec4(c*(0.6+f*1.3+l*d*d*0.5),a);}';
+    function mat(hex, k, l) {                                      // l: luz desde arriba que marca el relieve de los músculos
+      return new THREE.ShaderMaterial({ uniforms: { c: { value: new THREE.Color(hex) }, t: tiempo, k: { value: k || 1 }, l: { value: l || 0 } }, vertexShader: VS, fragmentShader: FS,
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
     }
     var cuerpo = new THREE.Group(); escena.add(cuerpo);
     var gCil = new THREE.CylinderGeometry(1, 1, 1, 12, 1, true), gEsf = new THREE.SphereGeometry(1, 16, 12);
+    /* Tronco esculpido de una sola pieza. Unidades: x = ancho de hombros, y = 0 cadera .. 1 hombros, z = metros (frente = -z) */
+    function tronco() {
+      var K = [[0, 0.4, 0.098], [0.16, 0.39, 0.094], [0.34, 0.385, 0.092], [0.5, 0.46, 0.096], [0.66, 0.6, 0.106], [0.8, 0.64, 0.114], [0.92, 0.62, 0.1], [0.99, 0.55, 0.086], [1.05, 0.32, 0.066], [1.12, 0.13, 0.052]];
+      function interp(t, c) { for (var i = 1; i < K.length; i++) if (t <= K[i][0]) { var a = K[i - 1], b = K[i], u = (t - a[0]) / (b[0] - a[0]); u = u * u * (3 - 2 * u); return a[c] + (b[c] - a[c]) * u; } return K[K.length - 1][c]; }
+      function g(x, m, sd) { var d = (x - m) / sd; return Math.exp(-d * d); }
+      var NR = 46, NS = 48, pos = [], idx = [];
+      for (var r = 0; r < NR; r++) {
+        var t = 1.12 * r / (NR - 1), W = interp(t, 1), D = interp(t, 2);
+        for (var j = 0; j < NS; j++) {
+          var th = j / NS * Math.PI * 2, cx = Math.cos(th), sz = Math.sin(th);
+          var x = W * Math.sign(cx) * Math.pow(Math.abs(cx), 0.85), z = D * sz, ax = Math.abs(x);
+          if (sz < 0) {                                                       // frente: pectorales, esternón, abdominales
+            var fr = -sz;
+            var pec = g(ax, 0.22, 0.13) * (t < 0.8 ? g(t, 0.8, 0.055) : g(t, 0.8, 0.12));
+            var ster = g(x, 0, 0.03) * g(t, 0.82, 0.1);
+            var abd = 0; [0.27, 0.38, 0.49, 0.6].forEach(function (f) { abd += g(t, f, 0.038); });
+            abd *= g(ax, 0.075, 0.045) * (t < 0.66 ? 1 : 0);
+            z -= fr * (0.042 * pec + 0.015 * abd - 0.009 * ster);
+          } else {                                                            // espalda
+            z -= sz * 0.009 * g(x, 0, 0.035) * g(t, 0.6, 0.3);              // línea de la columna
+            z += sz * 0.012 * g(ax, 0.22, 0.1) * g(t, 0.82, 0.08);          // omóplatos
+          }
+          pos.push(x, t, z);
+        }
+      }
+      for (var r2 = 0; r2 < NR - 1; r2++) for (var j2 = 0; j2 < NS; j2++) {
+        var a0 = r2 * NS + j2, a1 = r2 * NS + (j2 + 1) % NS;
+        idx.push(a0, a0 + NS, a1, a1, a0 + NS, a1 + NS);
+      }
+      var geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+      return geo;
+    }
     function perfil(pts) { return new THREE.LatheGeometry(pts.map(function (q) { return new THREE.Vector2(q[1], q[0] - 0.5); }), 16); }
     var gForma = {}; Object.keys(FORMAS).forEach(function (k) { gForma[k] = perfil(FORMAS[k]); });
-    var mCuerpo = mat(0x63e6be, 1), mJunta = mat(0x9ff5dc, 0.9), mTorso = mat(0x63e6be, 0.9);
+    var mCuerpo = mat(0x63e6be, 1.15, 0.7), mJunta = mat(0x9ff5dc, 0.9), mTorso = mat(0x63e6be, 1.2, 1), mDelt = mat(0x63e6be, 0.85, 0.7);
     var huesos = HUESOS.map(function (b) { var m = new THREE.Mesh(gForma[b[3]], mCuerpo); m.userData = b; cuerpo.add(m); return m; });
-    var cuello = new THREE.Mesh(gCil, mCuerpo), torso = new THREE.Mesh(gForma.torso, mTorso), pelvis = new THREE.Mesh(gEsf, mTorso), cabeza = new THREE.Mesh(gEsf, mCuerpo);
-    var trapecio = new THREE.Mesh(gEsf, mTorso), pecho = { 11: new THREE.Mesh(gEsf, mCuerpo), 12: new THREE.Mesh(gEsf, mCuerpo) };
-    [cuello, torso, pelvis, cabeza, trapecio, pecho[11], pecho[12]].forEach(function (m) { cuerpo.add(m); });
+    var cuello = new THREE.Mesh(gCil, mCuerpo), torso = new THREE.Mesh(gForma.torso, mTorso), pelvis = new THREE.Mesh(gEsf, mDelt), cabeza = new THREE.Mesh(gEsf, mCuerpo);
+    torso.geometry = tronco();
+    [cuello, torso, pelvis, cabeza].forEach(function (m) { cuerpo.add(m); });
     /* Hombros (deltoides) y articulaciones pequeñas, para que no parezcan bolitas */
-    var juntas = {}, TAM = { 11: 0.09, 12: 0.09, 13: 0.03, 14: 0.03, 25: 0.036, 26: 0.036 };
+    var juntas = {}, TAM = { 11: 0.075, 12: 0.075, 13: 0.03, 14: 0.03, 25: 0.036, 26: 0.036 };
     Object.keys(TAM).forEach(function (i) { var m = new THREE.Mesh(gEsf, +i < 13 ? mCuerpo : mJunta); m.scale.set(TAM[i], TAM[i] * (+i < 13 ? 0.85 : 1), TAM[i]); cuerpo.add(m); juntas[i] = m; });
+    [11, 12].forEach(function (i) { juntas[i].material = mDelt; juntas[i].scale.set(0.072, 0.092, 0.068); });
     var pies = { 27: new THREE.Mesh(gEsf, mCuerpo), 28: new THREE.Mesh(gEsf, mCuerpo) };
     pies[27].scale.set(0.045, 0.032, 0.105); pies[28].scale.set(0.045, 0.032, 0.105); cuerpo.add(pies[27]); cuerpo.add(pies[28]);
     /* Guante: puño, pulgar y muñequera; se orienta con el antebrazo */
@@ -21340,22 +21373,19 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
       ejeX.copy(v3(11)).sub(v3(12)); var anchoH = ejeX.length() || 0.36;
       ejeZ.crossVectors(ejeX, ejeY).normalize(); ejeX.crossVectors(ejeY, ejeZ).normalize();
       base.makeBasis(ejeX, ejeY, ejeZ); giroTronco.setFromRotationMatrix(base);
-      torso.quaternion.copy(giroTronco); torso.position.copy(cad).addScaledVector(ejeY, alto * 0.52);
-      torso.scale.set(anchoH * 0.72, alto * 1.08, 0.13);
-      /* Trapecios, pectorales: dan volumen de boxeador. Ojo: ejeZ apunta hacia la espalda */
-      trapecio.quaternion.copy(giroTronco); trapecio.position.copy(hom).addScaledVector(ejeY, -0.01).addScaledVector(ejeZ, 0.02);
-      trapecio.scale.set(anchoH * 0.48, 0.065, 0.07);
-      [11, 12].forEach(function (i) {
-        var pc = pecho[i]; pc.quaternion.copy(giroTronco);
-        pc.position.copy(hom).addScaledVector(ejeY, -0.085).addScaledVector(ejeX, (i === 11 ? 1 : -1) * anchoH * 0.22).addScaledVector(ejeZ, -0.095);
-        pc.scale.set(anchoH * 0.24, 0.065, 0.045);
-      });
+      /* Tronco esculpido. Ojo: ejeZ apunta hacia la espalda; el frente es -ejeZ, igual que -z en tronco() */
+      torso.quaternion.copy(giroTronco); torso.position.copy(cad);
+      torso.scale.set(anchoH, alto, 1);
       pelvis.quaternion.copy(giroTronco); pelvis.position.copy(cad).addScaledVector(ejeY, 0.015);
-      pelvis.scale.set(Math.max(0.1, v3(23).distanceTo(v3(24)) * 0.78), 0.075, 0.1);
+      pelvis.scale.set(Math.max(0.1, v3(23).distanceTo(v3(24)) * 0.72), 0.06, 0.09);
       cab.copy(v3(0)); cab.y += 0.04;
       hueso(cuello, hom, cab, 0.052);
       cabeza.position.copy(cab); cabeza.position.y += 0.05; cabeza.scale.set(0.095, 0.118, 0.105);
       Object.keys(juntas).forEach(function (i) { juntas[i].position.copy(v3(+i)); });
+      [11, 12].forEach(function (i) {                                       // deltoides: siguen al brazo
+        var d = juntas[i]; dirE.copy(v3(i === 11 ? 13 : 14)).sub(v3(i)).normalize();
+        d.quaternion.setFromUnitVectors(Y, dirE); d.position.addScaledVector(dirE, 0.03).addScaledVector(ejeY, 0.008);
+      });
       [27, 28].forEach(function (i) { var pie = pies[i]; pie.position.copy(v3(i)); pie.position.y -= 0.035; pie.position.addScaledVector(ejeZ, -0.055); pie.quaternion.copy(giroTronco); });
       [15, 16].forEach(function (i) {
         var gl = guantes[i], codo = v3(i === 15 ? 13 : 14);
