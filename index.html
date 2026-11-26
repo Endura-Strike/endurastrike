@@ -6012,6 +6012,9 @@ html.es-app .app-tab span { font: 500 10px -apple-system, system-ui, sans-serif 
     <div class="cam2-inner">
       <div class="cam2-head"><span class="cam2-live"></span><span class="es-emblem" style="width:22px;height:16px;margin:0 7px -2px 0"></span>Cámara AI <span style="opacity:.5;font-size:12px">· en vivo</span></div>
       <div id="cam2-videoslot" class="cam2-videoslot"></div>
+      <div id="cam2-holo" class="cam2-holo" role="img" aria-label="Holograma 3D de tu cuerpo"><div class="cam2-holo-lbl"><i></i>Holograma <b>demo</b></div><div class="cam2-holo-sin">El holograma necesita WebGL</div></div>
+      <div class="cam2-guardia" role="group" aria-label="Tu guardia"><span>Guardia</span><div><button type="button" data-g="orto" onclick="camSetGuardia('orto')">Ortodoxo</button><button type="button" data-g="zurdo" onclick="camSetGuardia('zurdo')">Zurdo</button></div></div>
+      <pre id="cam2-debug" aria-hidden="true"></pre>
       <div class="cam2-grid">
         <div class="cam2-card">
           <svg viewBox="0 0 120 120" class="cam2-ring-svg"><circle cx="60" cy="60" r="50" class="cam2-ring-bg"/><circle id="cam2-ring" cx="60" cy="60" r="50" class="cam2-ring-fg"/></svg>
@@ -20985,5 +20988,364 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
 })();
 
 </script>
+<style id="cam27css">
+/* ═══ v57 · Cámara AI: holograma y guardia ═══ */
+.cam2-holo{position:relative;height:230px;border-radius:14px;overflow:hidden;margin-bottom:12px;touch-action:pan-y;cursor:grab;
+  background:radial-gradient(ellipse at 50% 92%,rgba(99,230,190,.16),transparent 62%),radial-gradient(ellipse at 50% 10%,rgba(99,230,190,.06),transparent 60%),#04060a;
+  border:1px solid rgba(99,230,190,.22);box-shadow:inset 0 0 40px rgba(99,230,190,.06)}
+.cam2-holo:active{cursor:grabbing}
+.cam2-holo canvas{position:absolute;inset:0;width:100% !important;height:100% !important;display:block}
+.cam2-holo-lbl{position:absolute;left:12px;top:10px;z-index:2;display:flex;align-items:center;gap:7px;font:600 12px -apple-system,BlinkMacSystemFont,Inter,sans-serif;color:#63e6be;letter-spacing:.3px;pointer-events:none}
+.cam2-holo-lbl i{width:7px;height:7px;border-radius:50%;background:#63e6be;box-shadow:0 0 8px #63e6be}
+.cam2-holo-lbl b{font-weight:600;color:rgba(235,235,245,.6)}
+.cam2-holo.vivo .cam2-holo-lbl i{animation:hbPulse 1.2s ease-in-out infinite}
+.cam2-holo-sin{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font:500 13px -apple-system,system-ui,sans-serif;color:rgba(235,235,245,.5)}
+.cam2-holo.sin-3d .cam2-holo-sin{display:flex}
+.cam2-guardia{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.cam2-guardia > span{font:600 13px -apple-system,system-ui,sans-serif;color:rgba(235,235,245,.62)}
+.cam2-guardia div{display:flex;flex:1;background:rgba(118,118,128,.24);border-radius:999px;padding:3px;gap:2px}
+.cam2-guardia button{flex:1;border:0;background:transparent;color:rgba(255,255,255,.75);font:600 13px -apple-system,system-ui,sans-serif;padding:8px 10px;border-radius:999px;cursor:pointer;transition:background .3s,color .3s}
+.cam2-guardia button.on{background:rgba(255,255,255,.2);color:#fff}
+#cam2-debug{display:none;margin:0 0 12px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.5);color:#63e6be;font:11px/1.45 ui-monospace,Menlo,monospace;white-space:pre}
+#cam2-debug.on{display:block}
+@media (prefers-reduced-motion:reduce){.cam2-holo.vivo .cam2-holo-lbl i{animation:none}}
+</style>
+<script id="cam27">
+/* ═══ v57 · CÁMARA AI 2 ═══
+   1) Detector de golpes en 3D. Usa las coordenadas en metros de MediaPipe (poseWorldLandmarks),
+      así cuenta también los golpes que van rectos hacia la cámara, que en la imagen plana casi no se mueven.
+      Mide cuánto se estira el brazo respecto a su largo y a qué velocidad, y cuenta en el pico del golpe.
+   2) Holograma 3D de tu cuerpo con three.js. Antes de que llegue la cámara, hace sombra solo.
+   Todo se engancha envolviendo funciones del código original; si algo falta, la app sigue como antes. */
+(function () {
+  if (typeof camState === 'undefined') return;
+
+  /* Todos los umbrales en un solo lugar (unidades: metros, segundos, grados) */
+  var U = window.CAM_UMBRAL = {
+    suav: 0.6,                 // cuánto pesa el cuadro nuevo en el suavizado (1 = sin suavizar)
+    ventana: 120,              // ms entre las dos muestras con que se mide la velocidad
+    recta: { vel: 2.2, pico: 0.82, inicioMax: 0.75, frena: 0.8, tiempo: 450, codoMin: 150 },
+    curva: { vel: 1.9, codoMax: 140, codoAltura: 0.16, sobreCabeza: 0.25, minLado: 0.12, minSubida: 0.12, tiempo: 500 },
+    reposo: { ratio: 0.72, vel: 1.1, tiempo: 700 },
+    potencia: { min: 1.4, max: 5.5 }
+  };
+  function leer(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
+  window.camGuardia = leer('es_guardia', 'orto');          // orto: mano izquierda adelante · zurdo: derecha
+  function manoLider() { return window.camGuardia === 'zurdo' ? 'right' : 'left'; }
+
+  /* ── vectores ── */
+  function xyz(p) { return { x: p.x, y: p.y, z: p.z }; }
+  function sub(a, b) { return { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z }; }
+  function mul(a, k) { return { x: a.x * k, y: a.y * k, z: a.z * k }; }
+  function dot(a, b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+  function len(a) { return Math.sqrt(dot(a, a)); }
+  function norm(a) { return mul(a, 1 / (len(a) || 1)); }
+  function cruz(a, b) { return { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x }; }
+  function mezcla(a, b, k) { return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, z: a.z + (b.z - a.z) * k }; }
+  function angulo(a, b, c) { var u = sub(a, b), v = sub(c, b), cs = dot(u, v) / ((len(u) * len(v)) || 1); return Math.acos(Math.max(-1, Math.min(1, cs))) * 180 / Math.PI; }
+
+  /* Ejes del cuerpo sacados de la propia pose: así no importa el signo que use MediaPipe */
+  function ejes(w) {
+    var cadera = mezcla(w[23], w[24], 0.5), hombros = mezcla(w[11], w[12], 0.5);
+    var arriba = norm(sub(hombros, cadera)), lado = norm(sub(w[11], w[12]));
+    return { arriba: arriba, lado: lado, frente: norm(cruz(lado, arriba)) };
+  }
+
+  var IDX = { left: { s: 11, e: 13, w: 15 }, right: { s: 12, e: 14, w: 16 } };
+  function reiniciar() { camState._p3 = { left: { hist: [], fase: 'listo' }, right: { hist: [], fase: 'listo' } }; camState._world = null; camState._ejes = null; }
+  reiniciar();
+
+  function potenciaDe(v) { return Math.round(Math.max(5, Math.min(100, (v - U.potencia.min) / (U.potencia.max - U.potencia.min) * 100))); }
+  function emitir(side, now, tipo, vmax) {
+    var P = camState._p3[side];
+    P.fase = 'bloq'; P.f = { t: now };
+    if (camState._calidadOk === false) return;               // mal encuadrado: no cuenta
+    var pot = potenciaDe(vmax), lm = camState._lm2d, wi = IDX[side].w;
+    if (lm && lm[wi] && typeof spawnBurstFX === 'function') spawnBurstFX(lm[wi].x, lm[wi].y, pot);
+    registrarGolpe(side, now, tipo, pot);
+    if (HOLO.golpe) HOLO.golpe(side, pot);
+  }
+
+  function detectar3D(side, w, now) {
+    var P = camState._p3[side], ix = IDX[side], s = w[ix.s], e = w[ix.e], wr = w[ix.w];
+    if (!s || !e || !wr) return;
+    if ((e.visibility != null && e.visibility < 0.4) || (wr.visibility != null && wr.visibility < 0.4)) { P.hist.length = 0; return; }
+    var k = U.suav;
+    P.S = P.S ? mezcla(P.S, s, k) : xyz(s);
+    P.E = P.E ? mezcla(P.E, e, k) : xyz(e);
+    P.W = P.W ? mezcla(P.W, wr, k) : xyz(wr);
+    var largo = len(sub(P.E, P.S)) + len(sub(P.W, P.E));
+    P.L = P.L ? P.L + (largo - P.L) * 0.1 : largo;            // largo del brazo, muy suavizado
+    var rel = sub(P.W, P.S), ratio = len(rel) / P.L, codo = angulo(P.S, P.E, P.W);
+    var h = P.hist;
+    h.push({ t: now, rel: rel, r: ratio });
+    while (h.length > 2 && now - h[1].t >= U.ventana) h.shift();
+    var o = h[0], dt = (now - o.t) / 1000;
+    if (dt > 0.4) { P.hist = [h[h.length - 1]]; return; }
+    if (dt < 0.05) return;
+    var vel = mul(sub(rel, o.rel), 1 / dt), rapidez = len(vel), rVel = (ratio - o.r) / dt;
+    var E = camState._ejes || ejes(w), f = P.f;
+    P.dbg = { r: ratio, v: rapidez, rv: rVel, codo: codo };
+
+    if (P.fase === 'bloq') {                                  // espera a que el brazo vuelva antes del siguiente
+      if ((ratio < U.reposo.ratio && rapidez < U.reposo.vel) || now - f.t > U.reposo.tiempo) { P.fase = 'listo'; P.f = null; }
+      return;
+    }
+    if (P.fase === 'listo') {
+      if (rVel > U.recta.vel && o.r < U.recta.inicioMax) { P.fase = 'recta'; P.f = { t: now, max: rapidez, rmax: ratio }; }
+      else if (rapidez > U.curva.vel && codo < U.curva.codoMax && rVel < U.recta.vel * 0.6) { P.fase = 'curva'; P.f = { t: now, ini: o.rel, max: rapidez }; }
+      return;
+    }
+    if (P.fase === 'recta') {                                 // jab o cross: cuenta cuando el brazo llega estirado y frena
+      f.max = Math.max(f.max, rapidez); f.rmax = Math.max(f.rmax, ratio);
+      var recta = side === manoLider() ? 'jab' : 'cross';
+      var esRecto = codo > U.recta.codoMin && dot(rel, E.arriba) < U.curva.sobreCabeza;   // brazo derecho y no por encima de la cabeza
+      f.ok = f.ok || (ratio >= U.recta.pico && esRecto);
+      if (ratio >= U.recta.pico && rVel < U.recta.frena) { if (esRecto) return emitir(side, now, recta, f.max); P.fase = 'listo'; P.f = null; return; }
+      if (rVel < 0 && f.rmax < U.recta.pico) { P.fase = 'listo'; P.f = null; return; }
+      if (now - f.t > U.recta.tiempo) { if (f.ok) return emitir(side, now, recta, f.max); P.fase = 'listo'; P.f = null; }
+      return;
+    }
+    if (P.fase === 'curva') {                                 // gancho o uppercut: se decide al frenar, por la dirección
+      f.max = Math.max(f.max, rapidez);
+      if (rapidez > f.max * 0.55 && now - f.t < U.curva.tiempo) return;
+      var d = sub(rel, f.ini), sube = dot(d, E.arriba), lado = Math.abs(dot(d, E.lado)), frente = Math.abs(dot(d, E.frente));
+      var codoAlto = Math.abs(dot(sub(P.E, P.S), E.arriba)) < U.curva.codoAltura;
+      var sobreCabeza = dot(rel, E.arriba) > U.curva.sobreCabeza;
+      var tipo = null;
+      if (sube > U.curva.minSubida && sube > lado && sube > frente * 0.8 && dot(f.ini, E.arriba) < 0) tipo = 'uppercut';
+      else if (!sobreCabeza && codoAlto && lado > U.curva.minLado && lado >= frente * 0.7) tipo = 'hook';
+      if (tipo) return emitir(side, now, tipo, f.max);
+      P.fase = 'listo'; P.f = null;
+    }
+  }
+
+  /* El detector viejo queda de respaldo si el teléfono no da coordenadas 3D */
+  var detector2D = window.detectPunch;
+  window.detectPunch = function (side, wrist, shoulder, elbow, nose, now) {
+    var w = camState._world;
+    if (w && w.length > 24) return detectar3D(side, w, now);
+    return detector2D.apply(this, arguments);
+  };
+  /* En el respaldo, el jab es la mano de adelante según tu guardia */
+  var clasificar2D = window.clasificarGolpe;
+  window.clasificarGolpe = function (side) {
+    var t = clasificar2D.apply(this, arguments);
+    return (t === 'jab' || t === 'cross') ? (side === manoLider() ? 'jab' : 'cross') : t;
+  };
+
+  /* Cada cuadro guarda las coordenadas 3D y alimenta el holograma, antes que el resto */
+  var opr = window.onPoseResults;
+  window.onPoseResults = function (res) {
+    try {
+      var w = res && res.poseWorldLandmarks;
+      camState._world = w || null;
+      camState._lm2d = (res && res.poseLandmarks) || null;
+      camState._ejes = (w && w.length > 24) ? ejes(w) : null;
+      if (w && HOLO.pose) HOLO.pose(w);
+    } catch (e) {}
+    var out = opr.apply(this, arguments);
+    try { pintarDebug(); } catch (e) {}
+    return out;
+  };
+  ['resetCamStats', 'detenerCamara'].forEach(function (n) {
+    var f = window[n]; if (typeof f !== 'function') return;
+    window[n] = function () { reiniciar(); return f.apply(this, arguments); };
+  });
+
+  /* Guardia ortodoxa o zurda */
+  window.camSetGuardia = function (g) {
+    window.camGuardia = g === 'zurdo' ? 'zurdo' : 'orto';
+    try { localStorage.setItem('es_guardia', window.camGuardia); } catch (e) {}
+    document.querySelectorAll('.cam2-guardia button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-g') === window.camGuardia); });
+  };
+
+  /* Lectura para ajustar umbrales con golpes reales: ?debug=1 o localStorage es_cam_debug=1 */
+  var debugOn = /[?&]debug=1/.test(location.search) || leer('es_cam_debug', '') === '1', ultDebug = 0;
+  function pintarDebug() {
+    if (!debugOn) return;
+    var el = document.getElementById('cam2-debug'), now = Date.now();
+    if (!el || now - ultDebug < 150) return; ultDebug = now;
+    el.classList.add('on');
+    el.textContent = ['left', 'right'].map(function (s) {
+      var P = camState._p3[s], d = P.dbg || {};
+      return (s === manoLider() ? 'adelante' : 'atrás   ') + '  estira ' + (d.r || 0).toFixed(2) + '  vel ' + (d.v || 0).toFixed(1) + ' m/s  vEst ' + (d.rv || 0).toFixed(1) + '  codo ' + Math.round(d.codo || 0) + '°  ' + P.fase;
+    }).join('\n') + '\n' + (camState._world ? 'modo 3D' : 'modo 2D (respaldo)') + (camState._calidadOk === false ? ' · encuádrate' : '');
+  }
+
+  /* ═══ HOLOGRAMA ═══ */
+  var HOLO = window.HOLO = { on: false, raf: 0 };
+  function quieto() { return (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) || document.documentElement.classList.contains('sin-movimiento'); }
+
+  /* Guardia de referencia (coordenadas de MediaPipe: metros, origen en la cadera, y hacia abajo) */
+  var BASE = { 0: [0, -0.62, -0.08], 11: [0.18, -0.48, 0], 12: [-0.18, -0.48, 0], 13: [0.2, -0.28, -0.12], 14: [-0.2, -0.28, -0.1],
+    15: [0.1, -0.52, -0.2], 16: [-0.1, -0.52, -0.18], 23: [0.11, 0, 0], 24: [-0.11, 0, 0], 25: [0.14, 0.42, -0.06], 26: [-0.12, 0.42, 0.04],
+    27: [0.15, 0.86, -0.1], 28: [-0.14, 0.86, 0.08] };
+  var ESTIRADO = { 13: [0.17, -0.47, -0.235], 15: [0.16, -0.46, -0.5], 14: [-0.17, -0.47, -0.235], 16: [-0.16, -0.46, -0.5] };
+  var PUNTOS = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
+  var HUESOS = [[11, 13, 0.05], [13, 15, 0.042], [12, 14, 0.05], [14, 16, 0.042], [23, 25, 0.068], [25, 27, 0.05], [24, 26, 0.068], [26, 28, 0.05], [11, 12, 0.045], [23, 24, 0.055]];
+
+  function sombraDemo(t) {                                    // sombra sola mientras no hay cámara
+    var out = {}, ciclo = t % 2.6, golpe = ciclo > 1.6 && ciclo < 2.15 ? Math.sin((ciclo - 1.6) / 0.55 * Math.PI) : 0;
+    var mano = Math.floor(t / 2.6) % 2 === 0 ? 'l' : 'r', bote = quieto() ? 0 : Math.sin(t * 4.2) * 0.018, giro = quieto() ? 0 : Math.sin(t * 1.3) * 0.03;
+    PUNTOS.forEach(function (i) {
+      var p = BASE[i], q = p;
+      if (golpe > 0 && ESTIRADO[i] && ((mano === 'l' && (i === 13 || i === 15)) || (mano === 'r' && (i === 14 || i === 16)))) {
+        var e = ESTIRADO[i]; q = [p[0] + (e[0] - p[0]) * golpe, p[1] + (e[1] - p[1]) * golpe, p[2] + (e[2] - p[2]) * golpe];
+      }
+      out[i] = [q[0] + giro * (q[1] + 0.5), q[1] + (i < 25 ? bote : 0), q[2]];
+    });
+    if (golpe > 0.97 && !HOLO._demoGolpe) { HOLO._demoGolpe = true; HOLO.golpe(mano === 'l' ? 'left' : 'right', 60); }
+    if (golpe < 0.5) HOLO._demoGolpe = false;
+    return out;
+  }
+
+  function crear() {
+    if (HOLO.r) return true;
+    var box = document.getElementById('cam2-holo');
+    if (!box) return false;
+    if (typeof THREE === 'undefined') { box.classList.add('sin-3d'); return false; }
+    var r;
+    try { r = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'low-power' }); }
+    catch (e) { box.classList.add('sin-3d'); return false; }
+    box.classList.remove('sin-3d');
+    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    r.setClearColor(0x000000, 0);
+    box.insertBefore(r.domElement, box.firstChild);
+    var escena = new THREE.Scene(), cam = new THREE.PerspectiveCamera(36, 1, 0.1, 50);
+    cam.position.set(0, 0.1, 3.05); cam.lookAt(0, -0.05, 0);
+    var tiempo = { value: 0 };
+    var VS = 'varying vec3 vN;varying vec3 vV;varying float vY;void main(){vec4 wp=modelMatrix*vec4(position,1.0);vY=wp.y;vN=normalize(mat3(modelMatrix)*normal);vV=normalize(cameraPosition-wp.xyz);gl_Position=projectionMatrix*viewMatrix*wp;}';
+    var FS = 'uniform vec3 c;uniform float t;uniform float k;varying vec3 vN;varying vec3 vV;varying float vY;void main(){float f=pow(1.0-abs(dot(normalize(vN),normalize(vV))),2.0);float s=0.72+0.28*sin(vY*150.0-t*5.0);float fl=0.94+0.06*sin(t*31.0);float a=clamp((0.14+f*0.95)*s*fl*k,0.0,1.0);gl_FragColor=vec4(c*(0.6+f*1.3),a);}';
+    function mat(hex, k) {
+      return new THREE.ShaderMaterial({ uniforms: { c: { value: new THREE.Color(hex) }, t: tiempo, k: { value: k || 1 } }, vertexShader: VS, fragmentShader: FS,
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+    }
+    var cuerpo = new THREE.Group(); escena.add(cuerpo);
+    var gCil = new THREE.CylinderGeometry(1, 1, 1, 12, 1, true), gEsf = new THREE.SphereGeometry(1, 16, 12);
+    var mCuerpo = mat(0x63e6be, 1), mJunta = mat(0x9ff5dc, 1.2), mGuanteL = mat(0xff453a, 1.4), mGuanteR = mat(0xff453a, 1.4), mTorso = mat(0x63e6be, 0.75);
+    var huesos = HUESOS.map(function (b) { var m = new THREE.Mesh(gCil, mCuerpo); m.userData = b; cuerpo.add(m); return m; });
+    var columna = new THREE.Mesh(gCil, mCuerpo), cuello = new THREE.Mesh(gCil, mCuerpo), torso = new THREE.Mesh(gEsf, mTorso), cabeza = new THREE.Mesh(gEsf, mCuerpo);
+    [columna, cuello, torso, cabeza].forEach(function (m) { cuerpo.add(m); });
+    var juntas = {};
+    [11, 12, 13, 14, 23, 24, 25, 26, 27, 28].forEach(function (i) { var m = new THREE.Mesh(gEsf, mJunta); m.scale.setScalar(i > 24 ? 0.04 : 0.045); cuerpo.add(m); juntas[i] = m; });
+    var guantes = { 15: new THREE.Mesh(gEsf, mGuanteL), 16: new THREE.Mesh(gEsf, mGuanteR) };
+    guantes[15].scale.setScalar(0.085); guantes[16].scale.setScalar(0.085); cuerpo.add(guantes[15]); cuerpo.add(guantes[16]);
+
+    /* Piso: rejilla circular y proyector de luz */
+    var cv = document.createElement('canvas'); cv.width = cv.height = 512; var x = cv.getContext('2d');
+    var g = x.createRadialGradient(256, 256, 20, 256, 256, 256); g.addColorStop(0, 'rgba(99,230,190,.55)'); g.addColorStop(.7, 'rgba(99,230,190,.12)'); g.addColorStop(1, 'rgba(99,230,190,0)');
+    x.strokeStyle = g; x.lineWidth = 2;
+    for (var rr = 40; rr < 256; rr += 36) { x.beginPath(); x.arc(256, 256, rr, 0, Math.PI * 2); x.stroke(); }
+    for (var a = 0; a < 24; a++) { x.beginPath(); x.moveTo(256, 256); x.lineTo(256 + Math.cos(a / 24 * Math.PI * 2) * 250, 256 + Math.sin(a / 24 * Math.PI * 2) * 250); x.stroke(); }
+    var piso = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    piso.rotation.x = -Math.PI / 2; piso.position.y = -0.98; escena.add(piso);
+    var haz = new THREE.Mesh(new THREE.CylinderGeometry(0.62, 0.78, 2.1, 40, 1, true), new THREE.ShaderMaterial({
+      uniforms: { t: tiempo }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+      vertexShader: 'varying vec2 u;void main(){u=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
+      fragmentShader: 'uniform float t;varying vec2 u;void main(){float a=(1.0-u.y)*0.09*(0.85+0.15*sin(u.x*60.0+t*2.0));gl_FragColor=vec4(0.39,0.9,0.75,a);}' }));
+    haz.position.y = 0.07; escena.add(haz);
+
+    /* Polvo de luz que sube */
+    var N = 90, pos = new Float32Array(N * 3), vel = [];
+    for (var i = 0; i < N; i++) { var ang = Math.random() * Math.PI * 2, rad = 0.2 + Math.random() * 0.6; pos[i * 3] = Math.cos(ang) * rad; pos[i * 3 + 1] = -1 + Math.random() * 2.1; pos[i * 3 + 2] = Math.sin(ang) * rad; vel.push(0.08 + Math.random() * 0.18); }
+    var gPol = new THREE.BufferGeometry(); gPol.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var polvo = new THREE.Points(gPol, new THREE.PointsMaterial({ color: 0x63e6be, size: 0.018, transparent: true, opacity: 0.7, depthWrite: false, blending: THREE.AdditiveBlending }));
+    escena.add(polvo);
+
+    /* Ondas de impacto al golpear */
+    var gAro = new THREE.RingGeometry(0.8, 1, 40), ondas = [];
+    for (var o = 0; o < 4; o++) { var m = new THREE.Mesh(gAro, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide })); m.visible = false; m.userData.vida = 0; cuerpo.add(m); ondas.push(m); }
+
+    var actual = {}, meta = {}, ultimaPose = 0, giro = 0.32, arrastre = null, reloj = new THREE.Clock(), Y = new THREE.Vector3(0, 1, 0);
+    var tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3();
+    function v3(i) { return actual[i] || (actual[i] = new THREE.Vector3()); }
+    function aHolo(p, signoY) { return [-p[0], p[1] * signoY, -p[2]]; }   // espejo, como tu imagen en la cámara
+    function fijarMeta(src, signoY) { PUNTOS.forEach(function (i) { var p = src[i]; if (p) meta[i] = aHolo(p, signoY); }); }
+
+    HOLO.pose = function (w) {
+      var sy = (w[11].y + w[12].y) / 2 < (w[23].y + w[24].y) / 2 ? -1 : 1;     // los hombros siempre arriba
+      var src = {}; PUNTOS.forEach(function (i) { if (w[i]) src[i] = [w[i].x, w[i].y, w[i].z]; });
+      fijarMeta(src, sy); ultimaPose = Date.now();
+    };
+    HOLO.golpe = function (side, pot) {
+      var i = side === 'left' ? 15 : 16, gl = guantes[i];
+      gl.userData.flash = 1;
+      var onda = ondas.filter(function (x) { return x.userData.vida <= 0; })[0] || ondas[0];
+      onda.position.copy(gl.position); onda.userData.vida = 1; onda.userData.pot = pot || 50; onda.visible = true;
+      onda.lookAt(cam.position);
+    };
+
+    function hueso(m, a, b, radio) {
+      m.position.copy(a).add(b).multiplyScalar(0.5);
+      tmpA.copy(b).sub(a); var l = tmpA.length() || 0.001;
+      m.scale.set(radio, l, radio);
+      m.quaternion.setFromUnitVectors(Y, tmpA.multiplyScalar(1 / l));
+    }
+    function cuadro() {
+      if (!HOLO.on) { HOLO.raf = 0; return; }
+      HOLO.raf = requestAnimationFrame(cuadro);
+      if (document.hidden) return;
+      var t = reloj.getElapsedTime(), q = quieto(), vivo = Date.now() - ultimaPose < 700;
+      tiempo.value = q ? 0 : t;
+      box.classList.toggle('vivo', vivo);
+      var lbl = box.querySelector('.cam2-holo-lbl b'); if (lbl) lbl.textContent = vivo ? 'en vivo' : 'demo';
+      if (!vivo) fijarMeta(sombraDemo(t), -1);
+      var k = q ? 1 : 0.45;
+      PUNTOS.forEach(function (i) { var m = meta[i]; if (!m) return; var c = v3(i); c.x += (m[0] - c.x) * k; c.y += (m[1] - c.y) * k; c.z += (m[2] - c.z) * k; });
+      huesos.forEach(function (h) { var b = h.userData; hueso(h, v3(b[0]), v3(b[1]), b[2]); });
+      var hom = tmpB.copy(v3(11)).add(v3(12)).multiplyScalar(0.5).clone(), cad = new THREE.Vector3().copy(v3(23)).add(v3(24)).multiplyScalar(0.5);
+      hueso(columna, cad, hom, 0.05);
+      var cab = v3(0).clone(); cab.y += 0.04;
+      hueso(cuello, hom, cab, 0.04);
+      cabeza.position.copy(cab).add(new THREE.Vector3(0, 0.04, 0)); cabeza.scale.set(0.11, 0.13, 0.11);
+      torso.position.copy(hom).add(cad).multiplyScalar(0.5);
+      tmpA.copy(hom).sub(cad); var alto = tmpA.length() || 0.4;
+      torso.quaternion.setFromUnitVectors(Y, tmpA.normalize());
+      torso.scale.set(Math.max(0.12, v3(11).distanceTo(v3(12)) * 0.62), alto * 0.62, 0.13);
+      Object.keys(juntas).forEach(function (i) { juntas[i].position.copy(v3(+i)); });
+      [15, 16].forEach(function (i) {
+        var gl = guantes[i]; gl.position.copy(v3(i));
+        var fl = gl.userData.flash || 0; gl.userData.flash = Math.max(0, fl - 0.06);
+        gl.scale.setScalar(0.085 * (1 + fl * 0.45)); gl.material.uniforms.k.value = 1.4 + fl * 2.2;
+      });
+      ondas.forEach(function (o) {
+        if (o.userData.vida <= 0) { o.visible = false; return; }
+        o.userData.vida -= 0.045; var v = 1 - o.userData.vida, s = 0.05 + v * (0.1 + o.userData.pot / 700);
+        o.scale.setScalar(s); o.material.opacity = Math.max(0, o.userData.vida) * 0.9;
+      });
+      if (!q) {
+        var p = gPol.attributes.position.array;
+        for (var j = 0; j < N; j++) { p[j * 3 + 1] += vel[j] * 0.016; if (p[j * 3 + 1] > 1.15) p[j * 3 + 1] = -1; }
+        gPol.attributes.position.needsUpdate = true;
+        piso.rotation.z = t * 0.12;
+      }
+      cuerpo.rotation.y = giro + (q || arrastre ? 0 : Math.sin(t * 0.35) * 0.14);
+      polvo.rotation.y = cuerpo.rotation.y * 0.5;
+      r.render(escena, cam);
+    }
+    HOLO.arrancar = function () { if (!HOLO.raf) cuadro(); };
+    function ajustar() { var w = box.clientWidth, h = box.clientHeight; if (!w || !h) return; r.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); }
+    HOLO.ajustar = ajustar;
+    try { new ResizeObserver(ajustar).observe(box); } catch (e) { window.addEventListener('resize', ajustar); }
+    box.addEventListener('pointerdown', function (e) { arrastre = { x: e.clientX, g: giro }; });
+    window.addEventListener('pointermove', function (e) { if (arrastre) giro = arrastre.g + (e.clientX - arrastre.x) * 0.012; }, { passive: true });
+    window.addEventListener('pointerup', function () { arrastre = null; });
+    HOLO.r = r;
+    return true;
+  }
+
+  /* Un solo renderizador durante toda la visita: se pausa al cerrar y se reutiliza al abrir */
+  var abrir = window.abrirCam2, cerrar = window.cerrarCam2;
+  if (typeof abrir === 'function') window.abrirCam2 = function () {
+    var out = abrir.apply(this, arguments);
+    try { if (crear()) { HOLO.on = true; HOLO.ajustar(); HOLO.arrancar(); } } catch (e) {}
+    try { window.camSetGuardia(window.camGuardia); } catch (e) {}
+    return out;
+  };
+  if (typeof cerrar === 'function') window.cerrarCam2 = function () { HOLO.on = false; return cerrar.apply(this, arguments); };
+})();
+</script>
+
 </body>
 </html>
