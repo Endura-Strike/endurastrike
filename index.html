@@ -5266,7 +5266,7 @@ html.es-app .app-tab span { font: 500 10px -apple-system, system-ui, sans-serif 
 <section id="boxing" class="apg">
   <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><div style="width:5px;height:38px;border-radius:4px;background:linear-gradient(180deg,#ffffff,transparent)"></div><div style="font-size:24px;filter:drop-shadow(0 0 8px #e8192c66)">🥊</div><div><div style="font-family:var(--display);font-size:30px;font-weight:800;text-transform:uppercase;letter-spacing:-1px;line-height:1;color:#ffffff">Boxeo</div><div style="font-size:10px;letter-spacing:1.5px;color:var(--muted);font-family:var(--mono);text-transform:uppercase;margin-top:2px" id="sub-boxing">Sesiones, combos y clips</div></div></div>
   <div class="tabs" id="tabs-boxing">
-    <button class="tab active" onclick="switchTab('boxing','t-hub')">🥊 Tecnicas</button>
+    <button class="tab active" onclick="switchTab('boxing','t-hub')">🥊 Técnicas</button>
         <button class="tab" onclick="switchTab('boxing','t-combos')">🔥 Combos</button>
     <button class="tab" onclick="switchTab('boxing','t-practica')">🎯 Práctica</button><button class="tab" onclick="switchTab('boxing','t-clips');renderClips()">🎬 Clips</button>
         </div>
@@ -5274,43 +5274,58 @@ html.es-app .app-tab span { font: 500 10px -apple-system, system-ui, sans-serif 
   <div class="tab-content active" id="t-hub">
       <div class="card tec3d" style="margin-bottom:15px">
         <div class="tec3d-cab"><div class="card-title">Técnica</div>
-          <div class="tec3d-modo" role="group" aria-label="Golpes o defensa"><button type="button" data-m="golpes" class="on" aria-pressed="true" onclick="tecModo('golpes')">Golpes</button><button type="button" data-m="defensa" aria-pressed="false" onclick="tecModo('defensa')">Defensa</button></div></div>
+          <div class="tec3d-modo" role="group" aria-label="Golpes o defensa"><button type="button" data-m="golpes" class="on" aria-pressed="true" onclick="tecModo('golpes')">Golpes</button><button type="button" data-m="defensa" aria-pressed="false" onclick="tecModo('defensa')">Defensa</button><button type="button" data-m="distancia" aria-pressed="false" onclick="tecModo('distancia')">Distancia</button></div></div>
         <div class="cam2-holo tec3d-holo" id="tec3d-holo"><div class="cam2-holo-lbl"><i></i>Holograma <b id="tec3d-nombre">Jab</b></div><div class="cam2-holo-sin">El 3D no está disponible en este teléfono</div></div>
         <div class="tec3d-tabs" id="tec3d-fam" role="group" aria-label="Familia"></div>
         <p class="tec3d-fam-txt" id="tec3d-fam-txt">Viajan en línea recta, del hombro al objetivo. Son los más rápidos.</p>
         <div class="tec3d-tipos" id="tec3d-tipos" role="group" aria-label="Tipo de golpe"></div>
         <div class="tec3d-pie"><p id="tec3d-txt">Mano de adelante, recta y rápida. Vuelve a la cara por el mismo camino.</p><button type="button" class="tec3d-lento" id="tec3d-lento" aria-pressed="false" onclick="tecLento()">Lento</button></div>
+        <details class="tec3d-det" id="tec3d-det"><summary>Cómo se hace</summary><div id="tec3d-det-c"></div></details>
       </div>
-      <div class="card" style="margin-bottom:15px">
-        <div class="card-title"><span class="ct-dot"></span>Postura básica</div>
-        <div style="display:grid;gap:8px">
-          <div style="display:flex;gap:9px;align-items:center;font-size:12px;color:var(--text)"><span style="font-size:15px">🦶</span> Pies al ancho de hombros, pie habil atras.</div>
-          <div style="display:flex;gap:9px;align-items:center;font-size:12px;color:var(--text)"><span style="font-size:15px">✊</span> Manos arriba, protegen tu rostro siempre.</div>
-          <div style="display:flex;gap:9px;align-items:center;font-size:12px;color:var(--text)"><span style="font-size:15px">😤</span> Menton abajo, mirada al frente.</div>
-          <div style="display:flex;gap:9px;align-items:center;font-size:12px;color:var(--text)"><span style="font-size:15px">🧎</span> Rodillas flexionadas, listo para moverte.</div>
+      <div class="card bx" style="margin-bottom:15px">
+        <div class="card-title">Guardia y pasos</div>
+        <ul class="bx-lista">
+          <li><b>Pies</b> algo más abiertos que los hombros; el de atrás atrasado y en diagonal. Peso repartido, sobre la parte delantera de los pies.</li>
+          <li><b>Rodillas</b> sueltas, un poco flexionadas: listo para moverte.</li>
+          <li><b>Manos</b>: la de adelante a la altura de la mejilla, la de atrás en la mandíbula. Codos cerrados, cuidando las costillas.</li>
+          <li><b>Mentón</b> abajo y mirada al pecho del rival.</li>
+          <li><b>Pasos</b>: mueve primero el pie del lado al que vas y el otro lo sigue la misma distancia. Pasos cortos; los pies nunca se cruzan ni se juntan.</li>
+        </ul>
+        <p class="bx-nota">Ortodoxo: izquierda adelante. Zurdo: al revés.</p>
+      </div>
+      <div class="card bx" style="margin-bottom:15px">
+        <div class="card-title">Las tres distancias</div>
+        <div class="bx-dist">
+          <div><h4>Larga</h4><p class="bx-def">Para alcanzar al rival tienes que dar un paso.</p><p><b>Golpes:</b> rectos, sobre todo el jab para medir y entrar.</p><p><b>Defensa:</b> los pies (paso atrás, lateral, salir en ángulo), esquiva atrás y parada.</p></div>
+          <div><h4>Media</h4><p class="bx-def">Alcanzas sin avanzar, y el rival a ti también.</p><p><b>Golpes:</b> combinaciones y cruzados.</p><p><b>Defensa:</b> movimiento de cabeza (esquivas, agachada, pendular, hombro) para contragolpear.</p></div>
+          <div><h4>Corta</h4><p class="bx-def">Los guantes casi se tocan.</p><p><b>Golpes:</b> ganchos y cruzados cortos, mucho al cuerpo.</p><p><b>Defensa:</b> cubrirse, codos, controlar la cabeza del rival y el clinch.</p></div>
         </div>
+        <p class="bx-nota">Entra de larga a media detrás del jab; entra a corta pasando por debajo del golpe. Para salir, mejor en ángulo que en línea recta.</p>
+        <button type="button" class="bx-btn" onclick="tecVerDistancia()">Ver cada distancia en 3D</button>
       </div>
-      <div class="card" style="margin-bottom:15px">
-        <div class="card-title"><span class="ct-dot"></span>Los 4 golpes basicos</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid #ffffff;border-radius:12px;padding:10px"><div style="font-size:12px;font-weight:800;color:var(--white);font-family:var(--display)">Jab</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Recto de mano adelantada. Mide y abre.</div></div>
-          <div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid #d1d1d6;border-radius:12px;padding:10px"><div style="font-size:12px;font-weight:800;color:var(--white);font-family:var(--display)">Cross</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Recto de mano atrasada. Tu poder.</div></div>
-          <div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid #ffffff;border-radius:12px;padding:10px"><div style="font-size:12px;font-weight:800;color:var(--white);font-family:var(--display)">Hook</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Gancho lateral. Sorprende de costado.</div></div>
-          <div style="background:var(--s2);border:1px solid var(--border);border-left:3px solid #ffffff;border-radius:12px;padding:10px"><div style="font-size:12px;font-weight:800;color:var(--white);font-family:var(--display)">Uppercut</div><div style="font-size:10px;color:var(--muted);margin-top:2px">Gancho ascendente. Sube por el centro.</div></div>
+      <div class="card bx" style="margin-bottom:15px">
+        <div class="card-title">Qué defensa contra qué golpe</div>
+        <div class="bx-tabla">
+          <div><b>Jab</b><span>Atrape, parada, esquiva o paso atrás</span><i>Parada y jab · esquiva por fuera y recto</i></div>
+          <div><b>Recto</b><span>Parada con la mano de adelante, esquiva, rodar el hombro, cubrirse</span><i>Esquiva y cruzado de adelante · hombro y recto</i></div>
+          <div><b>Cruzado arriba</b><span>Bloqueo lateral, agachada, pendular, esquiva atrás</span><i>Pendular y cruzado del otro lado</i></div>
+          <div><b>Cruzado al cuerpo</b><span>Bloqueo con el codo o paso atrás</span><i>Codo y cruzado arriba del mismo lado</i></div>
+          <div><b>Gancho</b><span>Bloqueo con la mano o los antebrazos, paso atrás</span><i>Bloqueo y cruzado</i></div>
+          <div><b>Ráfaga en corta</b><span>Cubrirse, clinch o salir en ángulo</span><i>Al cortar la ráfaga, tu combinación</i></div>
         </div>
+        <p class="bx-nota">Defiende lo justo, sin cerrar los ojos, con la otra mano arriba. Si no vas a contragolpear, para o bloquea; si vas a contragolpear, esquiva.</p>
       </div>
-      <div class="card" style="margin-bottom:15px;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent)">
-        <div class="card-title"><span class="ct-dot"></span>Errores comunes a evitar</div>
-        <div style="display:grid;gap:7px">
-          <div style="font-size:12px;color:var(--text)">❌ Bajar las manos despues de golpear.</div>
-          <div style="font-size:12px;color:var(--text)">❌ Cruzar los pies al moverte.</div>
-          <div style="font-size:12px;color:var(--text)">❌ Aguantar la respiración al pegar.</div>
-          <div style="font-size:12px;color:var(--text)">❌ Mirar al suelo en vez del rival.</div>
-        </div>
+      <div class="card bx" style="margin-bottom:15px">
+        <div class="card-title">Haz esto</div>
+        <ul class="bx-lista">
+          <li>Saca la fuerza de las piernas y la cadera; el brazo solo entrega el golpe.</li>
+          <li>Mientras una mano golpea, la otra se queda en la cara.</li>
+          <li>Vuelve a la guardia por el mismo camino, igual de rápido que saliste.</li>
+          <li>Exhala en cada golpe y mantén la mirada en el rival.</li>
+          <li>Termina cada paso en la misma guardia en la que empezaste.</li>
+        </ul>
+        <p class="bx-nota">La app te ayuda a practicar; revisa tu técnica con un entrenador. Si algo duele, para.</p>
       </div>
-
-    <div class="card" style="margin-bottom:15px"><div class="card-title"><span class="ct-dot"></span>Biblioteca de Tecnicas</div><div class="tech-grid"><div class="tech-btn active" id="tb-JAB" onclick="verTecnica('JAB')"><div class="tb-icon">👊</div><h4>JAB</h4><p>Velocidad</p></div><div class="tech-btn" id="tb-CROSS" onclick="verTecnica('CROSS')"><div class="tb-icon">💥</div><h4>CROSS</h4><p>Potencia</p></div><div class="tech-btn" id="tb-HOOK" onclick="verTecnica('HOOK')"><div class="tb-icon">🌀</div><h4>HOOK</h4><p>Lateral</p></div><div class="tech-btn" id="tb-UPPERCUT" onclick="verTecnica('UPPERCUT')"><div class="tb-icon">⬆️</div><h4>UPPERCUT</h4><p>Ascendente</p></div></div></div>
-    <div class="card" id="tech-detail-card"></div>
   </div>
   <!-- Contador -->
   <!-- Combos -->
@@ -6918,13 +6933,21 @@ function verTecnica(nombre) {
 
 // ─── COMBOS ───
 const COMBOS = [
-  { id:'c1', name:'1-2',       level:'Basico',      color:'#ffffff', seq:['JAB','CROSS'],           desc:'La combinacion mas fundamental. El jab abre la guardia, el cross cierra con potencia.', pasos:['Jab rapido para medir y abrir defensa','Cross inmediato aprovechando el espacio','Regresar a guardia en linea recta'], tip:'Practica este combo 200 veces al dia. La velocidad importa mas que la fuerza.', xp:15 },
-  { id:'c2', name:'1-2-3',     level:'Intermedio',  color:'#ebebf5', seq:['JAB','CROSS','HOOK'],           desc:'El combo clasico que agrega el hook despues del 1-2.', pasos:['Jab para establecer distancia','Cross para atacar en linea recta','Hook girando desde la cintura'], tip:'El hook sale cuando el cross hace que el rival se mueva — el angulo se abre solo.', xp:25 },
-  { id:'c3', name:'1-2-3-2',   level:'Avanzado',    color:'#ffffff', seq:['JAB','CROSS','HOOK','CROSS'],   desc:'Extension del 1-2-3 con segundo cross final.', pasos:['Jab de sondeo','Cross potente','Hook para cambiar angulo','Cross final aprovechando la apertura'], tip:'El segundo cross es el golpe KO. El rival no lo espera despues del hook.', xp:35 },
-  { id:'c4', name:'Body-Head', level:'Intermedio',  color:'#2fd4ff', seq:['HOOK','HOOK'],                  desc:'Hook al cuerpo para bajar la guardia, hook a la cabeza para el KO.', pasos:['Hook al higado — baja el codo del rival','Hook a la cabeza en el mismo movimiento','Salir hacia la derecha despues'], tip:'El hook al cuerpo debe ser convincente para que el segundo conecte.', xp:30 },
-  { id:'c5', name:'Upper-Hook', level:'Avanzado',   color:'#d1d1d6', seq:['UPPERCUT','HOOK'],              desc:'Uppercut que dobla al rival y hook mientras esta expuesto.', pasos:['Uppercut al cuerpo — el rival se dobla','Hook izquierdo a la sien expuesta','Clinch o salida lateral'], tip:'Solo funciona en corta distancia. Usa el jab para entrar primero.', xp:40 },
-  { id:'c6', name:'1-2-1-2',   level:'Basico',      color:'#d1d1d6', seq:['JAB','CROSS','JAB','CROSS'],    desc:'Double jab-cross. Presion constante sin respiro.', pasos:['Primer 1-2 a velocidad media','Segundo 1-2 mas rapido con mas intencion','Mantener ritmo sin telegrafiar'], tip:'Varia la velocidad entre el primer y segundo 1-2. El cambio de ritmo confunde.', xp:20 },
+  { id:'c1', name:'1-2', level:'Básico', dist:'Larga', seq:['jab','recto'], desc:'La combinación base: el jab mide y abre, el recto entra por el centro.', pasos:['Jab rápido para medir y tapar la visión','Recto inmediato girando la cadera','Vuelve a la guardia por el mismo camino'], tip:'La velocidad importa más que la fuerza: el recto sale cuando el jab todavía está volviendo.', xp:15 },
+  { id:'c6', name:'1-1-2', level:'Básico', dist:'Larga', seq:['jab','jab','recto'], desc:'Doble jab para entrar y recto detrás.', pasos:['Primer jab para medir','Segundo jab con un paso adelante','Recto cuando ya estás en media distancia'], tip:'El segundo jab cubre tu paso: así entras sin recibir.', xp:20 },
+  { id:'c9', name:'Parada y jab', level:'Básico', dist:'Larga', seq:['parada','jab'], desc:'Desvías su jab con la mano de atrás y respondes con el tuyo.', pasos:['Toque corto con la palma de la mano de atrás','Tu jab sale mientras su brazo vuelve','Ambas manos de nuevo arriba'], tip:'Parar es un toque, no un manotazo: si estiras el brazo, abres tu cara.', xp:20 },
+  { id:'c10', name:'Abajo y arriba', level:'Intermedio', dist:'Larga', seq:['jab_cuerpo','recto'], desc:'Jab al cuerpo para que baje la guardia y recto a la cabeza.', pasos:['Baja con las rodillas y jab al estómago','Sube y lanza el recto arriba','Sal con un paso atrás'], tip:'Que el jab al cuerpo sea convincente: si no baja las manos, no hay hueco arriba.', xp:25 },
+  { id:'c2', name:'1-2-3', level:'Intermedio', dist:'Media', seq:['jab','recto','cruzado'], desc:'El clásico: después del 1-2, cruzado de adelante.', pasos:['Jab para establecer la distancia','Recto girando la cadera','Cruzado de adelante pivoteando el pie de adelante'], tip:'El giro del recto deja cargado el cruzado: no te detengas entre golpes.', xp:25 },
+  { id:'c3', name:'1-2-3-2', level:'Avanzado', dist:'Media', seq:['jab','recto','cruzado','recto'], desc:'Cierras el 1-2-3 con otro recto.', pasos:['Jab de sondeo','Recto','Cruzado de adelante para cambiar el ángulo','Recto final por el hueco que abre el cruzado'], tip:'El último recto llega cuando el rival se cubre del cruzado.', xp:35 },
+  { id:'c7', name:'Esquiva y recto', level:'Intermedio', dist:'Media', seq:['esq_der','recto'], desc:'Esquivas su jab por fuera y respondes con el recto.', pasos:['La cabeza sale por fuera del jab','El giro del torso carga el recto','Recto mientras su brazo vuelve'], tip:'Esquiva lo justo: si te vas lejos, el recto no llega.', xp:30 },
+  { id:'c8', name:'Pendular y cruzado', level:'Avanzado', dist:'Media', seq:['pendular','cruzado'], desc:'Pasas por debajo de su cruzado y respondes desde el otro lado.', pasos:['Baja hacia un lado con las rodillas','Pasa por debajo dibujando una U','Sube con el cruzado del lado al que sales'], tip:'La mirada no se despega del rival mientras pasas por abajo.', xp:40 },
+  { id:'c12', name:'1-2 y salir en ángulo', level:'Intermedio', dist:'Media', seq:['jab','recto','pivote'], desc:'Golpeas y sales en ángulo en vez de retroceder recto.', pasos:['Jab','Recto','Pivote sobre el pie de adelante para salir de su línea'], tip:'Después de pivotear, quedas al costado y cerca: listo para otro golpe.', xp:30 },
+  { id:'c4', name:'Cuerpo y cabeza', level:'Intermedio', dist:'Media y corta', seq:['cruzado_cuerpo','cruzado'], desc:'Cruzado al cuerpo para bajar su codo y cruzado arriba con la misma mano.', pasos:['Baja con las piernas y cruzado al hígado','Sube sin volver a la guardia','Cruzado a la cabeza y sal en ángulo'], tip:'El de abajo tiene que ser convincente para que el de arriba encuentre hueco.', xp:30 },
+  { id:'c11', name:'Ganchos 5-6', level:'Intermedio', dist:'Corta', seq:['gancho','gancho_atras'], desc:'Gancho de adelante y gancho de atrás por dentro de su guardia.', pasos:['Baja un poco hacia tu lado de adelante','Gancho de adelante subiendo con las piernas','Gancho de atrás girando la cadera'], tip:'Golpes cortos: el codo no se abre y la cabeza queda pegada a su hombro.', xp:30 },
+  { id:'c5', name:'Gancho y cruzado', level:'Avanzado', dist:'Corta', seq:['gancho_cuerpo','cruzado'], desc:'Gancho al cuerpo que lo dobla y cruzado arriba mientras está expuesto.', pasos:['Gancho de atrás al plexo','Cruzado de adelante a la cabeza','Clinch o salida lateral'], tip:'Solo funciona en corta: entra primero con el jab o pasando por debajo.', xp:40 },
 ];
+const COMBO_NOMBRE = { jab:'Jab', recto:'Recto', jab_cuerpo:'Jab al cuerpo', cruzado:'Cruzado', cruzado_cuerpo:'Cruzado al cuerpo', gancho:'Gancho', gancho_atras:'Gancho de atrás', gancho_cuerpo:'Gancho al cuerpo', esq_der:'Esquiva', pendular:'Pendular', parada:'Parada', pivote:'Pivote' };
+function comboPaso(t) { return COMBO_NOMBRE[t] || t; }
 
 function renderCombos() {
   const list = $('combo-list');
@@ -6934,9 +6957,9 @@ function renderCombos() {
       <div style="flex:1">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:5px">
           <strong style="font-size:15px">${c.name}</strong>
-          <span class="combo-badge" style="background:${c.color}22;color:${c.color};border:1px solid ${c.color}44">${c.level}</span>
+          <span class="combo-badge">${c.level}</span><span class="combo-badge combo-dist">${c.dist}</span>
         </div>
-        <div class="combo-seq-row">${c.seq.map(s=>`<span style="color:${c.color};border-color:${c.color}44">${s}</span>`).join('')}</div>
+        <div class="combo-seq-row">${c.seq.map(s=>`<span>${comboPaso(s)}</span>`).join('')}</div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <span style="color:var(--gold);font-size:10px;font-weight:700;font-family:var(--mono)">+${c.xp}</span>
@@ -6953,14 +6976,14 @@ function verCombo(id) {
   const card = $('combo-detail-card');
   if (!card) return;
   card.innerHTML = `
-    <div class="ct"><span class="ct-dot"></span>${c.name} <span style="color:${c.color}">${c.level}</span></div>
+    <div class="ct"><span class="ct-dot"></span>${c.name} <span class="combo-badge">${c.level}</span> <span class="combo-badge combo-dist">Distancia ${c.dist.toLowerCase()}</span></div>
     <div class="combo-seq-row" style="margin-bottom:16px">
-      ${c.seq.map((s,i)=>`<span style="color:${c.color};border-color:${c.color}66;padding:6px 14px;font-size:12px">${i+1}. ${s}</span>${i<c.seq.length-1?'<span style="color:var(--dim)">→</span>':''}`).join('')}
+      ${c.seq.map((s,i)=>`<span style="padding:6px 14px;font-size:12px">${i+1}. ${comboPaso(s)}</span>${i<c.seq.length-1?'<span style="color:var(--dim)">→</span>':''}`).join('')}
     </div>
     <div class="hl" style="margin-bottom:12px"><h4>Descripción</h4><p>${c.desc}</p></div>
-    <div class="hl" style="margin-bottom:12px"><h4>Ejecucion</h4><ul>${c.pasos.map((p,i)=>`<li><strong style="color:${c.color}">${i+1}.</strong> ${p}</li>`).join('')}</ul></div>
+    <div class="hl" style="margin-bottom:12px"><h4>Ejecución</h4><ul>${c.pasos.map((p,i)=>`<li><strong>${i+1}.</strong> ${p}</li>`).join('')}</ul></div>
     <div class="hl red" style="margin-bottom:12px"><h4>Coach dice</h4><p>${c.tip}</p></div>
-    <button onclick="practicarCombo('${c.id}')" style="width:100%;padding:13px;background:${c.color};border:none;border-radius:var(--r);color:white;font-weight:900;font-size:12px;cursor:pointer;font-family:var(--display);letter-spacing:1px">Practicar (+${c.xp} XP)</button>`;
+    <button onclick="practicarCombo('${c.id}')" style="width:100%;padding:13px;background:var(--green,#30d158);border:none;border-radius:var(--r);color:#000;font-weight:700;font-size:15px;cursor:pointer">Practicar (+${c.xp} XP)</button>`;
 }
 
 function practicarCombo(id) {
@@ -11886,13 +11909,18 @@ function generarAnalisisAI() {
 
 // ── QUIZ DE BOXEO ──
 const QUIZ_PREGUNTAS = [
-  { q:'Cual es el golpe recto con la mano adelantada?', op:['Jab','Cross','Hook','Uppercut'], correcta:0 },
-  { q:'Que significa mantener la guardia alta?', op:['Bajar las manos','Proteger la cara con los puños','Correr','Saltar'], correcta:1 },
-  { q:'El uppercut es un golpe...', op:['Recto','Lateral','Ascendente','Hacia atras'], correcta:2 },
-  { q:'Que es el footwork?', op:['Juego de piernas','Tipo de golpe','Una dieta','Un guante'], correcta:0 },
-  { q:'Cuantos rounds suele tener una pelea amateur?', op:['1','3','12','20'], correcta:1 },
-  { q:'Que musculo es clave para la potencia del golpe?', op:['Solo el brazo','El core y cadera','El cuello','Los pies solamente'], correcta:1 },
-  { q:'Que se hace en un "slip"?', op:['Golpear fuerte','Esquivar moviendo la cabeza','Descansar','Bloquear con el guante'], correcta:1 }
+  { q:'¿Cuál es el golpe recto con la mano de adelante?', op:['Jab','Recto','Cruzado','Gancho'], correcta:0 },
+  { q:'En la app, el "gancho" (uppercut) es un golpe...', op:['Recto','De lado, en arco','Que sube de abajo hacia arriba','Hacia atrás'], correcta:2 },
+  { q:'¿De dónde sale la fuerza de un golpe?', op:['Solo del brazo','De las piernas, la cadera y el giro del tronco','Del cuello','De apretar el puño'], correcta:1 },
+  { q:'Estás en distancia larga cuando...', op:['Los guantes casi se tocan','Alcanzas sin avanzar','Tienes que dar un paso para alcanzar al rival','Estás en las cuerdas'], correcta:2 },
+  { q:'¿Qué golpes dominan la distancia corta?', op:['Jab y recto largos','Ganchos y cruzados cortos','Solo el volado','Ninguno'], correcta:1 },
+  { q:'Para dar un paso hacia la derecha, ¿qué pie se mueve primero?', op:['El izquierdo','El derecho','Los dos a la vez','Da igual'], correcta:1 },
+  { q:'¿Qué haces en una esquiva (slip)?', op:['Golpear fuerte','Sacar la cabeza de la línea del golpe','Cerrar los ojos','Dar la espalda'], correcta:1 },
+  { q:'¿Qué defensa sirve contra un cruzado al cuerpo?', op:['Bloqueo con el codo','Esquiva hacia atrás','Atrape con la palma','Levantar las dos manos a la frente'], correcta:0 },
+  { q:'Contra el jab del rival, la parada se hace con...', op:['La mano de atrás, con un toque corto','La mano de adelante, estirando el brazo','El codo','El hombro'], correcta:0 },
+  { q:'Al pendular (bob and weave), tu cabeza dibuja...', op:['Una línea recta','Una U por debajo del golpe','Un círculo hacia atrás','Nada: no se mueve'], correcta:1 },
+  { q:'Mientras una mano golpea, la otra...', op:['Baja para tomar impulso','Se queda en la cara','Va hacia atrás','Da igual'], correcta:1 },
+  { q:'¿Cuántos rounds suele tener una pelea amateur?', op:['1','3','12','20'], correcta:1 }
 ];
 let quizState = { idx:0, aciertos:0, preguntas:[] };
 function iniciarQuiz() {
@@ -21750,8 +21778,11 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     }).observe(tecBox);
   }
   /* Familias y tipos: [nombre corto, nombre completo, cómo se tira] */
-  var MODOS = { golpes: ['rectos', 'cruzados', 'ganchos'], defensa: ['esquivas', 'agachadas', 'bloqueos', 'pasos'] };
+  var MODOS = { golpes: ['rectos', 'cruzados', 'ganchos'], defensa: ['esquivas', 'agachadas', 'bloqueos', 'pasos'], distancia: ['larga', 'media', 'corta'] };
   var FAMILIAS = {
+    larga: { n: 'Larga', txt: 'Para alcanzar al rival tienes que dar un paso. Rectos y pies: mide con el jab, entra y sal.', tipos: ['jab', 'recto', 'jab_cuerpo', 'parada', 'esq_atras', 'paso_atras'] },
+    media: { n: 'Media', txt: 'Alcanzas sin avanzar, y el rival a ti también. Combinaciones, cruzados y movimiento de cabeza para contragolpear.', tipos: ['cruzado', 'cruzado_atras', 'esq_der', 'pendular', 'hombro', 'pivote'] },
+    corta: { n: 'Corta', txt: 'Los guantes casi se tocan. Ganchos y cruzados cortos, mucho al cuerpo; cúbrete y controla la cabeza del rival.', tipos: ['gancho', 'gancho_atras', 'gancho_cuerpo', 'cruzado_cuerpo', 'cubrirse', 'codo'] },
     esquivas: { n: 'Esquivas', txt: 'Sacan la cabeza de la línea del golpe sin dar un paso.', tipos: ['esq_der', 'esq_izq', 'esq_atras'] },
     agachadas: { n: 'Agachadas', txt: 'Pasas por debajo de los golpes altos doblando las rodillas.', tipos: ['agachada', 'pendular'] },
     bloqueos: { n: 'Bloqueos', txt: 'Paras o desvías el golpe con los guantes, los brazos o el hombro.', tipos: ['cubrirse', 'codo', 'parada', 'hombro'] },
@@ -21786,12 +21817,46 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     paso_lateral: ['Lateral', 'Paso lateral', 'Hacia la izquierda mueve primero el pie izquierdo; hacia la derecha, el derecho.'],
     pivote: ['Pivote', 'Pivote', 'Gira sobre la punta del pie de adelante para cambiar el ángulo y salir de la línea del rival.']
   };
+  /* Cómo se hace cada técnica: [distancia, pasos, error común] (skill tecnica-boxeo) */
+  var DET = {
+    jab: ['larga y media', ['El puño sale recto desde la mejilla y gira al final (palma abajo).', 'El hombro de adelante sube y cubre el mentón.', 'Vuelve a la cara por el mismo camino, rápido.'], 'bajar la mano de atrás mientras sale el jab.'],
+    recto: ['larga y media', ['Empuja con el pie de atrás y pivotea sobre la punta.', 'Gira la cadera y el hombro de atrás hacia adelante; el puño va recto al centro.', 'La mano de adelante vuelve a la cara.'], 'lanzar solo con el brazo: pierde fuerza y carga el hombro.'],
+    jab_cuerpo: ['larga', ['Baja doblando las rodillas, con la espalda recta.', 'El jab sale recto a la boca del estómago.', 'Sube a la guardia enseguida.'], 'agacharse con la espalda en vez de las rodillas.'],
+    recto_cuerpo: ['larga y media', ['Flexiona las rodillas y gira la cadera.', 'La cabeza sale de la línea del rival.', 'La otra mano protege la cara.'], 'dejar la cabeza al frente, donde llega el contragolpe.'],
+    cruzado: ['media (corto en corta)', ['Codo a la altura del hombro, brazo doblado cerca de 90°.', 'Pivotea el pie de adelante y gira la cadera.', 'El puño hace un arco corto hacia el centro.'], 'abrir el golpe o bajar el codo antes: se ve venir.'],
+    cruzado_atras: ['media', ['Pivotea el pie de atrás.', 'La cadera cierra el giro y el brazo sigue.', 'Termina de nuevo en guardia, no de frente.'], 'tirarlo muy abierto y quedar cuadrado.'],
+    cruzado_cuerpo: ['media y corta', ['Baja con las piernas.', 'Codo pegado a tu costado.', 'Golpea al hígado o a las costillas y sube.'], 'inclinarte de lado en vez de flexionar las rodillas.'],
+    volado: ['media', ['Esquiva un poco hacia afuera.', 'La mano de atrás pasa por encima de la guardia del rival en arco.', 'Recupera el equilibrio y vuelve a guardia.'], 'tirarlo sin preparación: es muy visible.'],
+    gancho: ['corta y media', ['Baja un poco hacia tu lado de adelante.', 'Sube con las piernas y la cadera; el codo queda abajo.', 'Palma hacia ti, recorrido corto.'], 'bajar de más o lanzarlo solo con el brazo.'],
+    gancho_atras: ['corta', ['Carga el peso en la pierna de atrás.', 'Gira la cadera y pivotea el pie de atrás.', 'El puño sube por el centro.'], 'bajar la mano antes de lanzarlo.'],
+    gancho_cuerpo: ['corta', ['Flexiona bien las rodillas para entrar.', 'Sube desde abajo al plexo o al hígado.', 'La cabeza fuera de la línea del rival.'], 'inclinar la espalda en vez de las rodillas.'],
+    esq_der: ['media', ['La cabeza sale por fuera del jab.', 'Gira un poco el torso y dobla cintura y rodillas.', 'Quedas cargado para el recto.'], 'mover solo el cuello o esquivar de más.'],
+    esq_izq: ['media', ['La cabeza sale hacia tu lado de adelante.', 'Dobla cintura y rodillas, la mirada al rival.', 'Contragolpea con el cruzado de adelante.'], 'cerrar los ojos o bajar la mirada.'],
+    esq_atras: ['larga y media', ['El peso pasa a la pierna de atrás.', 'La cara se aleja lo justo; los pies no se mueven.', 'Vuelve con un recto.'], 'echar la cabeza atrás sin mover el peso.'],
+    agachada: ['media', ['Baja con las rodillas, espalda recta.', 'La mirada sigue al frente.', 'Sube con un golpe al cuerpo o un gancho.'], 'doblar la espalda y perder de vista al rival.'],
+    pendular: ['media y corta', ['Baja hacia un lado.', 'Pasa por debajo del golpe dibujando una U.', 'Sube por el otro lado con un cruzado.'], 'bajar demasiado o quedarte abajo.'],
+    cubrirse: ['corta y media', ['Guantes a la frente, codos juntos.', 'Mentón abajo y rodillas sueltas para absorber.', 'Al cortar la ráfaga, contragolpea o sal en ángulo.'], 'cubrirte y quedarte quieto: invita a más golpes.'],
+    codo: ['corta', ['Baja el codo pegado a las costillas.', 'Gira un poco hacia ese lado.', 'Responde con un cruzado arriba del mismo lado.'], 'separar el codo del cuerpo.'],
+    parada: ['larga, media y corta', ['Toque corto con la palma que desvía el golpe.', 'Contra el jab, con la mano de atrás; contra el recto, con la de adelante.', 'La mano vuelve enseguida a la cara.'], 'estirar el brazo para ir a buscar el golpe.'],
+    hombro: ['media', ['Sube el hombro de adelante.', 'Esconde el mentón detrás y gira un poco el tronco.', 'El giro carga tu recto de atrás.'], 'dejar el mentón fuera del hombro.'],
+    paso_adelante: ['para pasar de larga a media', ['Primero el pie de adelante.', 'El de atrás lo sigue la misma distancia.', 'Termina en la misma guardia.'], 'dar un paso largo que desarma la guardia.'],
+    paso_atras: ['para salir a larga', ['Primero el pie de atrás.', 'El de adelante lo sigue la misma distancia.', 'Mejor con un jab al salir.'], 'retroceder en línea recta hasta las cuerdas.'],
+    paso_lateral: ['todas', ['Primero el pie del lado al que vas.', 'El otro lo sigue sin cruzarse.', 'Sal hacia fuera de la mano fuerte del rival.'], 'cruzar o juntar los pies.'],
+    pivote: ['media y corta', ['Gira sobre la punta del pie de adelante.', 'El pie de atrás describe un arco de 45° a 90°.', 'Quedas en ángulo y cerca para contragolpear.'], 'girar sobre los talones y perder el equilibrio.']
+  };
+  /* "Ver cada distancia en 3D" desde la tarjeta de las tres distancias */
+  window.tecVerDistancia = function () {
+    window.tecModo('distancia');
+    var c = document.querySelector('.tec3d'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  var tecModoActual = 'golpes';
   window.tecModo = function (m) {
     var fams = MODOS[m]; if (!fams) return;
     document.querySelectorAll('.tec3d-modo button').forEach(function (b) { var on = b.getAttribute('data-m') === m; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     var c = document.getElementById('tec3d-fam');
     if (c) {
       c.style.gridTemplateColumns = 'repeat(' + fams.length + ',1fr)'; c.classList.toggle('cuatro', fams.length > 3);
+      tecModoActual = m;
       c.innerHTML = fams.map(function (f) { return '<button type="button" data-f="' + f + '" aria-pressed="false" onclick="tecFamilia(\'' + f + '\')">' + FAMILIAS[f].n + '</button>'; }).join('');
     }
     window.tecFamilia(fams[0]);
@@ -21801,7 +21866,7 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     document.querySelectorAll('#tec3d-fam button').forEach(function (b) { var on = b.getAttribute('data-f') === f; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
     var tx = document.getElementById('tec3d-fam-txt'); if (tx) tx.textContent = F.txt;
     var c = document.getElementById('tec3d-tipos');
-    if (c) c.innerHTML = F.tipos.map(function (t) { return '<button type="button" data-t="' + t + '" aria-pressed="false" onclick="tecElegir(\'' + t + '\')">' + TEC[t][0] + '</button>'; }).join('');
+    if (c) c.innerHTML = F.tipos.map(function (t) { return '<button type="button" data-t="' + t + '" aria-pressed="false" onclick="tecElegir(\'' + t + '\')">' + TEC[t][tecModoActual === 'distancia' ? 1 : 0] + '</button>'; }).join('');
     window.tecElegir(F.tipos[0]);
   };
   window.tecElegir = function (t) {
@@ -21809,6 +21874,8 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     HOLO.tec = t; HOLO._tt = 0.55;                               // el golpe sale enseguida
     var n = document.getElementById('tec3d-nombre'), x = document.getElementById('tec3d-txt');
     if (n) n.textContent = TEC[t][1]; if (x) x.textContent = TEC[t][2];
+    var d = DET[t], dc = document.getElementById('tec3d-det-c');
+    if (dc && d) dc.innerHTML = '<p class="tec3d-dist"><b>Distancia:</b> ' + d[0] + '</p><ol>' + d[1].map(function (p) { return '<li>' + p + '</li>'; }).join('') + '</ol><p class="tec3d-err"><b>Error común:</b> ' + d[2] + '</p>';
     document.querySelectorAll('#tec3d-tipos button').forEach(function (b) { var on = b.getAttribute('data-t') === t; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
   };
   if (document.getElementById('tec3d-tipos')) window.tecModo('golpes');
@@ -21825,9 +21892,9 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
 .tec3d-tabs button{min-height:40px;border:0;border-radius:9px;background:transparent;color:rgba(235,235,245,.6);font:600 14px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;cursor:pointer}
 .tec3d-tabs button.on{background:#48484a;color:#fff}
 .tec3d-tabs button:focus-visible,.tec3d-lento:focus-visible{outline:2px solid #63e6be;outline-offset:2px}
-.tec3d-cab{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tec3d-cab{display:flex;flex-direction:column;align-items:stretch;gap:10px;margin-bottom:10px}
 .tec3d-cab .card-title{margin:0}
-.tec3d-modo{display:flex;gap:2px;padding:2px;border-radius:999px;background:#2c2c2e;flex:none}
+.tec3d-modo{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px;border-radius:999px;background:#2c2c2e}
 .tec3d-modo button{min-height:32px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:rgba(235,235,245,.6);font:600 13px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;cursor:pointer}
 .tec3d-modo button.on{background:#63e6be;color:#000}
 .tec3d-modo button:focus-visible{outline:2px solid #63e6be;outline-offset:2px}
@@ -21842,6 +21909,30 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
 .tec3d-pie p{flex:1;margin:0;font-size:13px;line-height:1.45;color:rgba(235,235,245,.7)}
 .tec3d-lento{flex:none;min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #48484a;background:transparent;color:#fff;font:600 13px -apple-system,system-ui,sans-serif;cursor:pointer}
 .tec3d-lento.on{background:#63e6be;border-color:#63e6be;color:#000}
+</style>
+<style id="boxeo-tec">
+.bx-lista{margin:0;padding-left:18px;display:grid;gap:7px;font-size:13px;line-height:1.45;color:rgba(235,235,245,.85)}
+.bx-lista b{color:#fff}
+.bx-nota{margin:10px 0 0;font-size:12px;line-height:1.45;color:rgba(235,235,245,.6)}
+.bx-dist{display:grid;gap:8px}
+.bx-dist > div{background:#2c2c2e;border-radius:12px;padding:10px 12px}
+.bx-dist h4{margin:0 0 2px;font-size:15px;color:#fff}
+.bx-dist p{margin:3px 0 0;font-size:12.5px;line-height:1.4;color:rgba(235,235,245,.78)}
+.bx-dist .bx-def{color:#63e6be;font-size:12.5px}
+.bx-btn{margin-top:12px;width:100%;min-height:44px;border-radius:12px;border:1px solid #48484a;background:transparent;color:#fff;font:600 14px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;cursor:pointer}
+.bx-tabla{display:grid;gap:6px}
+.bx-tabla > div{display:grid;gap:2px;background:#2c2c2e;border-radius:12px;padding:9px 12px}
+.bx-tabla b{font-size:13.5px;color:#fff}
+.bx-tabla span{font-size:12.5px;line-height:1.4;color:rgba(235,235,245,.82)}
+.bx-tabla i{font-style:normal;font-size:12px;color:#63e6be}
+.tec3d-det{margin-top:10px;border-top:1px solid #2c2c2e;padding-top:8px}
+.tec3d-det summary{cursor:pointer;font-size:13.5px;font-weight:600;color:#fff;min-height:32px;display:flex;align-items:center}
+.tec3d-det ol{margin:4px 0 6px;padding-left:18px;display:grid;gap:4px;font-size:13px;line-height:1.4;color:rgba(235,235,245,.85)}
+.tec3d-det p{margin:4px 0;font-size:12.5px;line-height:1.4;color:rgba(235,235,245,.7)}
+.tec3d-det b{color:#fff}
+.combo-badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#2c2c2e;color:rgba(235,235,245,.8);font-size:11px;font-weight:600;border:0}
+.combo-dist{color:#63e6be}
+.combo-seq-row span{color:#fff;border-color:#3a3a3c}
 </style>
 <style id="calma60">
 /* ═══ v60 · CALMA: una sola paleta y sin animaciones decorativas ═══

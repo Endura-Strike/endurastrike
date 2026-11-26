@@ -56,6 +56,13 @@ Para animar bien: primero la pierna o la cadera, después el brazo; en el impact
 
 **Cámara AI** (skill `camara-endura`). Hoy detecta jab, cross, gancho (hook), uppercut, golpes al cuerpo, esquivas, agachadas, bloqueo alto y guardia. No detecta parada, atrape, rodar el hombro, pasos ni clinch: son movimientos pequeños o necesitan ver al rival. Si se agregan, empieza por un caso sintético en `test-camara.js` que siga la mecánica de `referencias/`.
 
+## Dónde vive la técnica en la app (Boxeo)
+
+- **Técnicas** (`#t-hub`): tarjeta 3D con modos Golpes, Defensa y Distancia (`MODOS`, `FAMILIAS`, `TEC` y `DET` en el bloque `cam27`; `DET` = distancia, pasos y error común de cada técnica). Debajo, tarjetas estáticas: Guardia y pasos, Las tres distancias, Qué defensa contra qué golpe, Haz esto.
+- **Combos** (`COMBOS`): cada combo tiene `dist` (Larga, Media, Corta) y `seq` con las claves del holograma (`jab`, `recto`, `cruzado`, `esq_der`…); `COMBO_NOMBRE` las muestra en español.
+- **Práctica** (`QUIZ_PREGUNTAS`): preguntas con los nombres y conceptos de esta skill.
+Si cambias un nombre o un consejo aquí, cámbialo también en esos lugares.
+
 ## Reglas para los textos de la app
 
 - Un consejo = una idea, en una o dos frases, en español, con el nombre que usa la app y el inglés entre paréntesis solo la primera vez.
