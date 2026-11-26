@@ -5273,11 +5273,10 @@ html.es-app .app-tab span { font: 500 10px -apple-system, system-ui, sans-serif 
   <!-- Hub -->
   <div class="tab-content active" id="t-hub">
       <div class="card tec3d" style="margin-bottom:15px">
-        <div class="card-title">Mira cada golpe</div>
+        <div class="tec3d-cab"><div class="card-title">Técnica</div>
+          <div class="tec3d-modo" role="group" aria-label="Golpes o defensa"><button type="button" data-m="golpes" class="on" aria-pressed="true" onclick="tecModo('golpes')">Golpes</button><button type="button" data-m="defensa" aria-pressed="false" onclick="tecModo('defensa')">Defensa</button></div></div>
         <div class="cam2-holo tec3d-holo" id="tec3d-holo"><div class="cam2-holo-lbl"><i></i>Holograma <b id="tec3d-nombre">Jab</b></div><div class="cam2-holo-sin">El 3D no está disponible en este teléfono</div></div>
-        <div class="tec3d-tabs" id="tec3d-fam" role="group" aria-label="Familia de golpes">
-          <button type="button" data-f="rectos" class="on" aria-pressed="true" onclick="tecFamilia('rectos')">Rectos</button><button type="button" data-f="cruzados" aria-pressed="false" onclick="tecFamilia('cruzados')">Cruzados</button><button type="button" data-f="ganchos" aria-pressed="false" onclick="tecFamilia('ganchos')">Ganchos</button>
-        </div>
+        <div class="tec3d-tabs" id="tec3d-fam" role="group" aria-label="Familia"></div>
         <p class="tec3d-fam-txt" id="tec3d-fam-txt">Viajan en línea recta, del hombro al objetivo. Son los más rápidos.</p>
         <div class="tec3d-tipos" id="tec3d-tipos" role="group" aria-label="Tipo de golpe"></div>
         <div class="tec3d-pie"><p id="tec3d-txt">Mano de adelante, recta y rápida. Vuelve a la cara por el mismo camino.</p><button type="button" class="tec3d-lento" id="tec3d-lento" aria-pressed="false" onclick="tecLento()">Lento</button></div>
@@ -21361,7 +21360,9 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     var p = vRes(polo, vEsc(dir, vPunto(polo, dir))); p = vPunto(p, p) < 1e-6 ? [0, 1, 0] : vNorma(p);
     return [vSum(vSum(S, vEsc(dir, a)), vEsc(p, h)), vSum(S, vEsc(dir, dist))];
   }
-  var BRAZO = [0.25, 0.27], PIERNA = [0.43, 0.44], GUARDIA = { r: 0.45, d: 0, f: 0, l: 0, piv: 0 };
+  /* Además: tx, tz = mover todo el cuerpo; lx, lz, ly / rx, rz, ry = pie de adelante / de atrás (ly, ry lo levantan);
+     gp = girar todo el cuerpo sobre el pie de adelante; hl = subir el hombro de adelante */
+  var BRAZO = [0.25, 0.27], PIERNA = [0.43, 0.44], GUARDIA = { r: 0.45, d: 0, f: 0, l: 0, piv: 0, tx: 0, tz: 0, lx: 0, lz: 0, ly: 0, rx: 0, rz: 0, ry: 0, gp: 0, hl: 0 };
   function nariz(P) { var cae = 0.07 + P.d; return [P.l * 1.3, -0.6 + cae, -0.1 - P.f * 1.4]; }
   function manoGuardia(P, lado) {                           // adelante: a la altura de la mejilla; atrás: en la mandíbula
     var n = nariz(P);
@@ -21369,14 +21370,18 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
   }
   function poseDe(P, mL, mR) {
     var cae = 0.07 + P.d, C = [P.l, -0.47 + cae, -P.f], rh = P.r * 0.7, o = {};
-    o[11] = vSum(C, rotY([0.18, 0, 0], P.r)); o[12] = vSum(C, rotY([-0.18, 0, 0], P.r));
+    o[11] = vSum(C, rotY([0.18, 0, 0], P.r)); o[12] = vSum(C, rotY([-0.18, 0, 0], P.r)); o[11][1] -= P.hl;
     o[0] = nariz(P);
     o[23] = vSum([0, cae, 0], rotY([0.105, 0, 0], rh)); o[24] = vSum([0, cae, 0], rotY([-0.105, 0, 0], rh));
-    o[27] = [0.13, 0.86, -0.2]; o[28] = vMezcla([-0.15, 0.86, 0.19], [-0.12, 0.82, 0.16], P.piv);
+    o[27] = [0.13 + P.lx, 0.86 - P.ly, -0.2 + P.lz]; o[28] = vSum(vMezcla([-0.15, 0.86, 0.19], [-0.12, 0.82, 0.16], P.piv), [P.rx, -P.ry, P.rz]);
     var pi = ik(o[23], o[27], PIERNA[0], PIERNA[1], [0.25, 0, -1]), pd = ik(o[24], o[28], PIERNA[0], PIERNA[1], [-0.25, 0, -1]);
     o[25] = pi[0]; o[27] = pi[1]; o[26] = pd[0]; o[28] = pd[1];
     var bi = ik(o[11], mL.t, BRAZO[0], BRAZO[1], mL.p), bd = ik(o[12], mR.t, BRAZO[0], BRAZO[1], mR.p);
     o[13] = bi[0]; o[15] = bi[1]; o[14] = bd[0]; o[16] = bd[1];
+    if (P.gp || P.tx || P.tz) {
+      var pv = [o[27][0], 0, o[27][2]];
+      for (var i in o) o[i] = vSum(vSum(rotY(vRes(o[i], pv), P.gp), pv), [P.tx, 0, P.tz]);
+    }
     return o;
   }
   /* Golpes: [segundo del ciclo, parámetros]. L/R = [x, y, z del puño respecto a la nariz, x, y, z hacia donde apunta el codo]; sin L/R la mano queda en guardia */
@@ -21394,6 +21399,23 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     gancho_atras: { lado: 'R', imp: 1.16, k: [[0.8, {}], [0.97, { d: 0.07, l: -0.05, r: 0.55, R: [-0.14, 0.3, -0.25, -0.3, 1, 0.6] }], [1.16, { r: -0.1, piv: 1, R: [-0.01, -0.01, -0.33, -0.3, 1, 0.8] }], [1.28, 'igual'], [1.64, {}]] },
     gancho_cuerpo: { lado: 'R', imp: 1.14, k: [[0.8, {}], [0.97, { d: 0.09, l: -0.03, r: 0.5, R: [-0.12, 0.42, -0.22, -0.3, 1, 0.6] }], [1.14, { d: 0.07, f: 0.04, r: -0.05, piv: 1, R: [-0.02, 0.28, -0.38, -0.3, 1, 0.8] }], [1.26, 'igual'], [1.62, {}]] }
   };
+  /* Defensas: mismas reglas; sin destello de impacto. imp = la pose que se muestra con movimiento reducido */
+  var DEF = {
+    esq_der: { imp: 1.1, k: [[0.85, {}], [1.08, { l: -0.14, r: 0.65, d: 0.04 }], [1.35, 'igual'], [1.7, {}]] },
+    esq_izq: { imp: 1.1, k: [[0.85, {}], [1.08, { l: 0.13, r: 0.2, d: 0.04 }], [1.35, 'igual'], [1.7, {}]] },
+    esq_atras: { imp: 1.1, k: [[0.85, {}], [1.06, { f: -0.11, r: 0.55 }], [1.32, 'igual'], [1.65, {}]] },
+    agachada: { imp: 1.12, k: [[0.85, {}], [1.1, { d: 0.16, f: 0.05 }], [1.35, 'igual'], [1.72, {}]] },
+    pendular: { imp: 1.18, k: [[0.8, {}], [0.98, { d: 0.1, l: -0.1, f: 0.03 }], [1.18, { d: 0.17, l: 0, f: 0.05 }], [1.38, { d: 0.1, l: 0.1, f: 0.03 }], [1.75, {}]] },
+    cubrirse: { imp: 1.1, k: [[0.85, {}], [1.05, { d: 0.04, f: 0.02, L: [0.05, -0.05, -0.12, 0.3, 1, 0.3], R: [-0.05, -0.05, -0.12, -0.3, 1, 0.3] }], [1.45, 'igual'], [1.75, {}]] },
+    codo: { imp: 1.1, k: [[0.85, {}], [1.05, { d: 0.05, l: 0.04, r: 0.55, L: [0.1, 0.12, -0.1, 0.3, 1, 0.2] }], [1.4, 'igual'], [1.72, {}]] },
+    parada: { imp: 1.12, k: [[0.9, {}], [1.04, { R: [0.02, 0.06, -0.3, -0.4, 1, 0.2] }], [1.12, { r: 0.5, R: [0.11, 0.1, -0.26, -0.4, 1, 0.2] }], [1.36, {}]] },
+    hombro: { imp: 1.12, k: [[0.85, {}], [1.08, { r: 0.85, f: -0.04, hl: 0.05, L: [0.06, 0.33, -0.12, 0.5, 1, 0.2], R: [-0.04, 0.08, -0.06, -0.5, 1, 0.2] }], [1.4, 'igual'], [1.75, {}]] },
+    paso_adelante: { imp: 1.22, k: [[0.8, {}], [0.94, { lz: -0.08, ly: 0.04, tz: -0.02 }], [1.04, { lz: -0.16, tz: -0.06 }], [1.14, { lz: -0.05, rz: -0.08, ry: 0.03, tz: -0.12 }], [1.22, { tz: -0.16 }], [1.5, 'igual'], [1.95, {}]] },
+    paso_atras: { imp: 1.22, k: [[0.8, {}], [0.94, { rz: 0.08, ry: 0.04, tz: 0.02 }], [1.04, { rz: 0.16, tz: 0.06 }], [1.14, { rz: 0.05, lz: 0.08, ly: 0.03, tz: 0.12 }], [1.22, { tz: 0.16 }], [1.5, 'igual'], [1.95, {}]] },
+    paso_lateral: { imp: 1.22, k: [[0.8, {}], [0.94, { lx: 0.08, ly: 0.04, tx: 0.02 }], [1.04, { lx: 0.16, tx: 0.06 }], [1.14, { lx: 0.05, rx: 0.08, ry: 0.03, tx: 0.12 }], [1.22, { tx: 0.16 }], [1.5, 'igual'], [1.95, {}]] },
+    pivote: { imp: 1.15, k: [[0.85, {}], [1.15, { gp: 0.7, piv: 1, ry: 0.02 }], [1.45, 'igual'], [1.85, {}]] }
+  };
+  Object.keys(DEF).forEach(function (id) { GOLPES[id] = DEF[id]; });
   /* Cada fotograma clave se resuelve una vez: parámetros completos y puños en coordenadas absolutas */
   function resolver(spec) {
     var P = {}; for (var c in GUARDIA) P[c] = spec[c] != null ? spec[c] : GUARDIA[c];
@@ -21421,7 +21443,7 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     var pose = poseDe(P, m(A.mL, B.mL), m(A.mR, B.mR)), zurdo = window.camGuardia === 'zurdo', out = {};
     PUNTOS.forEach(function (i) { var p = pose[i]; if (zurdo) out[ESPEJO[i] || i] = [-p[0], p[1], p[2]]; else out[i] = p; });
     var lado = (G.lado === 'L') !== zurdo ? 'left' : 'right';
-    if (!q && tc >= G.imp && HOLO._imp !== tipo + n) { HOLO._imp = tipo + n; if (HOLO.golpe) HOLO.golpe(lado, 70); }
+    if (G.lado && !q && tc >= G.imp && HOLO._imp !== tipo + n) { HOLO._imp = tipo + n; if (HOLO.golpe) HOLO.golpe(lado, 70); }
     return out;
   }
   var DEMO = ['jab', 'recto', 'cruzado', 'gancho'];
@@ -21728,10 +21750,15 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     }).observe(tecBox);
   }
   /* Familias y tipos: [nombre corto, nombre completo, cómo se tira] */
+  var MODOS = { golpes: ['rectos', 'cruzados', 'ganchos'], defensa: ['esquivas', 'agachadas', 'bloqueos', 'pasos'] };
   var FAMILIAS = {
-    rectos: { txt: 'Viajan en línea recta, del hombro al objetivo. Son los más rápidos.', tipos: ['jab', 'recto', 'jab_cuerpo', 'recto_cuerpo'] },
-    cruzados: { txt: 'Recorren un arco de lado con el codo a la altura del hombro (en inglés, hook).', tipos: ['cruzado', 'cruzado_atras', 'cruzado_cuerpo', 'volado'] },
-    ganchos: { txt: 'Suben de abajo hacia arriba, cortos y por dentro (en inglés, uppercut).', tipos: ['gancho', 'gancho_atras', 'gancho_cuerpo'] }
+    esquivas: { n: 'Esquivas', txt: 'Sacan la cabeza de la línea del golpe sin dar un paso.', tipos: ['esq_der', 'esq_izq', 'esq_atras'] },
+    agachadas: { n: 'Agachadas', txt: 'Pasas por debajo de los golpes altos doblando las rodillas.', tipos: ['agachada', 'pendular'] },
+    bloqueos: { n: 'Bloqueos', txt: 'Paras o desvías el golpe con los guantes, los brazos o el hombro.', tipos: ['cubrirse', 'codo', 'parada', 'hombro'] },
+    pasos: { n: 'Pasos', txt: 'Te mueves para cambiar la distancia o el ángulo, siempre en guardia.', tipos: ['paso_adelante', 'paso_atras', 'paso_lateral', 'pivote'] },
+    rectos: { n: 'Rectos', txt: 'Viajan en línea recta, del hombro al objetivo. Son los más rápidos.', tipos: ['jab', 'recto', 'jab_cuerpo', 'recto_cuerpo'] },
+    cruzados: { n: 'Cruzados', txt: 'Recorren un arco de lado con el codo a la altura del hombro (en inglés, hook).', tipos: ['cruzado', 'cruzado_atras', 'cruzado_cuerpo', 'volado'] },
+    ganchos: { n: 'Ganchos', txt: 'Suben de abajo hacia arriba, cortos y por dentro (en inglés, uppercut).', tipos: ['gancho', 'gancho_atras', 'gancho_cuerpo'] }
   };
   var TEC = {
     jab: ['Jab', 'Jab', 'Mano de adelante, recta y rápida. Vuelve a la cara por el mismo camino.'],
@@ -21744,7 +21771,30 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     volado: ['Volado', 'Volado', 'De atrás, pasa por encima de la guardia del rival en un arco de arriba hacia abajo (en inglés, overhand).'],
     gancho: ['De adelante', 'Gancho de adelante', 'Baja un poco hacia tu lado de adelante y sube con las piernas. Corto: el codo no se abre.'],
     gancho_atras: ['De atrás', 'Gancho de atrás', 'Carga en la pierna de atrás y sube girando la cadera. El puño mira hacia ti.'],
-    gancho_cuerpo: ['Al cuerpo', 'Gancho al cuerpo', 'Al plexo o al hígado, desde abajo. Flexiona bien las rodillas para entrar.']
+    gancho_cuerpo: ['Al cuerpo', 'Gancho al cuerpo', 'Al plexo o al hígado, desde abajo. Flexiona bien las rodillas para entrar.'],
+    esq_der: ['A la derecha', 'Esquiva a la derecha', 'Contra el jab: sacas la cabeza por fuera girando un poco el torso, y quedas listo para contragolpear.'],
+    esq_izq: ['A la izquierda', 'Esquiva a la izquierda', 'Contra el recto de atrás: la cabeza sale hacia tu lado de adelante. Dobla la cintura y las rodillas, no solo el cuello.'],
+    esq_atras: ['Hacia atrás', 'Esquiva hacia atrás', 'Echa el peso a la pierna de atrás y saca la cara lo justo. Las manos no bajan.'],
+    agachada: ['Agacharse', 'Agachada', 'Baja con las rodillas, no con la espalda: la mirada sigue al frente. Contra cruzados altos.'],
+    pendular: ['Pendular', 'Pendular', 'Pasa por debajo del golpe dibujando una U: bajas por un lado y subes por el otro (en inglés, bob and weave).'],
+    cubrirse: ['Cubrirse', 'Cubrirse', 'Guantes a la frente, codos juntos y mentón abajo. Para aguantar una ráfaga.'],
+    codo: ['Con el codo', 'Bloqueo con el codo', 'Baja el codo pegado a las costillas y gira un poco hacia ese lado. Contra golpes al cuerpo.'],
+    parada: ['Parada', 'Parada', 'Con la mano de atrás desvías el jab con un toque corto. No la estires: vuelve enseguida a la cara.'],
+    hombro: ['Hombro', 'Rodar el hombro', 'Sube el hombro de adelante y esconde el mentón detrás. El golpe resbala por el hombro.'],
+    paso_adelante: ['Adelante', 'Paso adelante', 'Primero el pie de adelante y luego el de atrás, la misma distancia. Nunca cruces los pies.'],
+    paso_atras: ['Atrás', 'Paso atrás', 'Primero el pie de atrás y luego el de adelante. Los pies siempre a la misma distancia.'],
+    paso_lateral: ['Lateral', 'Paso lateral', 'Hacia la izquierda mueve primero el pie izquierdo; hacia la derecha, el derecho.'],
+    pivote: ['Pivote', 'Pivote', 'Gira sobre la punta del pie de adelante para cambiar el ángulo y salir de la línea del rival.']
+  };
+  window.tecModo = function (m) {
+    var fams = MODOS[m]; if (!fams) return;
+    document.querySelectorAll('.tec3d-modo button').forEach(function (b) { var on = b.getAttribute('data-m') === m; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+    var c = document.getElementById('tec3d-fam');
+    if (c) {
+      c.style.gridTemplateColumns = 'repeat(' + fams.length + ',1fr)'; c.classList.toggle('cuatro', fams.length > 3);
+      c.innerHTML = fams.map(function (f) { return '<button type="button" data-f="' + f + '" aria-pressed="false" onclick="tecFamilia(\'' + f + '\')">' + FAMILIAS[f].n + '</button>'; }).join('');
+    }
+    window.tecFamilia(fams[0]);
   };
   window.tecFamilia = function (f) {
     var F = FAMILIAS[f]; if (!F) return;
@@ -21761,7 +21811,7 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     if (n) n.textContent = TEC[t][1]; if (x) x.textContent = TEC[t][2];
     document.querySelectorAll('#tec3d-tipos button').forEach(function (b) { var on = b.getAttribute('data-t') === t; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
   };
-  if (document.getElementById('tec3d-tipos')) window.tecFamilia('rectos');
+  if (document.getElementById('tec3d-tipos')) window.tecModo('golpes');
   window.tecLento = function () {
     HOLO.lento = !HOLO.lento;
     var b = document.getElementById('tec3d-lento'); if (b) { b.classList.toggle('on', HOLO.lento); b.setAttribute('aria-pressed', HOLO.lento ? 'true' : 'false'); }
@@ -21775,6 +21825,14 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
 .tec3d-tabs button{min-height:40px;border:0;border-radius:9px;background:transparent;color:rgba(235,235,245,.6);font:600 14px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;cursor:pointer}
 .tec3d-tabs button.on{background:#48484a;color:#fff}
 .tec3d-tabs button:focus-visible,.tec3d-lento:focus-visible{outline:2px solid #63e6be;outline-offset:2px}
+.tec3d-cab{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tec3d-cab .card-title{margin:0}
+.tec3d-modo{display:flex;gap:2px;padding:2px;border-radius:999px;background:#2c2c2e;flex:none}
+.tec3d-modo button{min-height:32px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:rgba(235,235,245,.6);font:600 13px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;cursor:pointer}
+.tec3d-modo button.on{background:#63e6be;color:#000}
+.tec3d-modo button:focus-visible{outline:2px solid #63e6be;outline-offset:2px}
+.tec3d-tabs button{padding:0 4px}
+.tec3d-tabs.cuatro button{font-size:12.5px;letter-spacing:-.01em}
 .tec3d-fam-txt{margin:8px 2px 10px;font-size:12.5px;line-height:1.4;color:rgba(235,235,245,.6)}
 .tec3d-tipos{display:flex;flex-wrap:wrap;gap:8px}
 .tec3d-tipos button{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid #3a3a3c;background:transparent;color:rgba(235,235,245,.85);font:600 13px -apple-system,BlinkMacSystemFont,Inter,system-ui,sans-serif;cursor:pointer}
