@@ -21192,6 +21192,9 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     ante: [[0, 0.72], [0.14, 0.96], [0.3, 1], [0.6, 0.76], [0.85, 0.58], [1, 0.54]],
     muslo: [[0, 0.9], [0.15, 1], [0.42, 0.96], [0.7, 0.86], [0.82, 0.8], [0.92, 0.64], [1, 0.56]],
     pierna: [[0, 0.62], [0.12, 0.86], [0.3, 1], [0.48, 0.86], [0.72, 0.58], [1, 0.46]],
+    cabeza: [[0, 0.3], [0.07, 0.58], [0.2, 0.78], [0.38, 0.92], [0.6, 1], [0.8, 0.94], [0.93, 0.68], [1, 0.12]],
+    cadera: [[0, 0.74], [0.18, 0.92], [0.45, 1.02], [0.75, 0.98], [1, 0.9]],
+    short: [[0, 1], [0.55, 1.02], [0.88, 1.08], [1, 1.04]],
     torso: [[0, 0.56], [0.1, 0.6], [0.3, 0.52], [0.5, 0.68], [0.7, 0.92], [0.85, 1], [0.95, 0.9], [1, 0.4]]
   };
 
@@ -21268,11 +21271,12 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     }
     function perfil(pts) { return new THREE.LatheGeometry(pts.map(function (q) { return new THREE.Vector2(q[1], q[0] - 0.5); }), 16); }
     var gForma = {}; Object.keys(FORMAS).forEach(function (k) { gForma[k] = perfil(FORMAS[k]); });
-    var mCuerpo = mat(0x63e6be, 1.15, 0.7), mJunta = mat(0x9ff5dc, 0.9), mTorso = mat(0x63e6be, 1.2, 1), mDelt = mat(0x63e6be, 0.85, 0.7);
+    var mCuerpo = mat(0x63e6be, 1.15, 0.7), mJunta = mat(0x9ff5dc, 0.9), mTorso = mat(0x63e6be, 1.2, 1), mDelt = mat(0x63e6be, 0.85, 0.7), mShort = mat(0xff453a, 1.05, 0.8);
     var huesos = HUESOS.map(function (b) { var m = new THREE.Mesh(gForma[b[3]], mCuerpo); m.userData = b; cuerpo.add(m); return m; });
-    var cuello = new THREE.Mesh(gCil, mCuerpo), torso = new THREE.Mesh(gForma.torso, mTorso), pelvis = new THREE.Mesh(gEsf, mDelt), cabeza = new THREE.Mesh(gEsf, mCuerpo);
+    var cuello = new THREE.Mesh(gCil, mCuerpo), torso = new THREE.Mesh(gForma.torso, mTorso), pelvis = new THREE.Mesh(gForma.cadera, mShort), cabeza = new THREE.Mesh(gForma.cabeza, mCuerpo);
     torso.geometry = tronco();
-    [cuello, torso, pelvis, cabeza].forEach(function (m) { cuerpo.add(m); });
+    var pretina = new THREE.Mesh(gCil, mJunta), pernera = { 23: new THREE.Mesh(gForma.short, mShort), 24: new THREE.Mesh(gForma.short, mShort) };
+    [cuello, torso, pelvis, cabeza, pretina, pernera[23], pernera[24]].forEach(function (m) { cuerpo.add(m); });
     /* Hombros (deltoides) y articulaciones pequeñas, para que no parezcan bolitas */
     var juntas = {}, TAM = { 11: 0.075, 12: 0.075, 13: 0.03, 14: 0.03, 25: 0.036, 26: 0.036 };
     Object.keys(TAM).forEach(function (i) { var m = new THREE.Mesh(gEsf, +i < 13 ? mCuerpo : mJunta); m.scale.set(TAM[i], TAM[i] * (+i < 13 ? 0.85 : 1), TAM[i]); cuerpo.add(m); juntas[i] = m; });
@@ -21376,11 +21380,19 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
       /* Tronco esculpido. Ojo: ejeZ apunta hacia la espalda; el frente es -ejeZ, igual que -z en tronco() */
       torso.quaternion.copy(giroTronco); torso.position.copy(cad);
       torso.scale.set(anchoH, alto, 1);
-      pelvis.quaternion.copy(giroTronco); pelvis.position.copy(cad).addScaledVector(ejeY, 0.015);
-      pelvis.scale.set(Math.max(0.1, v3(23).distanceTo(v3(24)) * 0.72), 0.06, 0.09);
+      /* Short de boxeo: cadera + dos perneras + pretina */
+      var anchoC = Math.max(0.15, v3(23).distanceTo(v3(24)) * 0.5 + 0.075);
+      pelvis.quaternion.copy(giroTronco); pelvis.position.copy(cad).addScaledVector(ejeY, -0.03);
+      pelvis.scale.set(anchoC, 0.18, 0.118);
+      pretina.quaternion.copy(giroTronco); pretina.position.copy(cad).addScaledVector(ejeY, 0.065);
+      pretina.scale.set(anchoC * 0.99, 0.03, 0.12);
+      [23, 24].forEach(function (i) {
+        ejeXg.copy(v3(i)).addScaledVector(ejeY, 0.02); ejeYg.copy(v3(i)).lerp(v3(i + 2), 0.42);
+        hueso(pernera[i], ejeXg, ejeYg, 0.108);
+      });
       cab.copy(v3(0)); cab.y += 0.04;
-      hueso(cuello, hom, cab, 0.052);
-      cabeza.position.copy(cab); cabeza.position.y += 0.05; cabeza.scale.set(0.095, 0.118, 0.105);
+      hueso(cuello, hom, cab, 0.06);
+      cabeza.position.copy(cab); cabeza.position.y += 0.05; cabeza.quaternion.copy(giroTronco); cabeza.scale.set(0.088, 0.24, 0.1);
       Object.keys(juntas).forEach(function (i) { juntas[i].position.copy(v3(+i)); });
       [11, 12].forEach(function (i) {                                       // deltoides: siguen al brazo
         var d = juntas[i]; dirE.copy(v3(i === 11 ? 13 : 14)).sub(v3(i)).normalize();

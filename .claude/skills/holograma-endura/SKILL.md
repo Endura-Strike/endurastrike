@@ -12,7 +12,7 @@ El holograma vive en el bloque `<script id="cam27">` de `index.html`, dentro de 
 - **Un solo `THREE.WebGLRenderer`** para toda la visita (`HOLO.r`). `abrirCam2` lo crea la primera vez o lo reanuda; `cerrarCam2` pone `HOLO.on = false` y el bucle se detiene. Nunca crees otro renderizador ni otra escena: el Cronómetro ya usa un contexto y los teléfonos tienen pocos.
 - **three.js carga con `defer`**: crea todo dentro de `crear()`, nunca al nivel superior del script.
 - **Material holográfico**: `mat(color, k, l)`; `l` = luz suave desde arriba que marca el relieve (pecho, abdominales). Las normales van con `normalMatrix`, porque las piezas se escalan distinto en cada eje. Un `ShaderMaterial` (`VS`/`FS` en `crear()`) con borde brillante (fresnel), líneas de escaneo y parpadeo, mezcla aditiva y `depthWrite:false`. El uniform `t` (tiempo) es un solo objeto compartido por todos los materiales.
-- **Cuerpo**: brazos, piernas y torso son `LatheGeometry` con perfil de músculo (`FORMAS`), escalados y orientados por `hueso(m, a, b, radio)`; el tronco es una sola malla esculpida (`tronco()`: espalda en V, pectorales, esternón, abdominales, columna, omóplatos; escala = ancho de hombros × largo del tronco × 1) y, con la pelvis, sigue la base del tronco (hombros, columna; `ejeZ` apunta a la espalda, el frente es `-ejeZ`). Silueta musculosa: deltoides grandes, bíceps, pantorrillas. Guantes = grupo de puño, pulgar y muñequera orientado con el antebrazo. Estelas = cinta aditiva de 10 puntos por guante, visible solo con velocidad o golpe. `HUESOS` = [desde, hasta, grosor, forma].
+- **Cuerpo**: brazos, piernas y torso son `LatheGeometry` con perfil de músculo (`FORMAS`), escalados y orientados por `hueso(m, a, b, radio)`; el tronco es una sola malla esculpida (`tronco()`: espalda en V, pectorales, esternón, abdominales, columna, omóplatos; escala = ancho de hombros × largo del tronco × 1) y sigue la base del tronco. Short de boxeo rojo (`pelvis` con forma `cadera`, dos `pernera` y una `pretina` menta). Cabeza con forma (cráneo y mandíbula, `FORMAS.cabeza`) que gira con el tronco (hombros, columna; `ejeZ` apunta a la espalda, el frente es `-ejeZ`). Silueta musculosa: deltoides grandes, bíceps, pantorrillas. Guantes = grupo de puño, pulgar y muñequera orientado con el antebrazo. Estelas = cinta aditiva de 10 puntos por guante, visible solo con velocidad o golpe. `HUESOS` = [desde, hasta, grosor, forma].
 - **Pose**: `HOLO.pose(worldLandmarks)` fija la meta. Cada cuadro `cuadro()` suaviza hacia la meta (k = 0,45). Sin pose real por 700 ms, `sombraDemo(t)` hace sombra (jab y cross alternados).
 - **Escena**: piso con rejilla (textura de canvas), haz de proyector (cilindro abierto con shader), 90 partículas que suben, 4 ondas de impacto reutilizables (`HOLO.golpe(lado, potencia)`).
 - **Espejo**: `aHolo` invierte x, y, z para que el holograma se vea como tu imagen en la cámara.
@@ -22,8 +22,8 @@ El holograma vive en el bloque `<script id="cam27">` de `index.html`, dentro de 
 | Medida | Ahora | Límite |
 |---|---|---|
 | Contextos WebGL al abrir/cerrar 4 veces | 1 | 1 |
-| Llamadas de dibujo por cuadro | 29 (sin estela) | 45 |
-| Triángulos | ~10.800 | 15.000 |
+| Llamadas de dibujo por cuadro | 32 (sin estela) | 45 |
+| Triángulos | ~10.700 | 15.000 |
 | Tiempo por cuadro (mediana, escritorio sin GPU) | 16,7 ms | 17 ms |
 | `pixelRatio` | máx. 1,5 | 1,5 |
 
