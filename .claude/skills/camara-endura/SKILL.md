@@ -20,7 +20,17 @@ Todo vive en `index.html` (un solo archivo de ~1,3 MB). No lo leas entero: busca
 - Por brazo: `ratio = |muñeca − hombro| / largo del brazo` (0,4 en guardia, ~1 estirado), velocidad de la muñeca respecto al hombro y ángulo del codo.
 - Fases: `listo` → `recta` (jab/cross) o `curva` (gancho/uppercut) → `bloq` (espera a que el brazo vuelva).
   - Recto: `ratio` sube rápido, se cuenta al llegar a `pico` con el codo > `codoMin` y la mano no por encima de la cabeza.
-  - Curva: velocidad alta con el codo doblado; al frenar se mira la dirección: sube → uppercut; de lado con el codo a la altura del hombro → gancho.
+  - Curva: velocidad alta con el codo doblado; al frenar se mira la dirección: sube → uppercut; de lado con el codo a la altura del hombro (o la muñeca baja, gancho al cuerpo) → gancho.
+- **Al cuerpo**: si al contar la muñeca está más de `CAM_UMBRAL.cuerpo` bajo el hombro, se suma a `camState.alCuerpo` y aparece "Jab al cuerpo". No se agregan claves a `camState.tipos`: el modo guiado, `actualizarTiposUI` y las sesiones guardadas esperan exactamente jab, cross, hook y uppercut.
+
+## Movimientos (esquiva, agachada, bloqueo, guardia)
+
+`window.detectarDefensa` y `window.evaluarGuardia` se reemplazan por asignación; sin poses usan el código original.
+- **Esquiva**: la cabeza se sale del centro sobre la línea de la cadera (horizontal, con la vertical de la cámara, no la del torso, que se inclina al esquivar), rápido. El centro se adapta despacio cuando estás quieto. No cuenta mientras un brazo está golpeando.
+- **Agachada**: se mide en la imagen (2D), porque en 3D el origen es la cadera y bajar doblando las rodillas no se ve. Cuenta como esquiva y en `camState.agachadas`.
+- **Bloqueo**: las dos muñecas a la altura de la nariz o más, juntas y pegadas a la cara, sostenidas `sostener` ms. La guardia normal (manos al mentón) no cuenta.
+- **Guardia**: altura de cada mano respecto a la cara (80 %) y codos cerrados (20 %). La mano que golpea no se evalúa; si la otra está baja aparece "Cuida la cara con la otra mano". El DOM se escribe solo cuando cambia.
+- Umbrales en `CAM_UMBRAL.esquiva`, `.agachada`, `.bloqueo`, `.guardia`. El recuadro `?debug=1` muestra `cabeza lado`, `baja`, `cubre` y `guardia`.
 - **Todos los umbrales están en `window.CAM_UMBRAL`.** Ajusta ahí, nunca con números sueltos en el código.
 
 ## Convenciones
@@ -36,7 +46,7 @@ node .claude/skills/camara-endura/scripts/test-camara.js index.html [--three rut
 ```
 
 - Alimenta `onPoseResults` con golpes sintéticos a 30 fps (no hace falta cámara ni modelos de MediaPipe).
-- 9 casos: jab y cross rectos a la cámara, gancho, uppercut, jab con ruido, y cuatro que deben dar 0 o caer al respaldo (alcanzar lento, saludar, solo retraer, respaldo 2D).
+- 22 casos. Golpes: jab, cross, gancho, uppercut, jab con ruido, jab y gancho al cuerpo, cross con giro de hombros. Movimientos: esquiva a cada lado, agachada (`dy2` baja el cuerpo solo en la imagen), bloqueo, guardia baja y "cuida la cara". Y los que deben dar 0: alcanzar lento, saludar, solo retraer, guardia quieta, inclinarse lento, bloqueo breve. Cada caso revisa también esquivas, bloqueos y golpes al cuerpo (0 si no se dice).
 - Con `--three` también comprueba que abrir/cerrar la cámara varias veces usa **un solo** contexto WebGL. three.js se consigue con `npm pack three@0.128.0` si la red bloquea cdnjs.
 - `DEBUG=1` imprime los valores de cada golpe contado.
 - Sale con código 1 si algo falla. Corre la batería varias veces: el caso con ruido es aleatorio.

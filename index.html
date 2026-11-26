@@ -21027,7 +21027,13 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     recta: { vel: 2.2, pico: 0.82, inicioMax: 0.75, frena: 0.8, tiempo: 450, codoMin: 150 },
     curva: { vel: 1.9, codoMax: 140, codoAltura: 0.16, sobreCabeza: 0.25, minLado: 0.12, minSubida: 0.12, tiempo: 500 },
     reposo: { ratio: 0.72, vel: 1.1, tiempo: 700 },
-    potencia: { min: 1.4, max: 5.5 }
+    potencia: { min: 1.4, max: 5.5 },
+    cuerpo: -0.17,             // muñeca a más de 17 cm bajo el hombro al contar = golpe al cuerpo
+    /* Movimientos de defensa */
+    esquiva: { lado: 0.1, vel: 0.6, vuelta: 0.05, espera: 600 },          // cabeza fuera del centro (m), a qué velocidad (m/s), cuándo vuelve, pausa (ms)
+    agachada: { baja: 0.42, vel: 1.4, vuelta: 0.2, espera: 700 },        // cuánto baja la cabeza en la imagen, en anchos de hombro (y por segundo)
+    bloqueo: { altura: -0.03, juntas: 0.24, cerca: 0.3, sostener: 250, espera: 900 },  // muñecas a la altura de la nariz o más, juntas y pegadas a la cara
+    guardia: { alta: -0.15, baja: -0.35, codoBien: 1.15, codoMal: 1.7 }   // muñeca respecto a la nariz (m); codo abierto en medios anchos de hombro
   };
   function leer(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
   window.camGuardia = leer('es_guardia', 'orto');          // orto: mano izquierda adelante · zurdo: derecha
@@ -21052,7 +21058,8 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
   }
 
   var IDX = { left: { s: 11, e: 13, w: 15 }, right: { s: 12, e: 14, w: 16 } };
-  function reiniciar() { camState._p3 = { left: { hist: [], fase: 'listo' }, right: { hist: [], fase: 'listo' } }; camState._world = null; camState._ejes = null; }
+  function reiniciar() { camState._p3 = { left: { hist: [], fase: 'listo' }, right: { hist: [], fase: 'listo' } }; camState._world = null; camState._ejes = null; camState._mov = { hist: [], ult: 0, ultBloq: 0 }; }
+  var NOMBRE = { jab: 'Jab', cross: 'Cross', hook: 'Gancho', uppercut: 'Uppercut' };
   reiniciar();
 
   function potenciaDe(v) { return Math.round(Math.max(5, Math.min(100, (v - U.potencia.min) / (U.potencia.max - U.potencia.min) * 100))); }
@@ -21060,7 +21067,11 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     var P = camState._p3[side];
     P.fase = 'bloq'; P.f = { t: now };
     if (camState._calidadOk === false) return;               // mal encuadrado: no cuenta
-    var pot = potenciaDe(vmax), lm = camState._lm2d, wi = IDX[side].w;
+    var pot = potenciaDe(vmax), lm = camState._lm2d, wi = IDX[side].w, w = camState._world;
+    if (w && tipo !== 'uppercut' && dot(sub(w[wi], w[IDX[side].s]), (camState._ejes || ejes(w)).arriba) < U.cuerpo) {
+      camState.alCuerpo = (camState.alCuerpo || 0) + 1;
+      if (typeof flashDefensa === 'function') flashDefensa(NOMBRE[tipo] + ' al cuerpo', '#ebebf5');
+    }
     if (lm && lm[wi] && typeof spawnBurstFX === 'function') spawnBurstFX(lm[wi].x, lm[wi].y, pot);
     registrarGolpe(side, now, tipo, pot);
     if (HOLO.golpe) HOLO.golpe(side, pot);
@@ -21114,7 +21125,7 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
       var sobreCabeza = dot(rel, E.arriba) > U.curva.sobreCabeza;
       var tipo = null;
       if (sube > U.curva.minSubida && sube > lado && sube > frente * 0.8 && dot(f.ini, E.arriba) < 0) tipo = 'uppercut';
-      else if (!sobreCabeza && codoAlto && lado > U.curva.minLado && lado >= frente * 0.7) tipo = 'hook';
+      else if (!sobreCabeza && (codoAlto || dot(rel, E.arriba) < U.cuerpo) && lado > U.curva.minLado && lado >= frente * 0.7) tipo = 'hook';
       if (tipo) return emitir(side, now, tipo, f.max);
       P.fase = 'listo'; P.f = null;
     }
@@ -21150,8 +21161,119 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
   };
   ['resetCamStats', 'detenerCamara'].forEach(function (n) {
     var f = window[n]; if (typeof f !== 'function') return;
-    window[n] = function () { reiniciar(); return f.apply(this, arguments); };
+    window[n] = function () {
+      reiniciar();
+      if (n === 'resetCamStats') { camState.alCuerpo = 0; camState.agachadas = 0; ultG = {}; }
+      return f.apply(this, arguments);
+    };
   });
+
+  /* ═══ MOVIMIENTOS: esquivas, agachadas, bloqueos y guardia ═══ */
+  function texto(id, v) { var e = document.getElementById(id); if (e) e.textContent = v; }
+  function golpeando() { var p = camState._p3; return p.left.fase === 'recta' || p.left.fase === 'curva' || p.right.fase === 'recta' || p.right.fase === 'curva'; }
+  function contarDefensa(tipo, txt, color) {
+    if (camState._calidadOk === false) return;                // mal encuadrado: no cuenta
+    if (tipo === 'bloqueo') { camState.bloqueos++; texto('cam-bloqueos', camState.bloqueos); }
+    else { camState.esquivas++; texto('cam-esquivas', camState.esquivas); if (tipo === 'agachada') camState.agachadas = (camState.agachadas || 0) + 1; }
+    if (typeof playSound === 'function') playSound('click');
+    if (typeof flashDefensa === 'function') flashDefensa(txt, color);
+  }
+  /* Usa la pose 3D si existe; la agachada siempre se mide en la imagen, porque en 3D el origen es la cadera y bajar con las rodillas no se ve */
+  function movimientos(now) {
+    var w = camState._world, lm = camState._lm2d, D = camState._mov;
+    if (!lm || !lm[0] || !lm[11] || !lm[12]) return;
+    var sw = Math.hypot(lm[11].x - lm[12].x, lm[11].y - lm[12].y); if (sw < 0.05) return;
+    var lat;                                                  // cabeza hacia tu izquierda (+) o derecha (−), en metros, sobre la línea de la cadera
+    if (w && w.length > 24) {                                 // línea de cadera sin su parte vertical: si se inclina, la altura de la cabeza no se cuela
+      var lc = sub(w[23], w[24]);                             // la vertical es la de la cámara (y de MediaPipe), no la del torso, que se inclina al esquivar
+      lat = dot(sub(w[0], mezcla(w[23], w[24], 0.5)), norm({ x: lc.x, y: 0, z: lc.z }));
+    }
+    else {
+      var cad = lm[23] && lm[24] && lm[23].visibility > 0.5 && lm[24].visibility > 0.5, cx = cad ? (lm[23].x + lm[24].x) / 2 : (lm[11].x + lm[12].x) / 2;
+      lat = (lm[0].x - cx) / sw * 0.36 * (lm[11].x > lm[12].x ? 1 : -1);   // 0,36 m = ancho de hombros típico
+    }
+    D.lat = D.lat == null ? lat : D.lat + (lat - D.lat) * U.suav; lat = D.lat;     // mismo suavizado que los brazos
+    var y = lm[0].y, h = D.hist;
+    h.push({ t: now, lat: lat, y: y });
+    while (h.length > 2 && now - h[1].t >= U.ventana) h.shift();
+    var o = h[0], dt = (now - o.t) / 1000;
+    if (D.latBase == null) { D.latBase = lat; D.yBase = y; }
+    var dLat = lat - D.latBase, baja = (y - D.yBase) / sw;
+    var vLat = dt > 0.05 ? (lat - o.lat) / dt : 0, vBaja = dt > 0.05 ? (y - o.y) / sw / dt : 0;
+    var punch = golpeando();
+    /* El centro se adapta despacio mientras estás quieto, así cambiar de postura no cuenta */
+    if (!D.esq && !punch && Math.abs(vLat) < 0.2) D.latBase += (lat - D.latBase) * 0.03;
+    if (!D.agach && !punch && Math.abs(vBaja) < 0.4 && baja < U.agachada.vuelta) D.yBase += (y - D.yBase) * 0.03;
+    if (!D.esq) {
+      if (Math.abs(dLat) > U.esquiva.lado && Math.abs(vLat) > U.esquiva.vel && vLat * dLat > 0 && !punch && now - D.ult > U.esquiva.espera) {
+        D.esq = true; D.ult = now; contarDefensa('esquiva', 'Esquiva a la ' + (dLat > 0 ? 'izquierda' : 'derecha'), 'var(--cyan)');
+      }
+    } else if (Math.abs(dLat) < U.esquiva.vuelta || now - D.ult > 2500) { D.esq = false; if (now - D.ult > 2500) D.latBase = lat; }
+    if (!D.agach) {
+      if (baja > U.agachada.baja && vBaja > U.agachada.vel && !punch && now - D.ult > U.agachada.espera) {
+        D.agach = true; D.ult = now; contarDefensa('agachada', 'Agachada', 'var(--cyan)');
+      }
+    } else if (baja < U.agachada.vuelta || now - D.ult > 2500) { D.agach = false; if (now - D.ult > 2500) D.yBase = y; }
+    /* Bloqueo: las dos manos suben a la cara y se quedan; la guardia normal no cuenta */
+    var cubre = false;
+    if (w && w.length > 24) {
+      var E = camState._ejes || ejes(w), n = w[0], B = U.bloqueo;
+      cubre = dot(sub(w[15], n), E.arriba) > B.altura && dot(sub(w[16], n), E.arriba) > B.altura &&
+        len(sub(w[15], w[16])) < B.juntas && len(sub(w[15], n)) < B.cerca && len(sub(w[16], n)) < B.cerca;
+    } else if (lm[15] && lm[16] && lm[15].visibility > 0.4 && lm[16].visibility > 0.4) {
+      cubre = (lm[15].y - y) / sw < 0.1 && (lm[16].y - y) / sw < 0.1 && Math.abs(lm[15].x - lm[16].x) < sw * 0.9;
+    }
+    if (cubre && !punch) {
+      if (!D.cubreDesde) D.cubreDesde = now;
+      if (!D.cubre && now - D.cubreDesde >= U.bloqueo.sostener && now - D.ultBloq > U.bloqueo.espera) { D.cubre = true; D.ultBloq = now; contarDefensa('bloqueo', 'Bloqueo', 'var(--gold)'); }
+    } else { D.cubreDesde = 0; D.cubre = false; }
+    D.dbg = { lat: dLat, baja: baja, cubre: cubre };
+  }
+  /* Guardia en 3D: altura de cada mano respecto a la cara y codos cerrados. La mano que golpea no se evalúa, pero la otra sí */
+  var ultG = {};
+  function guardia3D() {
+    var w = camState._world, E = camState._ejes || ejes(w), n = w[0], P = camState._p3, G = U.guardia;
+    var medio = Math.max(0.1, len(sub(w[11], w[12])) / 2), cen = mezcla(w[11], w[12], 0.5);
+    var total = 0, cuenta = 0, bajas = [], otraBaja = false;
+    [['left', 15, 13], ['right', 16, 14]].forEach(function (m) {
+      var s = m[0], wr = w[m[1]], el = w[m[2]];
+      if (P[s].fase !== 'listo' || !wr || !el || (wr.visibility != null && wr.visibility < 0.4)) return;
+      var sAlt = Math.max(0, Math.min(1, (dot(sub(wr, n), E.arriba) - G.baja) / (G.alta - G.baja)));
+      var abre = Math.abs(dot(sub(el, cen), E.lado)) / medio;
+      var sCodo = Math.max(0, Math.min(1, (G.codoMal - abre) / (G.codoMal - G.codoBien)));
+      total += sAlt * 0.8 + sCodo * 0.2; cuenta++;
+      if (sAlt < 0.5) { bajas.push(s); if (P[s === 'left' ? 'right' : 'left'].fase !== 'listo') otraBaja = true; }
+      P[s].dbgG = Math.round((sAlt * 0.8 + sCodo * 0.2) * 100);
+    });
+    if (!cuenta) return;
+    camState.guardiaScore = camState.guardiaScore * 0.9 + total / cuenta * 100 * 0.1;
+    var pct = Math.round(camState.guardiaScore);
+    var msg = otraBaja ? 'Cuida la cara con la otra mano' : pct >= 70 ? '' : bajas.length === 2 ? 'Sube la guardia' : bajas.length ? 'Sube la mano ' + (bajas[0] === 'left' ? 'izquierda' : 'derecha') : pct < 40 ? 'Sube la guardia' : '';
+    var txt = pct > 70 ? 'Buena' : pct > 40 ? 'Regular' : 'Baja';
+    if (ultG.pct !== pct) { var bar = document.getElementById('cam-guardia-bar'); if (bar) bar.style.width = pct + '%'; ultG.pct = pct; }
+    if (ultG.txt !== txt) { var t = document.getElementById('cam-guardia-txt'); if (t) { t.textContent = txt; t.style.color = pct > 70 ? 'var(--green)' : pct > 40 ? 'var(--gold)' : 'var(--red)'; } ultG.txt = txt; }
+    if (ultG.msg !== msg) { var a = document.getElementById('cam-guardia-alert'); if (a) { a.style.display = msg ? 'block' : 'none'; a.textContent = msg; } ultG.msg = msg; }
+  }
+  var guardia2D = window.evaluarGuardia;
+  if (typeof guardia2D === 'function') window.evaluarGuardia = function () {
+    if (camState._world && camState._world.length > 24) return guardia3D();
+    return guardia2D.apply(this, arguments);
+  };
+  var defensa2D = window.detectarDefensa;
+  if (typeof defensa2D === 'function') window.detectarDefensa = function (nose, lS, rS, lW, rW, now) {
+    if (camState._lm2d) return movimientos(now);
+    return defensa2D.apply(this, arguments);
+  };
+  /* La sesión guardada también lleva golpes al cuerpo y agachadas */
+  var guardarCam = window.guardarSesionCamara;
+  if (typeof guardarCam === 'function') window.guardarSesionCamara = function () {
+    var n = (state.sesiones || []).length, r = guardarCam.apply(this, arguments), ss = state.sesiones || [];
+    if (ss.length > n && ss[ss.length - 1].camara) {
+      ss[ss.length - 1].alCuerpo = camState.alCuerpo || 0; ss[ss.length - 1].agachadas = camState.agachadas || 0;
+      if (typeof guardarDatos === 'function') guardarDatos();
+    }
+    return r;
+  };
 
   /* Guardia ortodoxa o zurda */
   window.camSetGuardia = function (g) {
@@ -21170,7 +21292,7 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     el.textContent = ['left', 'right'].map(function (s) {
       var P = camState._p3[s], d = P.dbg || {};
       return (s === manoLider() ? 'adelante' : 'atrás   ') + '  estira ' + (d.r || 0).toFixed(2) + '  vel ' + (d.v || 0).toFixed(1) + ' m/s  vEst ' + (d.rv || 0).toFixed(1) + '  codo ' + Math.round(d.codo || 0) + '°  ' + P.fase;
-    }).join('\n') + '\n' + (camState._world ? 'modo 3D' : 'modo 2D (respaldo)') + (camState._calidadOk === false ? ' · encuádrate' : '');
+    }).join('\n') + '\n' + (function (d) { return 'cabeza lado ' + (d.lat || 0).toFixed(2) + ' m  baja ' + (d.baja || 0).toFixed(2) + '  cubre ' + (d.cubre ? 'sí' : 'no') + '  guardia ' + Math.round(camState.guardiaScore || 0); })(camState._mov.dbg || {}) + '\n' + (camState._world ? 'modo 3D' : 'modo 2D (respaldo)') + (camState._calidadOk === false ? ' · encuádrate' : '');
   }
 
   /* ═══ HOLOGRAMA ═══ */

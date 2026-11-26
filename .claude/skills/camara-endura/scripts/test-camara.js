@@ -1,4 +1,4 @@
-// Banco de pruebas de la Cámara AI con golpes sintéticos (sin cámara ni MediaPipe).
+// Banco de pruebas de la Cámara AI con golpes y movimientos sintéticos (sin cámara ni MediaPipe).
 // Uso:  node test-camara.js <ruta/index.html> [--three ruta/three.min.js] [--shot carpeta]
 // Alimenta onPoseResults con poses generadas cuadro a cuadro (30 fps) y cuenta lo que detecta.
 const { chromium } = require('playwright');
@@ -11,6 +11,7 @@ const threePath = opt('--three');
 const shotDir = opt('--shot');
 
 // Lo que debe pasar con cada caso. "min" acepta cualquier número mayor o igual.
+// esq (esquivas + agachadas), bloq y cuerpo valen 0 si no se dicen.
 const ESPERADO = {
   jab_recto: { golpes: 1, tipo: 'jab' },
   cross_recto: { golpes: 1, tipo: 'cross' },
@@ -20,7 +21,20 @@ const ESPERADO = {
   alcanzar_lento: { golpes: 0 },
   saludar: { golpes: 0 },
   solo_retraer: { golpes: 0 },
-  respaldo_2d: { min: 1 }
+  respaldo_2d: { min: 1, esq: null, bloq: null },
+  jab_al_cuerpo: { golpes: 1, tipo: 'jab', cuerpo: 1 },
+  gancho_al_cuerpo: { golpes: 1, tipo: 'hook', cuerpo: 1 },
+  cross_girando: { golpes: 1, tipo: 'cross' },
+  esquiva_izq: { golpes: 0, esq: 1, flash: 'Esquiva a la izquierda' },
+  esquiva_der: { golpes: 0, esq: 1, flash: 'Esquiva a la derecha' },
+  agachada: { golpes: 0, esq: 1, flash: 'Agachada' },
+  bloqueo: { golpes: 0, bloq: 1 },
+  guardia_quieta: { golpes: 0 },
+  inclinarse_lento: { golpes: 0 },
+  bloqueo_breve: { golpes: 0 },
+  guardia_baja: { golpes: 0, guardiaMax: 45 },
+  guardia_alta: { golpes: 0, guardiaMin: 80 },
+  jab_mano_baja: { golpes: 1, tipo: 'jab', aviso: 'Cuida la cara con la otra mano' }
 };
 
 (async () => {
@@ -47,6 +61,7 @@ const ESPERADO = {
     // Coordenadas como MediaPipe: metros, origen en la cadera, y hacia abajo, -z hacia la cámara.
     const G = { 0: [0, -0.62, -0.08], 11: [0.18, -0.48, 0], 12: [-0.18, -0.48, 0], 13: [0.2, -0.28, -0.12], 14: [-0.2, -0.28, -0.1],
       15: [0.1, -0.52, -0.2], 16: [-0.1, -0.52, -0.18], 23: [0.11, 0, 0], 24: [-0.11, 0, 0], 25: [0.13, 0.42, 0], 26: [-0.13, 0.42, 0], 27: [0.15, 0.85, 0], 28: [-0.15, 0.85, 0] };
+    G.dy2 = [0, 0, 0];
     const espejo = (o) => { const r = {}; for (const k in o) { const m = { 13: 14, 15: 16, 14: 13, 16: 15 }[k]; r[m] = [-o[k][0], o[k][1], o[k][2]]; } return r; };
     const ESTIRA_L = { 13: [0.17, -0.47, -0.235], 15: [0.16, -0.46, -0.5] };      // jab recto hacia la cámara
     const LATERAL_L = { 13: [0.415, -0.47, 0], 15: [0.68, -0.47, 0] };          // brazo estirado hacia un lado (se ve en 2D)
@@ -61,27 +76,45 @@ const ESPERADO = {
 
     window.__dn = Date.now; window.__T = 1e12; Date.now = () => window.__T;
     let ruido = 0;
+    // over.dy2 baja todo el cuerpo en la imagen sin cambiar el 3D (doblar las rodillas: en 3D el origen es la cadera)
     function cuadro(over, con3D) {
-      const P = Object.assign({}, G, over || {}), w = [], l = [];
+      const P = Object.assign({}, G, over || {}), w = [], l = [], dy2 = P.dy2 ? P.dy2[0] : 0;
       const at = (i) => P[i] || P[{ 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 17: 15, 19: 15, 21: 15, 18: 16, 20: 16, 22: 16, 29: 27, 31: 27, 30: 28, 32: 28 }[i]];
       for (let i = 0; i < 33; i++) {
         const q = at(i).map((v) => v + (ruido ? (Math.random() * 2 - 1) * ruido : 0));
         w.push({ x: q[0], y: q[1], z: q[2], visibility: 0.99 });
-        l.push({ x: 0.5 + q[0] * 0.7, y: 0.68 + q[1] * 0.7, z: q[2] * 0.7, visibility: 0.99 });
+        l.push({ x: 0.5 + q[0] * 0.7, y: 0.68 + q[1] * 0.7 + dy2, z: q[2] * 0.7, visibility: 0.99 });
       }
       window.__T += 33;
       onPoseResults(con3D === false ? { poseLandmarks: l } : { poseLandmarks: l, poseWorldLandmarks: w });
     }
     function correr(cuadros, con3D) {
-      resetCamStats(); camState.activa = true; camState.startTime = Date.now();
+      resetCamStats(); camState.activa = true; camState.startTime = Date.now(); camState.alCuerpo = 0; camState.agachadas = 0;
+      const fl = document.getElementById('cam-defensa-flash'); if (fl) fl.textContent = '';
       quieto({}, 40).forEach((f) => cuadro(f, con3D));                 // guardia encuadrada 1,3 s
-      const g0 = camState.golpes, t0 = Object.assign({}, camState.tipos);
-      cuadros.forEach((f) => cuadro(f, con3D));
+      const g0 = camState.golpes, t0 = Object.assign({}, camState.tipos), e0 = camState.esquivas, b0 = camState.bloqueos;
+      let gmin = 100;
+      const al = document.getElementById('cam-guardia-alert'), avisos = new Set();
+      cuadros.forEach((f) => { cuadro(f, con3D); gmin = Math.min(gmin, camState.guardiaScore); if (al && al.style.display !== 'none' && al.textContent) avisos.add(al.textContent); });
+      const gfin = camState.guardiaScore;
       quieto({}, 25).forEach((f) => cuadro(f, con3D));
       const tipos = {}; Object.keys(camState.tipos).forEach((k) => { const d = camState.tipos[k] - (t0[k] || 0); if (d) tipos[k] = d; });
-      return { golpes: camState.golpes - g0, tipos };
+      return { golpes: camState.golpes - g0, tipos, esq: camState.esquivas - e0, bloq: camState.bloqueos - b0, cuerpo: camState.alCuerpo || 0,
+        guardia: Math.round(Math.min(gmin, gfin)), avisos: [...avisos], flash: fl ? fl.textContent : '' };
     }
     const jab = (L) => [...tramo({}, L, 3), ...quieto(L, 4), ...tramo(L, {}, 6)];
+    const mover = (L, ida, queda, vuelta) => [...tramo({}, L, ida), ...quieto(L, queda), ...tramo(L, {}, vuelta)];
+    const suma = (pts, d) => { const r = {}; for (const k in pts) r[k] = [pts[k][0] + d[0], pts[k][1] + d[1], pts[k][2] + d[2]]; return r; };
+    // Brazo estirado hacia abajo (al cuerpo): mismo largo de brazo que la guardia
+    const ESTIRA_CUERPO_L = { 13: [0.161, -0.38, -0.21], 15: [0.139, -0.263, -0.454] };
+    // Esquiva: cabeza 16 cm a un lado (y un poco abajo), hombros y manos la acompañan, la cadera queda
+    const esquiva = (sg) => { const a = suma({ 11: G[11], 12: G[12], 13: G[13], 14: G[14], 15: G[15], 16: G[16] }, [0.1 * sg, 0.02, 0]); a[0] = [0.16 * sg, -0.58, -0.08]; return a; };
+    // Bloqueo: las dos manos suben a la frente, juntas
+    const CUBRE = { 13: [0.12, -0.4, -0.14], 15: [0.06, -0.66, -0.16], 14: [-0.12, -0.4, -0.14], 16: [-0.06, -0.66, -0.16] };
+    // Cross con 25° de giro de hombros: el brazo se mueve con el hombro, la cabeza se corre un poco
+    const giro = 25 * Math.PI / 180, S12 = [-0.18 * Math.cos(giro), -0.48, -0.18 * Math.sin(giro)], S11 = [0.18 * Math.cos(giro), -0.48, 0.18 * Math.sin(giro)];
+    const CROSS_GIRO = Object.assign(suma(espejo(ESTIRA_L), [S12[0] + 0.18, 0, S12[2]]), { 11: S11, 12: S12, 0: [0.05, -0.62, -0.1] }, suma({ 13: G[13], 15: G[15] }, [S11[0] - 0.18, 0, S11[2]]));
+    const gancho_bajo = (th) => { const g = gancho(th); return { 13: [g[13][0], g[13][1] + 0.22, g[13][2]], 15: [g[15][0], g[15][1] + 0.24, g[15][2]] }; };
     const casos = {
       jab_recto: () => correr(jab(ESTIRA_L)),
       cross_recto: () => correr(jab(espejo(ESTIRA_L))),
@@ -91,7 +124,20 @@ const ESPERADO = {
       alcanzar_lento: () => correr([...tramo({}, ESTIRA_L, 30), ...quieto(ESTIRA_L, 10), ...tramo(ESTIRA_L, {}, 30)]),
       saludar: () => { const A = Object.assign({}, SALUDO_E, { 16: [-0.42, -0.85, 0] }), B = Object.assign({}, SALUDO_E, { 16: [-0.12, -0.85, 0] }); return correr([...tramo({}, A, 12), ...tramo(A, B, 6), ...tramo(B, A, 6), ...tramo(A, B, 6), ...tramo(B, A, 6), ...tramo(A, {}, 12)]); },
       solo_retraer: () => correr([...tramo({}, ESTIRA_L, 30), ...quieto(ESTIRA_L, 25), ...tramo(ESTIRA_L, {}, 3)]),
-      respaldo_2d: () => correr([...tramo({}, LATERAL_L, 3), ...quieto(LATERAL_L, 4), ...tramo(LATERAL_L, {}, 6)], false)
+      respaldo_2d: () => correr([...tramo({}, LATERAL_L, 3), ...quieto(LATERAL_L, 4), ...tramo(LATERAL_L, {}, 6)], false),
+      jab_al_cuerpo: () => correr(jab(ESTIRA_CUERPO_L)),
+      gancho_al_cuerpo: () => { const a = gancho_bajo(0), z = gancho_bajo(80 * Math.PI / 180); return correr([...tramo({}, a, 10), ...Array.from({ length: 4 }, (_, i) => gancho_bajo((i + 1) / 4 * 80 * Math.PI / 180)), ...quieto(z, 3), ...tramo(z, {}, 10)]); },
+      cross_girando: () => correr(mover(CROSS_GIRO, 3, 4, 6)),
+      esquiva_izq: () => correr(mover(esquiva(1), 5, 6, 8)),
+      esquiva_der: () => correr(mover(esquiva(-1), 5, 6, 8)),
+      agachada: () => correr(mover({ dy2: [0.13, 0, 0], 0: [0, -0.58, -0.1] }, 5, 6, 8)),
+      bloqueo: () => correr(mover(CUBRE, 5, 12, 6)),
+      guardia_quieta: () => correr(quieto({}, 60)),
+      inclinarse_lento: () => correr(mover(esquiva(1), 45, 20, 45)),
+      bloqueo_breve: () => correr(mover(CUBRE, 5, 1, 2)),
+      guardia_baja: () => { const B = { 15: [0.16, -0.12, -0.12], 16: [-0.16, -0.12, -0.12], 13: [0.22, -0.2, -0.02], 14: [-0.22, -0.2, -0.02] }; return correr(mover(B, 25, 60, 25)); },
+      guardia_alta: () => correr(quieto({}, 60)),
+      jab_mano_baja: () => { const B = { 16: [-0.16, -0.12, -0.12], 14: [-0.22, -0.2, -0.02] }; return correr([...tramo({}, B, 25), ...tramo(B, Object.assign({}, B, ESTIRA_L), 3), ...quieto(Object.assign({}, B, ESTIRA_L), 4), ...tramo(Object.assign({}, B, ESTIRA_L), B, 6), ...tramo(B, {}, 25)]); }
     };
     if (window.__DBG) { const rg = registrarGolpe; window.registrarGolpe = function (side, now, tipo) { console.log('golpe', side, tipo, JSON.stringify(camState._p3 && camState._p3[side].dbg)); return rg.apply(this, arguments); }; }
     const out = {}; for (const k in casos) out[k] = casos[k]();
@@ -99,12 +145,16 @@ const ESPERADO = {
   });
 
   let fallos = 0;
-  console.log('caso'.padEnd(16), 'golpes', 'tipos', '  ok');
+  console.log('caso'.padEnd(17), 'golpes', 'tipos'.padEnd(16), 'movimientos'.padEnd(36), 'aviso'.padEnd(24), 'ok');
   for (const k in ESPERADO) {
     const e = ESPERADO[k], r = res[k];
-    const ok = e.min != null ? r.golpes >= e.min : (r.golpes === e.golpes && (!e.tipo || r.tipos[e.tipo] === 1));
+    const igual = (campo) => e[campo] === null || r[campo] === (e[campo] || 0);
+    const ok = (e.min != null ? r.golpes >= e.min : (r.golpes === e.golpes && (!e.tipo || r.tipos[e.tipo] === 1))) &&
+      igual('esq') && igual('bloq') && igual('cuerpo') && (!e.flash || r.flash === e.flash) &&
+      (e.guardiaMax == null || r.guardia <= e.guardiaMax) && (e.guardiaMin == null || r.guardia >= e.guardiaMin) &&
+      (!e.aviso || r.avisos.includes(e.aviso)) && (e.aviso || !r.avisos.includes('Cuida la cara con la otra mano'));
     if (!ok) fallos++;
-    console.log(k.padEnd(16), String(r.golpes).padEnd(6), JSON.stringify(r.tipos).padEnd(20), ok ? 'sí' : 'NO');
+    console.log(k.padEnd(17), String(r.golpes).padEnd(6), JSON.stringify(r.tipos).padEnd(16), ('esq ' + r.esq + ' bloq ' + r.bloq + ' cuerpo ' + r.cuerpo + ' guardia ' + r.guardia).padEnd(36), (r.flash || '').padEnd(24), ok ? 'sí' : 'NO');
   }
 
   // Holograma: abrir y cerrar tres veces no debe crear más de un contexto WebGL
