@@ -12,7 +12,7 @@ El holograma vive en el bloque `<script id="cam27">` de `index.html`, dentro de 
 - **Un solo `THREE.WebGLRenderer`** para toda la visita (`HOLO.r`). `abrirCam2` lo crea la primera vez o lo reanuda; `cerrarCam2` pone `HOLO.on = false` y el bucle se detiene. Nunca crees otro renderizador ni otra escena: el Cronómetro ya usa un contexto y los teléfonos tienen pocos.
 - **three.js carga con `defer`**: crea todo dentro de `crear()`, nunca al nivel superior del script.
 - **Material holográfico**: un `ShaderMaterial` (`VS`/`FS` en `crear()`) con borde brillante (fresnel), líneas de escaneo y parpadeo, mezcla aditiva y `depthWrite:false`. El uniform `t` (tiempo) es un solo objeto compartido por todos los materiales.
-- **Cuerpo**: huesos = un cilindro unitario compartido (`gCil`) escalado y orientado por `hueso(m, a, b, radio)`; juntas, cabeza, torso y guantes = una esfera compartida (`gEsf`). La lista `HUESOS` define qué se une y con qué grosor.
+- **Cuerpo**: brazos, piernas y torso son `LatheGeometry` con perfil de músculo (`FORMAS`), escalados y orientados por `hueso(m, a, b, radio)`; el torso en V y la pelvis siguen la base del tronco (hombros, columna, frente). Guantes = grupo de puño, pulgar y muñequera orientado con el antebrazo. Estelas = cinta aditiva de 10 puntos por guante, visible solo con velocidad o golpe. `HUESOS` = [desde, hasta, grosor, forma].
 - **Pose**: `HOLO.pose(worldLandmarks)` fija la meta. Cada cuadro `cuadro()` suaviza hacia la meta (k = 0,45). Sin pose real por 700 ms, `sombraDemo(t)` hace sombra (jab y cross alternados).
 - **Escena**: piso con rejilla (textura de canvas), haz de proyector (cilindro abierto con shader), 90 partículas que suben, 4 ondas de impacto reutilizables (`HOLO.golpe(lado, potencia)`).
 - **Espejo**: `aHolo` invierte x, y, z para que el holograma se vea como tu imagen en la cámara.
@@ -22,8 +22,8 @@ El holograma vive en el bloque `<script id="cam27">` de `index.html`, dentro de 
 | Medida | Ahora | Límite |
 |---|---|---|
 | Contextos WebGL al abrir/cerrar 4 veces | 1 | 1 |
-| Llamadas de dibujo por cuadro | 29 | 45 |
-| Triángulos | ~5.300 | 15.000 |
+| Llamadas de dibujo por cuadro | 29 (sin estela) | 45 |
+| Triángulos | ~6.100 | 15.000 |
 | Tiempo por cuadro (mediana, escritorio sin GPU) | 16,7 ms | 17 ms |
 | `pixelRatio` | máx. 1,5 | 1,5 |
 
@@ -53,9 +53,7 @@ El holograma vive en el bloque `<script id="cam27">` de `index.html`, dentro de 
 
 ## Ideas de mejora, de más a menos impacto
 
-1. **Silueta más humana**: torso con forma de V (hombros anchos, cintura angosta), cuello y trapecios, antebrazos que se afinan hacia la muñeca. Se logra con `LatheGeometry` o escalando esferas, sin subir mucho los triángulos.
-2. **Guantes con forma de guante**: una esfera achatada más un pulgar, en lugar de una esfera.
-3. **Estela del golpe**: guarda las últimas 6 posiciones del guante y dibuja una cinta aditiva que se desvanece. Que dure solo durante el golpe.
+1. ~~Silueta más humana~~, ~~guantes con forma~~ y ~~estela del golpe~~: hechas.
 4. **Color según el tipo de golpe**: jab menta, cross blanco, gancho ámbar, uppercut violeta. `HOLO.golpe` ya recibe el lado; pásale también el tipo desde `emitir()` en el detector.
 5. **Holograma que se arma al abrir**: las líneas de escaneo suben de los pies a la cabeza en ~0,8 s (un uniform `aparece` en el shader que recorta por altura).
 6. **Interferencia breve**: al recibir la primera pose real, 150 ms de desfase horizontal en el shader para marcar el paso de demo a en vivo.

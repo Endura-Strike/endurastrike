@@ -21183,7 +21183,17 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     27: [0.15, 0.86, -0.1], 28: [-0.14, 0.86, 0.08] };
   var ESTIRADO = { 13: [0.17, -0.47, -0.235], 15: [0.16, -0.46, -0.5], 14: [-0.17, -0.47, -0.235], 16: [-0.16, -0.46, -0.5] };
   var PUNTOS = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
-  var HUESOS = [[11, 13, 0.05], [13, 15, 0.042], [12, 14, 0.05], [14, 16, 0.042], [23, 25, 0.068], [25, 27, 0.05], [24, 26, 0.068], [26, 28, 0.05], [11, 12, 0.045], [23, 24, 0.055]];
+  /* [desde, hasta, grosor en la parte ancha, forma] */
+  var HUESOS = [[11, 13, 0.058, 'brazo'], [13, 15, 0.05, 'ante'], [12, 14, 0.058, 'brazo'], [14, 16, 0.05, 'ante'],
+    [23, 25, 0.085, 'muslo'], [25, 27, 0.062, 'pierna'], [24, 26, 0.085, 'muslo'], [26, 28, 0.062, 'pierna']];
+  /* Perfil de cada músculo a lo largo del hueso: [posición 0..1, radio relativo] */
+  var FORMAS = {
+    brazo: [[0, 0.82], [0.12, 1], [0.4, 0.96], [0.75, 0.74], [1, 0.62]],
+    ante: [[0, 0.78], [0.2, 1], [0.55, 0.82], [1, 0.56]],
+    muslo: [[0, 0.92], [0.22, 1], [0.6, 0.84], [1, 0.6]],
+    pierna: [[0, 0.68], [0.28, 1], [0.65, 0.66], [1, 0.48]],
+    torso: [[0, 0.6], [0.1, 0.66], [0.3, 0.6], [0.58, 0.8], [0.8, 1], [0.93, 0.9], [1, 0.42]]
+  };
 
   function sombraDemo(t) {                                    // sombra sola mientras no hay cámara
     if (quieto()) { var fijo = {}; PUNTOS.forEach(function (i) { fijo[i] = BASE[i]; }); return fijo; }
@@ -21224,14 +21234,40 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     }
     var cuerpo = new THREE.Group(); escena.add(cuerpo);
     var gCil = new THREE.CylinderGeometry(1, 1, 1, 12, 1, true), gEsf = new THREE.SphereGeometry(1, 16, 12);
-    var mCuerpo = mat(0x63e6be, 1), mJunta = mat(0x9ff5dc, 1.2), mGuanteL = mat(0xff453a, 1.4), mGuanteR = mat(0xff453a, 1.4), mTorso = mat(0x63e6be, 0.75);
-    var huesos = HUESOS.map(function (b) { var m = new THREE.Mesh(gCil, mCuerpo); m.userData = b; cuerpo.add(m); return m; });
-    var columna = new THREE.Mesh(gCil, mCuerpo), cuello = new THREE.Mesh(gCil, mCuerpo), torso = new THREE.Mesh(gEsf, mTorso), cabeza = new THREE.Mesh(gEsf, mCuerpo);
-    [columna, cuello, torso, cabeza].forEach(function (m) { cuerpo.add(m); });
-    var juntas = {};
-    [11, 12, 13, 14, 23, 24, 25, 26, 27, 28].forEach(function (i) { var m = new THREE.Mesh(gEsf, mJunta); m.scale.setScalar(i > 24 ? 0.04 : 0.045); cuerpo.add(m); juntas[i] = m; });
-    var guantes = { 15: new THREE.Mesh(gEsf, mGuanteL), 16: new THREE.Mesh(gEsf, mGuanteR) };
-    guantes[15].scale.setScalar(0.085); guantes[16].scale.setScalar(0.085); cuerpo.add(guantes[15]); cuerpo.add(guantes[16]);
+    function perfil(pts) { return new THREE.LatheGeometry(pts.map(function (q) { return new THREE.Vector2(q[1], q[0] - 0.5); }), 16); }
+    var gForma = {}; Object.keys(FORMAS).forEach(function (k) { gForma[k] = perfil(FORMAS[k]); });
+    var mCuerpo = mat(0x63e6be, 1), mJunta = mat(0x9ff5dc, 0.9), mTorso = mat(0x63e6be, 0.9);
+    var huesos = HUESOS.map(function (b) { var m = new THREE.Mesh(gForma[b[3]], mCuerpo); m.userData = b; cuerpo.add(m); return m; });
+    var cuello = new THREE.Mesh(gCil, mCuerpo), torso = new THREE.Mesh(gForma.torso, mTorso), pelvis = new THREE.Mesh(gEsf, mTorso), cabeza = new THREE.Mesh(gEsf, mCuerpo);
+    [cuello, torso, pelvis, cabeza].forEach(function (m) { cuerpo.add(m); });
+    /* Hombros (deltoides) y articulaciones pequeñas, para que no parezcan bolitas */
+    var juntas = {}, TAM = { 11: 0.064, 12: 0.064, 13: 0.03, 14: 0.03, 25: 0.036, 26: 0.036 };
+    Object.keys(TAM).forEach(function (i) { var m = new THREE.Mesh(gEsf, +i < 13 ? mCuerpo : mJunta); m.scale.set(TAM[i], TAM[i] * (+i < 13 ? 0.85 : 1), TAM[i]); cuerpo.add(m); juntas[i] = m; });
+    var pies = { 27: new THREE.Mesh(gEsf, mCuerpo), 28: new THREE.Mesh(gEsf, mCuerpo) };
+    pies[27].scale.set(0.045, 0.032, 0.105); pies[28].scale.set(0.045, 0.032, 0.105); cuerpo.add(pies[27]); cuerpo.add(pies[28]);
+    /* Guante: puño, pulgar y muñequera; se orienta con el antebrazo */
+    function guante() {
+      var m = mat(0xff453a, 1.4), g = new THREE.Group();
+      var puno = new THREE.Mesh(gEsf, m); puno.scale.set(0.074, 0.068, 0.09);
+      var pulgar = new THREE.Mesh(gEsf, m); pulgar.scale.set(0.026, 0.028, 0.048); pulgar.position.set(0.058, 0.018, -0.004); pulgar.rotation.y = -0.35;
+      var muneca = new THREE.Mesh(gCil, m); muneca.scale.set(0.048, 0.075, 0.048); muneca.rotation.x = Math.PI / 2; muneca.position.z = -0.095;
+      g.add(puno); g.add(pulgar); g.add(muneca); g.userData.mat = m; cuerpo.add(g); return g;
+    }
+    var guantes = { 15: guante(), 16: guante() };
+    /* Estela de luz que deja el guante al golpear */
+    var NT = 10;
+    function estela() {
+      var geo = new THREE.BufferGeometry(), idx = [];
+      geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(NT * 6), 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(new Float32Array(NT * 6), 3));
+      for (var i = 0; i < NT - 1; i++) { var a = i * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+      geo.setIndex(idx);
+      var m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
+      m.frustumCulled = false; m.visible = false; cuerpo.add(m);
+      var hist = []; for (var j = 0; j < NT; j++) hist.push(new THREE.Vector3());
+      return { m: m, hist: hist, fuerza: 0, listo: false };
+    }
+    var estelas = { 15: estela(), 16: estela() }, colorEstela = new THREE.Color(0xff6a5e);
 
     /* Piso: rejilla circular y proyector de luz */
     var cv = document.createElement('canvas'); cv.width = cv.height = 512; var x = cv.getContext('2d');
@@ -21261,6 +21297,8 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     var actual = {}, meta = {}, ultimaPose = 0, giro = 0.32, arrastre = null, reloj = new THREE.Clock(), Y = new THREE.Vector3(0, 1, 0);
     var tmpA = new THREE.Vector3(), hom = new THREE.Vector3(), cad = new THREE.Vector3(), cab = new THREE.Vector3();
     var lbl = box.querySelector('.cam2-holo-lbl b'), ultimoVivo = null;
+    var ejeX = new THREE.Vector3(), ejeY = new THREE.Vector3(), ejeZ = new THREE.Vector3(), ejeXg = new THREE.Vector3(), ejeYg = new THREE.Vector3(), ejeZg = new THREE.Vector3();
+    var base = new THREE.Matrix4(), giroTronco = new THREE.Quaternion(), camLocal = new THREE.Vector3(), dirE = new THREE.Vector3(), lado = new THREE.Vector3();
     function v3(i) { return actual[i] || (actual[i] = new THREE.Vector3()); }
     function aHolo(p, signoY) { return [-p[0], p[1] * signoY, -p[2]]; }   // espejo, como tu imagen en la cámara
     function fijarMeta(src, signoY) { PUNTOS.forEach(function (i) { var p = src[i]; if (p) meta[i] = aHolo(p, signoY); }); }
@@ -21296,19 +21334,30 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
       PUNTOS.forEach(function (i) { var m = meta[i]; if (!m) return; var c = v3(i); c.x += (m[0] - c.x) * k; c.y += (m[1] - c.y) * k; c.z += (m[2] - c.z) * k; });
       huesos.forEach(function (h) { var b = h.userData; hueso(h, v3(b[0]), v3(b[1]), b[2]); });
       hom.copy(v3(11)).add(v3(12)).multiplyScalar(0.5); cad.copy(v3(23)).add(v3(24)).multiplyScalar(0.5);
-      hueso(columna, cad, hom, 0.05);
+      /* Base del tronco: x = línea de hombros, y = columna, z = hacia adelante */
+      ejeY.copy(hom).sub(cad); var alto = ejeY.length() || 0.4; ejeY.multiplyScalar(1 / alto);
+      ejeX.copy(v3(11)).sub(v3(12)); var anchoH = ejeX.length() || 0.36;
+      ejeZ.crossVectors(ejeX, ejeY).normalize(); ejeX.crossVectors(ejeY, ejeZ).normalize();
+      base.makeBasis(ejeX, ejeY, ejeZ); giroTronco.setFromRotationMatrix(base);
+      torso.quaternion.copy(giroTronco); torso.position.copy(cad).addScaledVector(ejeY, alto * 0.52);
+      torso.scale.set(anchoH * 0.5, alto * 1.08, 0.11);
+      pelvis.quaternion.copy(giroTronco); pelvis.position.copy(cad).addScaledVector(ejeY, 0.015);
+      pelvis.scale.set(Math.max(0.1, v3(23).distanceTo(v3(24)) * 0.78), 0.075, 0.1);
       cab.copy(v3(0)); cab.y += 0.04;
-      hueso(cuello, hom, cab, 0.04);
-      cabeza.position.copy(cab); cabeza.position.y += 0.04; cabeza.scale.set(0.11, 0.13, 0.11);
-      torso.position.copy(hom).add(cad).multiplyScalar(0.5);
-      tmpA.copy(hom).sub(cad); var alto = tmpA.length() || 0.4;
-      torso.quaternion.setFromUnitVectors(Y, tmpA.normalize());
-      torso.scale.set(Math.max(0.12, v3(11).distanceTo(v3(12)) * 0.62), alto * 0.62, 0.13);
+      hueso(cuello, hom, cab, 0.042);
+      cabeza.position.copy(cab); cabeza.position.y += 0.05; cabeza.scale.set(0.095, 0.118, 0.105);
       Object.keys(juntas).forEach(function (i) { juntas[i].position.copy(v3(+i)); });
+      [27, 28].forEach(function (i) { var pie = pies[i]; pie.position.copy(v3(i)); pie.position.y -= 0.035; pie.position.addScaledVector(ejeZ, 0.055); pie.quaternion.copy(giroTronco); });
       [15, 16].forEach(function (i) {
-        var gl = guantes[i]; gl.position.copy(v3(i));
+        var gl = guantes[i], codo = v3(i === 15 ? 13 : 14);
+        gl.position.copy(v3(i));
+        ejeZg.copy(v3(i)).sub(codo).normalize();
+        ejeXg.copy(ejeX).multiplyScalar(i === 15 ? -1 : 1);                       // el pulgar mira hacia el centro del cuerpo
+        ejeXg.addScaledVector(ejeZg, -ejeXg.dot(ejeZg)).normalize();
+        ejeYg.crossVectors(ejeZg, ejeXg);
+        base.makeBasis(ejeXg, ejeYg, ejeZg); gl.quaternion.setFromRotationMatrix(base);
         var fl = gl.userData.flash || 0; gl.userData.flash = Math.max(0, fl - 0.06);
-        gl.scale.setScalar(0.085 * (1 + fl * 0.45)); gl.material.uniforms.k.value = 1.4 + fl * 2.2;
+        gl.scale.setScalar(1 + fl * 0.4); gl.userData.mat.uniforms.k.value = 1.4 + fl * 2.2;
       });
       ondas.forEach(function (o) {
         if (o.userData.vida <= 0) { o.visible = false; return; }
@@ -21323,6 +21372,33 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
       }
       cuerpo.rotation.y = giro + (q || arrastre ? 0 : Math.sin(t * 0.35) * 0.14);
       polvo.rotation.y = cuerpo.rotation.y * 0.5;
+      /* Estelas: siguen al guante y se encienden con la velocidad o el golpe */
+      cuerpo.updateMatrixWorld(true); camLocal.copy(cam.position); cuerpo.worldToLocal(camLocal);
+      var dtc = Math.min(0.1, Math.max(0.008, t - (HOLO._tPrev || t - 0.016))); HOLO._tPrev = t;
+      [15, 16].forEach(function (i) {
+        var e = estelas[i], h = e.hist, g = guantes[i].position;
+        if (q) { e.m.visible = false; e.listo = false; return; }
+        if (!e.listo || h[0].distanceTo(g) > 0.6) { h.forEach(function (v) { v.copy(g); }); e.listo = true; }
+        for (var j = NT - 1; j > 0; j--) h[j].copy(h[j - 1]);
+        h[0].copy(g);
+        var rap = h[0].distanceTo(h[1]) / dtc;
+        e.fuerza = Math.max(Math.min(1, (rap - 1.2) / 2.5, 1), (guantes[i].userData.flash || 0), e.fuerza * 0.86);
+        e.m.visible = e.fuerza > 0.02;
+        if (!e.m.visible) return;
+        var pa = e.m.geometry.attributes.position.array, ca = e.m.geometry.attributes.color.array;
+        for (var k = 0; k < NT; k++) {
+          var a = h[k], b = h[Math.min(NT - 1, k + 1)];
+          dirE.copy(k < NT - 1 ? a : h[k - 1]).sub(k < NT - 1 ? b : a);
+          lado.copy(camLocal).sub(a); lado.crossVectors(dirE, lado);
+          var l = lado.length(), ancho = 0.055 * (1 - k / NT) * (0.5 + e.fuerza * 0.5);
+          if (l > 1e-6) lado.multiplyScalar(ancho / l); else lado.set(0, 0, 0);
+          var o = k * 6, c = e.fuerza * Math.pow(1 - k / NT, 1.6);
+          pa[o] = a.x + lado.x; pa[o + 1] = a.y + lado.y; pa[o + 2] = a.z + lado.z;
+          pa[o + 3] = a.x - lado.x; pa[o + 4] = a.y - lado.y; pa[o + 5] = a.z - lado.z;
+          ca[o] = ca[o + 3] = colorEstela.r * c; ca[o + 1] = ca[o + 4] = colorEstela.g * c; ca[o + 2] = ca[o + 5] = colorEstela.b * c;
+        }
+        e.m.geometry.attributes.position.needsUpdate = true; e.m.geometry.attributes.color.needsUpdate = true;
+      });
       r.render(escena, cam);
     }
     HOLO.arrancar = function () { if (!HOLO.raf) cuadro(); };
