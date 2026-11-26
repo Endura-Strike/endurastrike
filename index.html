@@ -5331,8 +5331,11 @@ html.es-app .app-tab span { font: 500 10px -apple-system, system-ui, sans-serif 
   <!-- Combos -->
   <div class="tab-content" id="t-combos">
     <div class="grid g2">
+      <div class="card" id="combo-detail-card">
+        <div class="cam2-holo tec3d-holo" id="combo3d-holo"><div class="cam2-holo-lbl"><i></i>Holograma <b id="combo3d-nombre">1-2</b></div><div class="cam2-holo-sin">El 3D no está disponible en este teléfono</div></div>
+        <div id="combo-detail-info"><div class="card-title">Elige un combo</div><p class="bx-nota">Toca un combo de la lista y el holograma lo hace.</p></div>
+      </div>
       <div class="card"><div class="card-title"><span class="ct-dot"></span>Biblioteca de Combos</div><div id="combo-list"></div></div>
-      <div class="card" id="combo-detail-card"><div class="card-title"><span class="ct-dot"></span>Selecciona un combo</div><div class="hl"><p>Haz clic en un combo para ver la ejecución y consejos del AI Coach.</p></div></div>
     </div>
   </div>
 
@@ -6952,6 +6955,7 @@ function comboPaso(t) { return COMBO_NOMBRE[t] || t; }
 function renderCombos() {
   const list = $('combo-list');
   if (!list) return;
+  setTimeout(() => { if (!document.querySelector('.combo-item.active')) verCombo(COMBOS[0].id, true); }, 0);
   list.innerHTML = COMBOS.map(c => `
     <div class="combo-item" id="combo-${c.id}" onclick="verCombo('${c.id}')">
       <div style="flex:1">
@@ -6968,21 +6972,25 @@ function renderCombos() {
     </div>`).join('');
 }
 
-function verCombo(id) {
+function verCombo(id, sinDesplazar) {
   const c = COMBOS.find(x => x.id === id);
   if (!c) return;
   document.querySelectorAll('.combo-item').forEach(el => el.classList.remove('active'));
   const el = $('combo-'+id); if(el) el.classList.add('active');
-  const card = $('combo-detail-card');
+  const card = $('combo-detail-info');
   if (!card) return;
+  if (typeof comboVer3D === 'function') comboVer3D(c);
+  const ficha = $('combo-detail-card');
+  if (!sinDesplazar && ficha && ficha.getBoundingClientRect().top < 0) ficha.scrollIntoView({ behavior: 'smooth', block: 'start' });
   card.innerHTML = `
     <div class="ct"><span class="ct-dot"></span>${c.name} <span class="combo-badge">${c.level}</span> <span class="combo-badge combo-dist">Distancia ${c.dist.toLowerCase()}</span></div>
     <div class="combo-seq-row" style="margin-bottom:16px">
-      ${c.seq.map((s,i)=>`<span style="padding:6px 14px;font-size:12px">${i+1}. ${comboPaso(s)}</span>${i<c.seq.length-1?'<span style="color:var(--dim)">→</span>':''}`).join('')}
+      ${c.seq.map((s,i)=>`<span data-i="${i}" style="padding:6px 14px;font-size:12px">${i+1}. ${comboPaso(s)}</span>${i<c.seq.length-1?'<span class="combo-flecha" aria-hidden="true">→</span>':''}`).join('')}
     </div>
     <div class="hl" style="margin-bottom:12px"><h4>Descripción</h4><p>${c.desc}</p></div>
     <div class="hl" style="margin-bottom:12px"><h4>Ejecución</h4><ul>${c.pasos.map((p,i)=>`<li><strong>${i+1}.</strong> ${p}</li>`).join('')}</ul></div>
     <div class="hl red" style="margin-bottom:12px"><h4>Coach dice</h4><p>${c.tip}</p></div>
+    <div class="combo3d-pie"><span>El holograma repite el combo; el paso que hace se marca arriba.</span><button type="button" class="tec3d-lento${window.HOLO && window.HOLO.lento ? ' on' : ''}" aria-pressed="${window.HOLO && window.HOLO.lento ? 'true' : 'false'}" onclick="tecLento()">Lento</button></div>
     <button onclick="practicarCombo('${c.id}')" style="width:100%;padding:13px;background:var(--green,#30d158);border:none;border-radius:var(--r);color:#000;font-weight:700;font-size:15px;cursor:pointer">Practicar (+${c.xp} XP)</button>`;
 }
 
@@ -21459,7 +21467,7 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
   BASE = poseDe(POSE_GUARDIA, POSE_GUARDIA.mL, POSE_GUARDIA.mR);
   var ESPEJO = { 11: 12, 12: 11, 13: 14, 14: 13, 15: 16, 16: 15, 23: 24, 24: 23, 25: 26, 26: 25, 27: 28, 28: 27 };
   function suave(u) { return u * u * (3 - 2 * u); }
-  function golpeTecnica(tipo, tt) {
+  function golpeTecnica(tipo, tt, clave) {
     var G = GOLPES[tipo] || GOLPES.jab, k = G.k, q = quieto(), tc = q ? G.imp : tt % CICLO, n = Math.floor(tt / CICLO);
     var a = k[0], b = k[0];
     if (tc >= k[k.length - 1][0]) a = b = k[k.length - 1];
@@ -21471,8 +21479,23 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     var pose = poseDe(P, m(A.mL, B.mL), m(A.mR, B.mR)), zurdo = window.camGuardia === 'zurdo', out = {};
     PUNTOS.forEach(function (i) { var p = pose[i]; if (zurdo) out[ESPEJO[i] || i] = [-p[0], p[1], p[2]]; else out[i] = p; });
     var lado = (G.lado === 'L') !== zurdo ? 'left' : 'right';
-    if (G.lado && !q && tc >= G.imp && HOLO._imp !== tipo + n) { HOLO._imp = tipo + n; if (HOLO.golpe) HOLO.golpe(lado, 70); }
+    var cl = clave || tipo + n;
+    if (G.lado && !q && tc >= G.imp && tc < G.imp + 0.3 && HOLO._imp !== cl) { HOLO._imp = cl; if (HOLO.golpe) HOLO.golpe(lado, 70); }
     return out;
+  }
+  /* Combo: encadena técnicas. Cada una corre desde su primer fotograma clave y se corta un poco antes de volver del todo,
+     así la siguiente sale mientras la anterior regresa, como en un combo real. Al final, una pausa en guardia. */
+  var PAUSA_COMBO = 1.0;
+  function comboPose(seq, tt) {
+    var tramos = seq.map(function (t) { var k = (GOLPES[t] || GOLPES.jab).k, a = k[0][0], b = k[k.length - 1][0]; return [t, a, Math.max(0.25, b - a - 0.14)]; });
+    var total = tramos.reduce(function (s, x) { return s + x[2]; }, 0) + PAUSA_COMBO, ciclo = Math.floor(tt / total), local = tt % total;
+    if (quieto()) return golpeTecnica(tramos[0][0], 0);
+    for (var i = 0; i < tramos.length; i++) {
+      if (local < tramos[i][2]) { if (HOLO._paso !== i) { HOLO._paso = i; if (HOLO.alPaso) HOLO.alPaso(i); } return golpeTecnica(tramos[i][0], tramos[i][1] + local, 'c' + ciclo + '-' + i); }
+      local -= tramos[i][2];
+    }
+    if (HOLO._paso !== -1) { HOLO._paso = -1; if (HOLO.alPaso) HOLO.alPaso(-1); }
+    return golpeTecnica('jab', 0);                            // pausa en guardia
   }
   var DEMO = ['jab', 'recto', 'cruzado', 'gancho'];
   function sombraDemo(t) {                                    // sombra sola mientras no hay cámara: una de cada familia por turno
@@ -21630,12 +21653,12 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
       if (!HOLO.on) { HOLO.raf = 0; return; }
       HOLO.raf = requestAnimationFrame(cuadro);
       if (document.hidden) return;
-      var t = reloj.getElapsedTime(), q = quieto(), vivo = Date.now() - ultimaPose < 700, tec = HOLO.modo === 'tecnica';
+      var t = reloj.getElapsedTime(), q = quieto(), vivo = Date.now() - ultimaPose < 700, tec = HOLO.modo === 'tecnica' || HOLO.modo === 'combo';
       tiempo.value = q ? 0 : t;
       if (tec) {                                              // Técnicas: repite el golpe elegido (más lento si se pidió)
         var dtT = Math.min(0.1, Math.max(0, t - (HOLO._tUlt == null ? t : HOLO._tUlt))); HOLO._tUlt = t;
         HOLO._tt = (HOLO._tt || 0) + dtT * (HOLO.pausa ? 0 : HOLO.lento ? 0.35 : 1);   // pausa: para revisar un instante
-        fijarMeta(golpeTecnica(HOLO.tec || 'jab', HOLO._tt), -1);
+        fijarMeta(HOLO.modo === 'combo' ? comboPose(HOLO.combo || ['jab', 'recto'], HOLO._tt) : golpeTecnica(HOLO.tec || 'jab', HOLO._tt), -1);
       } else {
         if (vivo !== ultimoVivo) { ultimoVivo = vivo; box.classList.toggle('vivo', vivo); if (lbl) lbl.textContent = vivo ? 'en vivo' : 'demo'; }
         if (!vivo) fijarMeta(sombraDemo(t), -1);
@@ -21760,23 +21783,37 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     return out;
   };
 
-  /* ═══ TÉCNICAS EN 3D: Boxeo › Técnicas. Se enciende solo mientras la tarjeta está a la vista ═══ */
-  var tecBox = document.getElementById('tec3d-holo'), tecVisible = false;
+  /* ═══ HOLOGRAMA EN BOXEO: Técnicas y Combos. Se enciende solo la caja que está a la vista ═══ */
+  var tecBox = document.getElementById('tec3d-holo'), comboBox = document.getElementById('combo3d-holo');
+  var CAJAS = [{ el: tecBox, modo: 'tecnica', ve: false }, { el: comboBox, modo: 'combo', ve: false }].filter(function (c) { return c.el; });
   function tecMostrar() {
-    if (!tecBox || camAbierta || !tecVisible) return;
-    if (typeof THREE === 'undefined') { if (document.readyState !== 'complete') window.addEventListener('load', tecMostrar, { once: true }); else tecBox.classList.add('sin-3d'); return; }
+    if (camAbierta) return;
+    var c = CAJAS.filter(function (x) { return x.ve; })[0];
+    if (!c) { if (HOLO.modo !== 'camara') HOLO.on = false; return; }
+    if (typeof THREE === 'undefined') { if (document.readyState !== 'complete') window.addEventListener('load', tecMostrar, { once: true }); else c.el.classList.add('sin-3d'); return; }
     try {
-      if (!crear(tecBox)) return;
-      if (HOLO.modo !== 'tecnica') { HOLO.fijarGiro(0.75); HOLO._tt = 0.55; }   // de tres cuartos: así se ve el golpe que va hacia adelante
-      HOLO.montar(tecBox); HOLO.modo = 'tecnica'; HOLO.tec = HOLO.tec || 'jab'; HOLO.on = true; HOLO.arrancar();
+      if (!crear(c.el)) return;
+      if (HOLO.modo !== c.modo) { HOLO.fijarGiro(0.75); HOLO._tt = c.modo === 'combo' ? 0 : 0.55; HOLO._paso = null; }   // de tres cuartos: así se ve el golpe que va hacia adelante
+      HOLO.montar(c.el); HOLO.modo = c.modo; HOLO.tec = HOLO.tec || 'jab'; HOLO.on = true; HOLO.arrancar();
     } catch (e) {}
   }
-  if (tecBox && 'IntersectionObserver' in window) {
-    new IntersectionObserver(function (es) {
-      tecVisible = es[es.length - 1].isIntersecting;
-      if (tecVisible) tecMostrar(); else if (HOLO.modo === 'tecnica' && !camAbierta) HOLO.on = false;
-    }).observe(tecBox);
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { CAJAS.forEach(function (c) { if (c.el === e.target) c.ve = e.isIntersecting; }); });
+      tecMostrar();
+    });
+    CAJAS.forEach(function (c) { io.observe(c.el); });
   }
+  /* Combos: el holograma ejecuta la secuencia y se marca el paso que está haciendo */
+  var comboActual = null;
+  window.comboVer3D = function (c) {
+    if (!c || !c.seq) return;
+    comboActual = c; HOLO.combo = c.seq; HOLO._tt = 0; HOLO._paso = null;
+    var n = document.getElementById('combo3d-nombre'); if (n) n.textContent = c.name;
+  };
+  HOLO.alPaso = function (i) {
+    document.querySelectorAll('#combo-detail-info .combo-seq-row [data-i]').forEach(function (e) { e.classList.toggle('on', +e.getAttribute('data-i') === i); });
+  };
   /* Familias y tipos: [nombre corto, nombre completo, cómo se tira] */
   var MODOS = { golpes: ['rectos', 'cruzados', 'ganchos'], defensa: ['esquivas', 'agachadas', 'bloqueos', 'pasos'], distancia: ['larga', 'media', 'corta'] };
   var FAMILIAS = {
@@ -21881,7 +21918,7 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
   if (document.getElementById('tec3d-tipos')) window.tecModo('golpes');
   window.tecLento = function () {
     HOLO.lento = !HOLO.lento;
-    var b = document.getElementById('tec3d-lento'); if (b) { b.classList.toggle('on', HOLO.lento); b.setAttribute('aria-pressed', HOLO.lento ? 'true' : 'false'); }
+    document.querySelectorAll('.tec3d-lento').forEach(function (b) { b.classList.toggle('on', HOLO.lento); b.setAttribute('aria-pressed', HOLO.lento ? 'true' : 'false'); });
   };
 })();
 </script>
@@ -21932,6 +21969,11 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
 .tec3d-det b{color:#fff}
 .combo-badge{display:inline-block;padding:2px 8px;border-radius:999px;background:#2c2c2e;color:rgba(235,235,245,.8);font-size:11px;font-weight:600;border:0}
 .combo-dist{color:#63e6be}
+#combo-detail-info .combo-seq-row [data-i]{transition:background .15s,color .15s}
+#combo-detail-info .combo-seq-row [data-i].on{background:#63e6be;color:#000;border-color:#63e6be}
+.combo3d-pie{display:flex;align-items:center;gap:12px;margin:0 0 12px;font-size:12.5px;line-height:1.4;color:rgba(235,235,245,.6)}
+.combo3d-pie span{flex:1}
+#combo-detail-info .combo-seq-row .combo-flecha{background:none!important;border:0!important;padding:0 2px!important;color:rgba(235,235,245,.4)!important;min-width:0;box-shadow:none!important}
 .combo-seq-row span{color:#fff;border-color:#3a3a3c}
 </style>
 <style id="calma60">
