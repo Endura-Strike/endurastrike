@@ -21186,6 +21186,7 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
   var HUESOS = [[11, 13, 0.05], [13, 15, 0.042], [12, 14, 0.05], [14, 16, 0.042], [23, 25, 0.068], [25, 27, 0.05], [24, 26, 0.068], [26, 28, 0.05], [11, 12, 0.045], [23, 24, 0.055]];
 
   function sombraDemo(t) {                                    // sombra sola mientras no hay cámara
+    if (quieto()) { var fijo = {}; PUNTOS.forEach(function (i) { fijo[i] = BASE[i]; }); return fijo; }
     var out = {}, ciclo = t % 2.6, golpe = ciclo > 1.6 && ciclo < 2.15 ? Math.sin((ciclo - 1.6) / 0.55 * Math.PI) : 0;
     var mano = Math.floor(t / 2.6) % 2 === 0 ? 'l' : 'r', bote = quieto() ? 0 : Math.sin(t * 4.2) * 0.018, giro = quieto() ? 0 : Math.sin(t * 1.3) * 0.03;
     PUNTOS.forEach(function (i) {
@@ -21258,7 +21259,8 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
     for (var o = 0; o < 4; o++) { var m = new THREE.Mesh(gAro, new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide })); m.visible = false; m.userData.vida = 0; cuerpo.add(m); ondas.push(m); }
 
     var actual = {}, meta = {}, ultimaPose = 0, giro = 0.32, arrastre = null, reloj = new THREE.Clock(), Y = new THREE.Vector3(0, 1, 0);
-    var tmpA = new THREE.Vector3(), tmpB = new THREE.Vector3();
+    var tmpA = new THREE.Vector3(), hom = new THREE.Vector3(), cad = new THREE.Vector3(), cab = new THREE.Vector3();
+    var lbl = box.querySelector('.cam2-holo-lbl b'), ultimoVivo = null;
     function v3(i) { return actual[i] || (actual[i] = new THREE.Vector3()); }
     function aHolo(p, signoY) { return [-p[0], p[1] * signoY, -p[2]]; }   // espejo, como tu imagen en la cámara
     function fijarMeta(src, signoY) { PUNTOS.forEach(function (i) { var p = src[i]; if (p) meta[i] = aHolo(p, signoY); }); }
@@ -21288,17 +21290,16 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
       if (document.hidden) return;
       var t = reloj.getElapsedTime(), q = quieto(), vivo = Date.now() - ultimaPose < 700;
       tiempo.value = q ? 0 : t;
-      box.classList.toggle('vivo', vivo);
-      var lbl = box.querySelector('.cam2-holo-lbl b'); if (lbl) lbl.textContent = vivo ? 'en vivo' : 'demo';
+      if (vivo !== ultimoVivo) { ultimoVivo = vivo; box.classList.toggle('vivo', vivo); if (lbl) lbl.textContent = vivo ? 'en vivo' : 'demo'; }
       if (!vivo) fijarMeta(sombraDemo(t), -1);
       var k = q ? 1 : 0.45;
       PUNTOS.forEach(function (i) { var m = meta[i]; if (!m) return; var c = v3(i); c.x += (m[0] - c.x) * k; c.y += (m[1] - c.y) * k; c.z += (m[2] - c.z) * k; });
       huesos.forEach(function (h) { var b = h.userData; hueso(h, v3(b[0]), v3(b[1]), b[2]); });
-      var hom = tmpB.copy(v3(11)).add(v3(12)).multiplyScalar(0.5).clone(), cad = new THREE.Vector3().copy(v3(23)).add(v3(24)).multiplyScalar(0.5);
+      hom.copy(v3(11)).add(v3(12)).multiplyScalar(0.5); cad.copy(v3(23)).add(v3(24)).multiplyScalar(0.5);
       hueso(columna, cad, hom, 0.05);
-      var cab = v3(0).clone(); cab.y += 0.04;
+      cab.copy(v3(0)); cab.y += 0.04;
       hueso(cuello, hom, cab, 0.04);
-      cabeza.position.copy(cab).add(new THREE.Vector3(0, 0.04, 0)); cabeza.scale.set(0.11, 0.13, 0.11);
+      cabeza.position.copy(cab); cabeza.position.y += 0.04; cabeza.scale.set(0.11, 0.13, 0.11);
       torso.position.copy(hom).add(cad).multiplyScalar(0.5);
       tmpA.copy(hom).sub(cad); var alto = tmpA.length() || 0.4;
       torso.quaternion.setFromUnitVectors(Y, tmpA.normalize());
