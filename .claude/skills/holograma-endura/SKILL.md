@@ -15,6 +15,8 @@ El holograma vive en el bloque `<script id="cam27">` de `index.html`, dentro de 
 - **Cuerpo**: brazos, piernas y torso son `LatheGeometry` con perfil de músculo (`FORMAS`), escalados y orientados por `hueso(m, a, b, radio)`; el tronco es una sola malla esculpida (`tronco()`: espalda en V, pectorales, esternón, abdominales, columna, omóplatos; escala = ancho de hombros × largo del tronco × 1) y sigue la base del tronco. Short de boxeo rojo (`pelvis` con forma `cadera`, dos `pernera` y una `pretina` menta). Cabeza con forma (cráneo y mandíbula, `FORMAS.cabeza`) que gira con el tronco (hombros, columna; `ejeZ` apunta a la espalda, el frente es `-ejeZ`). Silueta musculosa: deltoides grandes, bíceps, pantorrillas. Guantes = grupo de puño, pulgar y muñequera orientado con el antebrazo. Estelas = cinta aditiva de 10 puntos por guante, visible solo con velocidad o golpe. `HUESOS` = [desde, hasta, grosor, forma].
 - **Tres lugares, un renderizador**: `#cam2-holo` (Cámara AI), `#tec3d-holo` (Boxeo › Técnicas) y `#combo3d-holo` (Boxeo › Combos). En Boxeo, `CAJAS` + un `IntersectionObserver` montan el canvas en la caja que está a la vista (`HOLO.modo` = `tecnica` o `combo`). `comboPose(seq, t)` encadena técnicas cortando el regreso a guardia de cada una y avisa el paso con `HOLO.alPaso(i)`. `HOLO.montar(caja)` muda el canvas; `HOLO.modo` es `camara` o `tecnica`. Técnicas se enciende con un `IntersectionObserver` solo mientras la tarjeta está a la vista, y vuelve ahí al cerrar la cámara.
 - **Golpes animados**: la guardia y los golpes se arman con `poseDe(P, manoIzq, manoDer)`: pocos parámetros (`r` giro del torso, `d` flexión de rodillas, `f` inclinación, `l` lateral, `piv` pivote del pie de atrás) y cinemática inversa de dos huesos (`ik`) para brazos y piernas, que siempre conservan su largo. `GOLPES` tiene 11 golpes en tres familias (rectos, cruzados = hook, ganchos = uppercut) y `DEF` 13 defensas en cuatro (esquivas, agachadas, bloqueos, pasos); `MODOS` dice qué familias van en Golpes y en Defensa. Parámetros extra para defensas: `tx`/`tz` mueven todo el cuerpo, `lx lz ly`/`rx rz ry` los pies, `gp` gira sobre el pie de adelante, `hl` sube el hombro; cada fotograma clave da los parámetros y el puño respecto a la nariz más hacia dónde apunta el codo. `golpeTecnica(tipo, t)` interpola y lanza `HOLO.golpe` en el impacto. La zurda se refleja con `ESPEJO`. `HOLO.lento` va a 0,35×; `HOLO.pausa` congela (para capturas: `HOLO.pausa = true; HOLO._tt = 1.06`).
+- **Movimiento**: `ritmo()` da vida a la guardia (rebote sobre la punta de los pies, peso de un pie al otro, torso y manos) y se apaga cerca de la acción. Curvas por tramo: hacia el impacto `explosivo` (sale disparado y se pasa un poco), regreso a guardia `vuelta` (más pausado), el resto `rapido`/`suave`. Los combos pasan la fase total para que el ritmo no salte.
+- **Efectos del golpe**: `HOLO.golpe(lado, potencia, tipo)` pinta la estela y la onda con `COLOR_GOLPE` (rectos: jab menta, recto blanco; cruzados ámbar; ganchos violeta; también `cross`/`hook`/`uppercut` del detector) y sacude la cámara un instante (`HOLO._sacude`). Luz bajo cada pie (`luzPie`) que se apaga al levantarlo. `HOLO.armar()` hace que el holograma se arme de pies a cabeza (uniform `ap` en el shader) al abrir la cámara o al mudarse de caja.
 - **Pose**: `HOLO.pose(worldLandmarks)` fija la meta. Cada cuadro `cuadro()` suaviza hacia la meta (k = 0,45). Sin pose real por 700 ms, `sombraDemo(t)` hace sombra (jab y cross alternados).
 - **Escena**: piso con rejilla (textura de canvas), haz de proyector (cilindro abierto con shader), 90 partículas que suben, 4 ondas de impacto reutilizables (`HOLO.golpe(lado, potencia)`).
 - **Espejo**: `aHolo` invierte x, y, z para que el holograma se vea como tu imagen en la cámara.
@@ -24,7 +26,7 @@ El holograma vive en el bloque `<script id="cam27">` de `index.html`, dentro de 
 | Medida | Ahora | Límite |
 |---|---|---|
 | Contextos WebGL al abrir/cerrar 4 veces | 1 | 1 |
-| Llamadas de dibujo por cuadro | 32 (sin estela) | 45 |
+| Llamadas de dibujo por cuadro | 34 (sin estela) | 45 |
 | Triángulos | ~10.700 | 15.000 |
 | Tiempo por cuadro (mediana, escritorio sin GPU) | 16,7 ms | 17 ms |
 | `pixelRatio` | máx. 1,5 | 1,5 |
@@ -55,7 +57,7 @@ El holograma vive en el bloque `<script id="cam27">` de `index.html`, dentro de 
 
 ## Ideas de mejora, de más a menos impacto
 
-1. ~~Silueta más humana~~, ~~guantes con forma~~ y ~~estela del golpe~~: hechas.
+1. ~~Silueta más humana~~, ~~guantes con forma~~, ~~estela del golpe~~, ~~color por tipo de golpe~~, ~~holograma que se arma~~ y ~~luz bajo los pies~~: hechas.
 4. **Color según el tipo de golpe**: jab menta, cross blanco, gancho ámbar, uppercut violeta. `HOLO.golpe` ya recibe el lado; pásale también el tipo desde `emitir()` en el detector.
 5. **Holograma que se arma al abrir**: las líneas de escaneo suben de los pies a la cabeza en ~0,8 s (un uniform `aparece` en el shader que recorta por altura).
 6. **Interferencia breve**: al recibir la primera pose real, 150 ms de desfase horizontal en el shader para marcar el paso de demo a en vivo.
