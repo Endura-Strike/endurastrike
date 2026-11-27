@@ -15451,7 +15451,7 @@ function renderRutinasCasa(){
     var eq = EQUIPO[r.eq], ru = RUIDO[r.ruido];
     return '<div class="casa-c" data-id="'+r.id+'">'
       + (r.mia ? '<button class="casa-mia" onclick="borrarRutinaMia(\''+r.id+'\')" title="Borrar mi rutina" aria-label="Borrar">✕</button>' : '')
-      + '<button class="casa-comp'+(r.mia?'':' sola')+'" onclick="compartirRutina(\''+r.id+'\')" title="Compartir esta rutina" aria-label="Compartir">↗</button>'
+      + '<button class="casa-comp'+(r.mia?'':' sola')+'" onclick="compartirRutina(\''+r.id+'\')" title="Compartir esta rutina" aria-label="Compartir"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7.5 7.5 12 3l4.5 4.5"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg></button>'
       + '<div class="casa-top">'
       +   '<div class="casa-min">'+r.min+'<span>min</span></div>'
       +   '<div class="casa-h"><div class="casa-n">'+r.n+'</div>'
@@ -20882,13 +20882,13 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
   function crear(arte, op){
     op=op||{};
     if(!arte || arte._3d || typeof THREE==='undefined') return null;
-    var test=document.createElement('canvas');
-    if(!(test.getContext('webgl')||test.getContext('experimental-webgl'))) return null;
+    /* Se prueba el 3D creando el renderizador de verdad: antes se creaba un lienzo de prueba que dejaba un contexto WebGL de más */
+    var renderer;
+    try { renderer=new THREE.WebGLRenderer({antialias:true, alpha:true}); } catch(e){ return null; }
     arte._3d=true;
     var quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     var W=arte.clientWidth||520, H=arte.clientHeight||520;
-    var renderer=new THREE.WebGLRenderer({antialias:true, alpha:true});
     renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
     renderer.setSize(W,H);
     renderer.outputEncoding=THREE.sRGBEncoding;
