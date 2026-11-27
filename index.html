@@ -6967,7 +6967,7 @@ function renderCombos() {
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         <span style="color:var(--gold);font-size:10px;font-weight:700;font-family:var(--mono)">+${c.xp}</span>
-        <button onclick="irACamaraAI(event)" title="Practicar con camara" style="width:34px;height:34px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--red),#ffffff);border:none;color:#fff;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 10px var(--red-g)">📷</button>
+        <button type="button" class="combo-cam" onclick="irACamaraAI(event)" title="Practicar con la cámara" aria-label="Practicar con la cámara"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7.5h3l1.6-2h6.8l1.6 2h3a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8.5a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
       </div>
     </div>`).join('');
 }
@@ -18796,6 +18796,9 @@ function regGuardar() {
 function mostrarBienvenidaDiaria() {
   var hoy = new Date().toDateString();
   if (state.ultimaBienvenida === hoy) return;
+  var onb = document.getElementById('app-onb');                 // la presentación ya saluda: no apilar otra ventana
+  if (onb && !onb.hidden && onb.style.display !== 'none' && onb.innerHTML) return;
+  if (document.getElementById('es-bien')) return;
   state.ultimaBienvenida = hoy;
   if (typeof guardarDatos === 'function') guardarDatos();
   var h = new Date().getHours(), saludo = h < 12 ? 'Buenos días' : (h < 19 ? 'Buenas tardes' : 'Buenas noches');
@@ -19872,6 +19875,9 @@ function espEstado() {
 function bienvenidaPintar() {
   var o = document.getElementById('es-bien');
   if (!o) { o = document.createElement('div'); o.id = 'es-bien'; o.className = 'es-bien'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-label', 'Bienvenida'); document.body.appendChild(o); }
+  /* Un solo saludo por día: esta bienvenida ya saluda, así que la diaria no sale detrás */
+  state.ultimaBienvenida = new Date().toDateString();
+  var wmb = document.getElementById('welcome-modal'); if (wmb) wmb.remove();
   var nom = (typeof nNombre === 'function' && nNombre()) || '';
   var m = (typeof focoMarcas === 'function') ? focoMarcas() : { tot: 0 };
   var rhoy = (typeof roundsDia === 'function') ? roundsDia(nClave()) : 0, meta = (typeof metaRounds === 'function') ? metaRounds() : 10;
@@ -21973,6 +21979,8 @@ html.es-app #page-app#page-app #cronometro .card > div[style*="height:3px"]{disp
 #combo-detail-info .combo-seq-row [data-i].on{background:#63e6be;color:#000;border-color:#63e6be}
 .combo3d-pie{display:flex;align-items:center;gap:12px;margin:0 0 12px;font-size:12.5px;line-height:1.4;color:rgba(235,235,245,.6)}
 .combo3d-pie span{flex:1}
+.combo-cam{width:36px;height:36px;flex:none;border-radius:50%;border:0;background:#2c2c2e;color:#fff;display:grid;place-items:center;cursor:pointer}
+.combo-cam:focus-visible{outline:2px solid #63e6be;outline-offset:2px}
 #combo-detail-info .combo-seq-row .combo-flecha{background:none!important;border:0!important;padding:0 2px!important;color:rgba(235,235,245,.4)!important;min-width:0;box-shadow:none!important}
 .combo-seq-row span{color:#fff;border-color:#3a3a3c}
 </style>
